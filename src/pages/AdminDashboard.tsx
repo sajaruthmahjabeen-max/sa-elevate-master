@@ -409,7 +409,7 @@ const AdminDashboard = () => {
 
       <main className="container mx-auto px-4 py-8">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-8">
-          <TabsList className="glass-strong flex md:grid md:grid-cols-5 overflow-x-auto md:overflow-hidden w-full h-auto p-1 sticky top-20 z-40 backdrop-blur-xl border border-primary/20 no-scrollbar touch-pan-x gap-1">
+          <TabsList className="glass-strong flex lg:grid lg:grid-cols-6 overflow-x-auto w-full h-auto p-1 sticky top-20 z-40 backdrop-blur-xl border border-primary/20 touch-pan-x gap-1 justify-start flex-nowrap">
             <TabsTrigger value="overview" className="data-[state=active]:gradient-bg h-10 px-4 min-w-[120px] flex-shrink-0">Overview</TabsTrigger>
             <TabsTrigger value="inquiries" className="data-[state=active]:gradient-bg h-10 px-4 min-w-[120px] flex-shrink-0 flex gap-2 items-center justify-center relative">
               <Mail size={16} /> Messages
