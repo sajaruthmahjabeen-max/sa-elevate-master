@@ -409,9 +409,9 @@ const AdminDashboard = () => {
 
       <main className="container mx-auto px-4 py-8">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-8">
-          <TabsList className="glass-strong flex md:grid md:grid-cols-5 overflow-x-auto md:overflow-hidden w-full h-auto p-1 sticky top-20 z-40 backdrop-blur-xl border border-primary/20 no-scrollbar touch-pan-x">
-            <TabsTrigger value="overview" className="data-[state=active]:gradient-bg h-10 px-4 min-w-[100px]">Overview</TabsTrigger>
-            <TabsTrigger value="inquiries" className="data-[state=active]:gradient-bg h-10 px-4 min-w-[100px] flex gap-2 items-center justify-center relative">
+          <TabsList className="glass-strong flex md:grid md:grid-cols-5 overflow-x-auto md:overflow-hidden w-full h-auto p-1 sticky top-20 z-40 backdrop-blur-xl border border-primary/20 no-scrollbar touch-pan-x gap-1">
+            <TabsTrigger value="overview" className="data-[state=active]:gradient-bg h-10 px-4 min-w-[120px] flex-shrink-0">Overview</TabsTrigger>
+            <TabsTrigger value="inquiries" className="data-[state=active]:gradient-bg h-10 px-4 min-w-[120px] flex-shrink-0 flex gap-2 items-center justify-center relative">
               <Mail size={16} /> Messages
               {inquiries.filter(i => i.status === 'new').length > 0 && (
                 <span className="absolute top-1 right-1 bg-green-500 text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center animate-pulse border border-background">
@@ -419,10 +419,10 @@ const AdminDashboard = () => {
                 </span>
               )}
             </TabsTrigger>
-            <TabsTrigger value="portfolio" className="data-[state=active]:gradient-bg h-10 px-4 min-w-[100px] flex gap-2 items-center justify-center">
+            <TabsTrigger value="portfolio" className="data-[state=active]:gradient-bg h-10 px-4 min-w-[120px] flex-shrink-0 flex gap-2 items-center justify-center">
               <Briefcase size={16} /> Portfolio
             </TabsTrigger>
-            <TabsTrigger value="reviews" className="data-[state=active]:gradient-bg h-10 px-4 min-w-[100px] relative">
+            <TabsTrigger value="reviews" className="data-[state=active]:gradient-bg h-10 px-4 min-w-[120px] flex-shrink-0 relative">
               Reviews
               {pendingCount > 0 && (
                 <span className="absolute top-1 right-1 bg-red-500 text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center animate-pulse border border-background">
@@ -430,8 +430,8 @@ const AdminDashboard = () => {
                 </span>
               )}
             </TabsTrigger>
-            <TabsTrigger value="settings" className="data-[state=active]:gradient-bg h-10 px-4 min-w-[120px]">Site Settings</TabsTrigger>
-            <TabsTrigger value="users" className="data-[state=active]:gradient-bg h-10 px-4 min-w-[120px]">User Control</TabsTrigger>
+            <TabsTrigger value="settings" className="data-[state=active]:gradient-bg h-10 px-4 min-w-[120px] flex-shrink-0">Site Settings</TabsTrigger>
+            <TabsTrigger value="users" className="data-[state=active]:gradient-bg h-10 px-4 min-w-[120px] flex-shrink-0">User Control</TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview">
@@ -772,7 +772,7 @@ const AdminDashboard = () => {
           <TabsContent value="portfolio">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
               {/* Project Form */}
-              <Card className="glass lg:col-span-1 h-fit sticky top-32" id="project-form">
+              <Card className="glass lg:col-span-1 h-fit md:sticky md:top-32" id="project-form">
                 <CardHeader>
                   <CardTitle className="font-display font-bold text-2xl flex items-center gap-2 text-primary">
                     {isEditingProject ? <Edit size={24} /> : <Plus size={24} />}
