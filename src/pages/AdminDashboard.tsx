@@ -1,0 +1,843 @@
+import { useState, useEffect, useCallback } from 'react';
+import { supabase } from '@/lib/supabase';
+import { useAuth } from '@/hooks/useAuth';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { useToast } from '@/components/ui/use-toast';
+import { Database } from '@/types/database.types';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { 
+  Users, 
+  MessageSquare, 
+  Star, 
+  LayoutDashboard, 
+  CheckCircle, 
+  XCircle, 
+  Trash2, 
+  ShieldCheck, 
+  LogOut,
+  Settings,
+  Mail,
+  Phone,
+  MapPin,
+  Save,
+  RefreshCw,
+  Search,
+  Briefcase,
+  Plus,
+  ExternalLink,
+  Smartphone,
+  Edit,
+  Globe,
+  Instagram,
+  Linkedin
+} from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+
+type Profile = Database['public']['Tables']['profiles']['Row'];
+type Review = Database['public']['Tables']['reviews']['Row'];
+type Project = Database['public']['Tables']['projects']['Row'];
+
+const AdminDashboard = () => {
+  const { profile, signOut } = useAuth();
+  const [users, setUsers] = useState<Profile[]>([]);
+  const [reviews, setReviews] = useState<Review[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const { toast } = useToast();
+  const navigate = useNavigate();
+  const [settings, setSettings] = useState({
+    contact_email: '',
+    contact_phone: '',
+    contact_address: '',
+    whatsapp_number: '',
+    linkedin_url: '',
+    instagram_url: ''
+  });
+  const [savingSettings, setSavingSettings] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  
+  // Portfolio State
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [isEditingProject, setIsEditingProject] = useState<string | null>(null);
+  const [savingProject, setSavingProject] = useState(false);
+  const [projectForm, setProjectForm] = useState({
+    title: '',
+    category: '',
+    description: '',
+    type: 'web' as 'web' | 'mobile' | 'other',
+    live_url: '',
+    apk_url: '',
+    color: 'from-[hsl(220,90%,56%)] to-[hsl(270,70%,60%)]'
+  });
+
+  const fetchAllData = useCallback(async (isSilent = false) => {
+    if (!isSilent) setLoading(true);
+    else setRefreshing(true);
+    
+    try {
+      const [usersResponse, reviewsResponse, projectsResponse] = await Promise.all([
+        supabase.from('profiles').select('*').order('created_at', { ascending: false }),
+        supabase.from('reviews').select('*').order('created_at', { ascending: false }),
+        supabase.from('projects').select('*').order('created_at', { ascending: false }),
+      ]);
+
+      if (usersResponse.error) throw usersResponse.error;
+      if (reviewsResponse.error) throw reviewsResponse.error;
+      if (projectsResponse.error) throw projectsResponse.error;
+
+      setUsers(usersResponse.data || []);
+      setReviews(reviewsResponse.data || []);
+      setProjects(projectsResponse.data || []);
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Error fetching data",
+        description: error.message,
+      });
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  }, [toast]);
+
+  const fetchSettings = useCallback(async () => {
+    try {
+      const { data, error } = await supabase.from('settings').select('*');
+      if (error) throw error;
+      
+      const settingsMap = data.reduce((acc: any, item: any) => {
+        acc[item.id] = item.value;
+        return acc;
+      }, {});
+      
+      setSettings({
+        contact_email: settingsMap.contact_email || '',
+        contact_phone: settingsMap.contact_phone || '',
+        contact_address: settingsMap.contact_address || '',
+        whatsapp_number: settingsMap.whatsapp_number || '',
+        linkedin_url: settingsMap.linkedin_url || '',
+        instagram_url: settingsMap.instagram_url || ''
+      });
+    } catch (error: any) {
+      console.error('Error fetching settings:', error);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchAllData();
+    fetchSettings();
+  }, [fetchAllData, fetchSettings]);
+
+  const handleUpdateReviewStatus = async (id: string, status: 'approved' | 'pending') => {
+    try {
+      const { error } = await supabase
+        .from('reviews')
+        .update({ status } as any)
+        .eq('id', id);
+
+      if (error) throw error;
+
+      toast({
+        title: `Review ${status === 'approved' ? 'Approved' : 'Moved back to Pending'}`,
+        description: "The changes have been saved to the database.",
+      });
+      fetchAllData(true);
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Error updating review",
+        description: error.message,
+      });
+    }
+  };
+
+  const handleDeleteReview = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this review?')) return;
+    try {
+      const { error } = await supabase.from('reviews').delete().eq('id', id);
+      if (error) throw error;
+      toast({
+        title: "Review Deleted",
+        description: "The item was removed from the database.",
+      });
+      fetchAllData(true);
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Error deleting review",
+        description: error.message,
+      });
+    }
+  };
+
+  const handleDeleteUser = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this user? This will remove their profile and all their reviews.')) return;
+    try {
+      const { error } = await supabase.from('profiles').delete().eq('id', id);
+      if (error) throw error;
+      toast({
+        title: "User Deleted",
+        description: "The user profile has been removed.",
+      });
+      fetchAllData(true);
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Error deleting user",
+        description: error.message,
+      });
+    }
+  };
+
+  const handleToggleRole = async (id: string, currentRole: string) => {
+    const newRole = currentRole === 'admin' ? 'user' : 'admin';
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update({ role: newRole } as any)
+        .eq('id', id);
+      if (error) throw error;
+      toast({
+        title: "Role Updated",
+        description: `User is now a ${newRole}.`,
+      });
+      fetchAllData(true);
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Error updating role",
+        description: error.message,
+      });
+    }
+  };
+
+  const handleSaveSettings = async () => {
+    setSavingSettings(true);
+    try {
+      const updates = Object.entries(settings).map(([id, value]) => ({
+        id,
+        value,
+        updated_at: new Date().toISOString()
+      }));
+
+      for (const update of updates) {
+        const { error } = await supabase
+          .from('settings')
+          .update(update as any)
+          .eq('id', update.id);
+        if (error) throw error;
+      }
+
+      toast({
+        title: "Settings Saved",
+        description: "Website contact information has been updated.",
+      });
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Error saving settings",
+        description: error.message,
+      });
+    } finally {
+      setSavingSettings(false);
+    }
+  };
+
+  const handleLogout = async () => {
+    await signOut();
+    navigate('/');
+  };
+
+  const handleSaveProject = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSavingProject(true);
+    try {
+      if (isEditingProject) {
+        const { error } = await supabase
+          .from('projects')
+          .update(projectForm as any)
+          .eq('id', isEditingProject);
+        if (error) throw error;
+        toast({ title: "Project Updated", description: "The project has been modified successfully." });
+      } else {
+        const { error } = await supabase
+          .from('projects')
+          .insert([projectForm] as any);
+        if (error) throw error;
+        toast({ title: "Project Added", description: "The new project is now live in your portfolio." });
+      }
+      setProjectForm({
+        title: '',
+        category: '',
+        description: '',
+        type: 'web',
+        live_url: '',
+        apk_url: '',
+        color: 'from-[hsl(220,90%,56%)] to-[hsl(270,70%,60%)]'
+      });
+      setIsEditingProject(null);
+      fetchAllData(true);
+    } catch (error: any) {
+      toast({ variant: "destructive", title: "Error saving project", description: error.message });
+    } finally {
+      setSavingProject(false);
+    }
+  };
+
+  const handleDeleteProject = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this project?')) return;
+    try {
+      const { error } = await supabase.from('projects').delete().eq('id', id);
+      if (error) throw error;
+      toast({ title: "Project Deleted", description: "The project has been removed." });
+      fetchAllData(true);
+    } catch (error: any) {
+      toast({ variant: "destructive", title: "Error deleting project", description: error.message });
+    }
+  };
+
+  const handleEditProject = (project: Project) => {
+    setProjectForm({
+      title: project.title,
+      category: project.category,
+      description: project.description || '',
+      type: project.type,
+      live_url: project.live_url || '',
+      apk_url: project.apk_url || '',
+      color: project.color || 'from-[hsl(220,90%,56%)] to-[hsl(270,70%,60%)]'
+    });
+    setIsEditingProject(project.id);
+    document.getElementById('project-form')?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  const stats = [
+    { label: 'Total Users', value: users.length, icon: Users, color: 'text-blue-500' },
+    { label: 'Total Reviews', value: reviews.length, icon: Star, color: 'text-yellow-500' },
+    { label: 'Pending Reviews', value: reviews.filter((r: any) => r.status === 'pending').length, icon: MessageSquare, color: 'text-orange-500' },
+    { label: 'Staff Admins', value: users.filter((u: any) => u.role === 'admin').length, icon: ShieldCheck, color: 'text-green-500' },
+  ];
+
+  const filteredReviews = reviews.filter(r => 
+    r.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+    r.message.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const filteredUsers = users.filter(u => 
+    (u.name || '').toLowerCase().includes(searchTerm.toLowerCase()) || 
+    u.email.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const pendingCount = reviews.filter((r: any) => r.status === 'pending').length;
+
+  if (loading) return (
+    <div className="min-h-screen flex items-center justify-center bg-background">
+      <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+    </div>
+  );
+
+  return (
+    <div className="min-h-screen bg-background">
+      <nav className="border-b glass sticky top-0 z-50">
+        <div className="container mx-auto px-4 py-4 flex justify-between items-center">
+          <h1 className="text-xl font-display font-bold gradient-text flex items-center gap-2">
+            <LayoutDashboard size={20} /> Admin Panel
+          </h1>
+          <div className="flex items-center gap-2 sm:gap-4">
+             <Button variant="ghost" onClick={() => fetchAllData(true)} disabled={refreshing} size="icon" className="h-9 w-9">
+              <RefreshCw size={18} className={refreshing ? "animate-spin" : ""} />
+            </Button>
+            <Button variant="ghost" onClick={() => navigate('/')} className="hidden sm:flex gap-2">
+              <LayoutDashboard size={18} /> Home
+            </Button>
+            <Button variant="outline" onClick={handleLogout} className="gap-2 h-9">
+              <LogOut size={16} /> <span className="hidden sm:inline">Logout</span>
+            </Button>
+          </div>
+        </div>
+      </nav>
+
+      <main className="container mx-auto px-4 py-8">
+        <Tabs defaultValue="overview" className="space-y-8">
+          <TabsList className="glass-strong flex md:grid md:grid-cols-5 overflow-x-auto md:overflow-hidden w-full h-auto p-1 sticky top-20 z-40 backdrop-blur-xl border border-primary/20 no-scrollbar">
+            <TabsTrigger value="overview" className="data-[state=active]:gradient-bg h-10 px-4 min-w-[100px]">Overview</TabsTrigger>
+            <TabsTrigger value="portfolio" className="data-[state=active]:gradient-bg h-10 px-4 min-w-[100px] flex gap-2 items-center justify-center">
+              <Briefcase size={16} /> Portfolio
+            </TabsTrigger>
+            <TabsTrigger value="reviews" className="data-[state=active]:gradient-bg h-10 px-4 min-w-[100px] relative">
+              Reviews
+              {pendingCount > 0 && (
+                <span className="absolute top-1 right-1 bg-red-500 text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center animate-pulse border border-background">
+                  {pendingCount}
+                </span>
+              )}
+            </TabsTrigger>
+            <TabsTrigger value="settings" className="data-[state=active]:gradient-bg h-10 px-4 min-w-[120px]">Site Settings</TabsTrigger>
+            <TabsTrigger value="users" className="data-[state=active]:gradient-bg h-10 px-4 min-w-[120px]">User Control</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="overview">
+             {/* Stats Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {stats.map((stat, i) => (
+                <Card key={i} className="glass">
+                  <CardHeader className="flex flex-row items-center justify-between pb-2">
+                    <CardTitle className="text-sm font-medium text-muted-foreground">{stat.label}</CardTitle>
+                    <stat.icon className={stat.color} size={18} />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-display font-bold">{stat.value}</div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+
+            <Card className="glass mt-8 border-primary/20">
+              <CardHeader>
+                <CardTitle className="gradient-text font-bold">Welcome back, Admin</CardTitle>
+                <CardDescription>Everything is running smoothly. There are {pendingCount} new reviews waiting for your approval.</CardDescription>
+              </CardHeader>
+              <CardContent className="flex gap-4 flex-wrap">
+                <Button onClick={() => document.querySelector('[value="reviews"]')?.dispatchEvent(new MouseEvent('mousedown', {bubbles: true}))}>
+                   Go to Moderation
+                </Button>
+                <Button variant="outline" onClick={() => document.querySelector('[value="settings"]')?.dispatchEvent(new MouseEvent('mousedown', {bubbles: true}))}>
+                   Update Contact Info
+                </Button>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="settings">
+            <Card className="glass">
+              <CardHeader>
+                <CardTitle className="font-display font-bold text-2xl flex items-center gap-2">
+                  <Settings size={24} className="text-primary" /> Website Settings
+                </CardTitle>
+                <CardDescription>Update your contact information, address, and WhatsApp link.</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <Label className="flex items-center gap-2"><Mail size={14} /> Contact Email</Label>
+                    <Input 
+                      value={settings.contact_email}
+                      onChange={(e) => setSettings({...settings, contact_email: e.target.value})}
+                      placeholder="email@example.com"
+                      className="bg-secondary/50"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="flex items-center gap-2"><Phone size={14} /> Contact Phone Numbers</Label>
+                    <Input 
+                      value={settings.contact_phone}
+                      onChange={(e) => setSettings({...settings, contact_phone: e.target.value})}
+                      placeholder="+1 (609) 313-9192, 9384797751"
+                      className="bg-secondary/50"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="flex items-center gap-2"><MapPin size={14} /> Address</Label>
+                    <Input 
+                      value={settings.contact_address}
+                      onChange={(e) => setSettings({...settings, contact_address: e.target.value})}
+                      placeholder="New Jersey, USA"
+                      className="bg-secondary/50"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="flex items-center gap-2"><MessageSquare size={14} /> WhatsApp Number</Label>
+                    <Input 
+                      value={settings.whatsapp_number}
+                      onChange={(e) => setSettings({...settings, whatsapp_number: e.target.value})}
+                      placeholder="9384797751"
+                      className="bg-secondary/50"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="flex items-center gap-2"><Linkedin size={14} /> LinkedIn URL</Label>
+                    <Input 
+                      value={settings.linkedin_url || ''}
+                      onChange={(e) => setSettings({...settings, linkedin_url: e.target.value})}
+                      placeholder="https://linkedin.com/in/your-profile"
+                      className="bg-secondary/50"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="flex items-center gap-2"><Instagram size={14} /> Instagram URL</Label>
+                    <Input 
+                      value={settings.instagram_url || ''}
+                      onChange={(e) => setSettings({...settings, instagram_url: e.target.value})}
+                      placeholder="https://instagram.com/your-profile"
+                      className="bg-secondary/50"
+                    />
+                  </div>
+                </div>
+              </CardContent>
+              <CardFooter className="border-t border-border/50 pt-6">
+                <Button 
+                  onClick={handleSaveSettings} 
+                  disabled={savingSettings}
+                  className="gradient-bg border-none gap-2 ml-auto"
+                >
+                  {savingSettings ? "Saving..." : <><Save size={18} /> Save Website Changes</>}
+                </Button>
+              </CardFooter>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="reviews">
+            <Card className="glass">
+              <CardHeader className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <div>
+                  <CardTitle className="font-display font-bold text-2xl flex items-center gap-2">
+                     <Star size={24} className="text-accent" /> Review Moderation
+                  </CardTitle>
+                  <CardDescription>Approve or delete client stories to be displayed on the website.</CardDescription>
+                </div>
+                <div className="relative w-full sm:w-64">
+                   <Search size={16} className="absolute left-3 top-3 text-muted-foreground" />
+                   <Input 
+                      placeholder="Search messages..." 
+                      className="pl-10 h-9"
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                   />
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>User</TableHead>
+                        <TableHead>Rating</TableHead>
+                        <TableHead>Message</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead className="text-right">Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {filteredReviews.length === 0 ? (
+                        <TableRow>
+                          <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
+                            {searchTerm ? "No matching reviews found." : "No reviews found."}
+                          </TableCell>
+                        </TableRow>
+                      ) : (
+                        filteredReviews.map((review) => (
+                          <TableRow key={review.id}>
+                            <TableCell className="font-medium">{review.name}</TableCell>
+                            <TableCell>
+                              <div className="flex items-center gap-1">
+                                {review.rating} <Star size={14} className="fill-accent text-accent" />
+                              </div>
+                            </TableCell>
+                            <TableCell className="max-w-xs truncate">{review.message}</TableCell>
+                            <TableCell>
+                              <span className={`text-[10px] px-2 py-1 rounded-full uppercase tracking-wider font-bold ${
+                                review.status === 'approved' ? 'bg-green-500/10 text-green-500' : 'bg-yellow-500/10 text-yellow-500'
+                              }`}>
+                                {review.status}
+                              </span>
+                            </TableCell>
+                            <TableCell className="text-right space-x-2">
+                              {review.status === 'pending' ? (
+                                <Button 
+                                  size="icon" 
+                                  variant="outline" 
+                                  className="h-8 w-8 bg-green-500/10 hover:bg-green-500/20 text-green-500 border-green-500/50"
+                                  onClick={() => handleUpdateReviewStatus(review.id, 'approved')}
+                                  title="Approve"
+                                >
+                                  <CheckCircle size={14} />
+                                </Button>
+                              ) : (
+                                <Button 
+                                  size="icon" 
+                                  variant="outline" 
+                                  className="h-8 w-8 bg-yellow-500/10 hover:bg-yellow-500/20 text-yellow-500 border-yellow-500/50"
+                                  onClick={() => handleUpdateReviewStatus(review.id, 'pending')}
+                                  title="Hide"
+                                >
+                                  <XCircle size={14} />
+                                </Button>
+                              )}
+                              <Button 
+                                size="icon" 
+                                variant="outline" 
+                                className="h-8 w-8 bg-red-500/10 hover:bg-red-500/20 text-red-500 border-red-500/50"
+                                onClick={() => handleDeleteReview(review.id)}
+                                title="Delete"
+                              >
+                                <Trash2 size={14} />
+                              </Button>
+                            </TableCell>
+                          </TableRow>
+                        ))
+                      )}
+                    </TableBody>
+                  </Table>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="portfolio">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              {/* Project Form */}
+              <Card className="glass lg:col-span-1 h-fit sticky top-32" id="project-form">
+                <CardHeader>
+                  <CardTitle className="font-display font-bold text-2xl flex items-center gap-2 text-primary">
+                    {isEditingProject ? <Edit size={24} /> : <Plus size={24} />}
+                    {isEditingProject ? 'Edit Project' : 'Add New Project'}
+                  </CardTitle>
+                  <CardDescription>
+                    Fill in the details for your portfolio item.
+                  </CardDescription>
+                </CardHeader>
+                <form onSubmit={handleSaveProject}>
+                  <CardContent className="space-y-4">
+                    <div className="space-y-2">
+                      <Label>Project Title</Label>
+                      <Input 
+                        required
+                        value={projectForm.title}
+                        onChange={(e) => setProjectForm({...projectForm, title: e.target.value})}
+                        placeholder="e.g. Silk Osai Boutique"
+                        className="bg-secondary/50"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Category</Label>
+                      <Input 
+                        required
+                        value={projectForm.category}
+                        onChange={(e) => setProjectForm({...projectForm, category: e.target.value})}
+                        placeholder="e.g. E-Commerce"
+                        className="bg-secondary/50"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Type</Label>
+                      <select 
+                        className="w-full h-10 rounded-md border border-input bg-secondary/50 px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                        value={projectForm.type}
+                        onChange={(e) => setProjectForm({...projectForm, type: e.target.value as any})}
+                      >
+                        <option value="web">Web Application</option>
+                        <option value="mobile">Mobile Application</option>
+                        <option value="other">Other</option>
+                      </select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Live URL (Optional)</Label>
+                      <Input 
+                        value={projectForm.live_url}
+                        onChange={(e) => setProjectForm({...projectForm, live_url: e.target.value})}
+                        placeholder="https://..."
+                        className="bg-secondary/50"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>APK Link (Optional)</Label>
+                      <Input 
+                        value={projectForm.apk_url}
+                        onChange={(e) => setProjectForm({...projectForm, apk_url: e.target.value})}
+                        placeholder="Download link for mobile app"
+                        className="bg-secondary/50"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Description</Label>
+                      <textarea 
+                        className="w-full min-h-[100px] rounded-md border border-input bg-secondary/50 px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                        value={projectForm.description}
+                        onChange={(e) => setProjectForm({...projectForm, description: e.target.value})}
+                        placeholder="Short project overview..."
+                      />
+                    </div>
+                  </CardContent>
+                  <CardFooter className="flex gap-2">
+                    {isEditingProject && (
+                      <Button variant="outline" type="button" onClick={() => {
+                        setIsEditingProject(null);
+                        setProjectForm({ title: '', category: '', description: '', type: 'web', live_url: '', apk_url: '', color: 'from-[hsl(220,90%,56%)] to-[hsl(270,70%,60%)]' });
+                      }}>Cancel</Button>
+                    )}
+                    <Button type="submit" disabled={savingProject} className="flex-1 gradient-bg border-none gap-2">
+                      {savingProject ? 'Saving...' : <><Save size={18} /> {isEditingProject ? 'Update Project' : 'Create Project'}</>}
+                    </Button>
+                  </CardFooter>
+                </form>
+              </Card>
+
+              {/* Project List */}
+              <Card className="glass lg:col-span-2">
+                <CardHeader>
+                  <CardTitle className="font-display font-bold text-2xl flex items-center gap-2">
+                    <Briefcase size={24} className="text-primary" /> Portfolio Items
+                  </CardTitle>
+                  <CardDescription>Manage your showcased works.</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="overflow-x-auto">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Project</TableHead>
+                          <TableHead>Category</TableHead>
+                          <TableHead>Type</TableHead>
+                          <TableHead>Links</TableHead>
+                          <TableHead className="text-right">Actions</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {projects.length === 0 ? (
+                          <TableRow>
+                            <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
+                              No projects added yet. Use the form to create your first portfolio item.
+                            </TableCell>
+                          </TableRow>
+                        ) : (
+                          projects.map((project) => (
+                            <TableRow key={project.id}>
+                              <TableCell className="font-medium text-foreground">{project.title}</TableCell>
+                              <TableCell className="text-muted-foreground">{project.category}</TableCell>
+                              <TableCell>
+                                <span className="flex items-center gap-1 text-xs text-primary font-bold">
+                                  {project.type === 'web' ? <Globe size={12} /> : <Smartphone size={12} />}
+                                  {project.type.toUpperCase()}
+                                </span>
+                              </TableCell>
+                              <TableCell>
+                                <div className="flex gap-2">
+                                  {project.live_url && <a href={project.live_url} target="_blank" rel="noreferrer" title="View Live"><ExternalLink size={16} className="text-primary hover:scale-110 transition-transform" /></a>}
+                                  {project.apk_url && <a href={project.apk_url} target="_blank" rel="noreferrer" title="Download APK"><Smartphone size={16} className="text-accent hover:scale-110 transition-transform" /></a>}
+                                </div>
+                              </TableCell>
+                              <TableCell className="text-right space-x-2">
+                                <Button 
+                                  size="icon" 
+                                  variant="ghost" 
+                                  className="h-8 w-8 text-primary hover:bg-primary/10"
+                                  onClick={() => handleEditProject(project)}
+                                >
+                                  <Edit size={14} />
+                                </Button>
+                                <Button 
+                                  size="icon" 
+                                  variant="ghost" 
+                                  className="h-8 w-8 text-red-500 hover:bg-red-500/10"
+                                  onClick={() => handleDeleteProject(project.id)}
+                                >
+                                  <Trash2 size={14} />
+                                </Button>
+                              </TableCell>
+                            </TableRow>
+                          ))
+                        )}
+                      </TableBody>
+                    </Table>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+          
+          <TabsContent value="users">
+            <Card className="glass">
+              <CardHeader className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <div>
+                  <CardTitle className="font-display font-bold text-2xl flex items-center gap-2">
+                    <Users size={24} className="text-blue-500" /> Registered Users
+                  </CardTitle>
+                  <CardDescription>A list of all users registered on the platform.</CardDescription>
+                </div>
+                <div className="relative w-full sm:w-64">
+                   <Search size={16} className="absolute left-3 top-3 text-muted-foreground" />
+                   <Input 
+                      placeholder="Search users..." 
+                      className="pl-10 h-9"
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                   />
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Name</TableHead>
+                        <TableHead>Email</TableHead>
+                        <TableHead>Role</TableHead>
+                        <TableHead>Joined</TableHead>
+                        <TableHead className="text-right">Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {filteredUsers.length === 0 ? (
+                        <TableRow>
+                           <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
+                            {searchTerm ? "No matching users found." : "No users found."}
+                          </TableCell>
+                        </TableRow>
+                      ) : (
+                        filteredUsers.map((user) => (
+                          <TableRow key={user.id}>
+                            <TableCell className="font-medium">{user.name || 'Anonymous'}</TableCell>
+                            <TableCell className="text-xs">{user.email}</TableCell>
+                            <TableCell>
+                              <span className={`px-2 py-0.5 rounded-full text-[10px] uppercase font-bold tracking-tight ${
+                                user.role === 'admin' ? 'bg-primary/20 text-primary' : 'bg-muted text-muted-foreground'
+                              }`}>
+                                {user.role}
+                              </span>
+                            </TableCell>
+                            <TableCell className="text-muted-foreground text-[10px]">
+                              {new Date(user.created_at).toLocaleDateString()}
+                            </TableCell>
+                            <TableCell className="text-right space-x-2">
+                               {user.id !== profile?.id && (
+                                <>
+                                  <Button 
+                                    size="icon" 
+                                    variant="ghost" 
+                                    className="h-8 w-8 text-primary hover:text-primary hover:bg-primary/10"
+                                    onClick={() => handleToggleRole(user.id, user.role || 'user')}
+                                    title="Toggle Role"
+                                  >
+                                    <ShieldCheck size={14} />
+                                  </Button>
+                                  <Button 
+                                    size="icon" 
+                                    variant="ghost" 
+                                    className="h-8 w-8 text-red-500 hover:text-red-700 hover:bg-red-500/10"
+                                    onClick={() => handleDeleteUser(user.id)}
+                                    title="Delete User"
+                                  >
+                                    <Trash2 size={14} />
+                                  </Button>
+                                </>
+                              )}
+                            </TableCell>
+                          </TableRow>
+                        ))
+                      )}
+                    </TableBody>
+                  </Table>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
+      </main>
+    </div>
+  );
+};
+
+export default AdminDashboard;
