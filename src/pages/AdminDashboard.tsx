@@ -61,6 +61,7 @@ const AdminDashboard = () => {
   });
   const [savingSettings, setSavingSettings] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+  const [activeTab, setActiveTab] = useState('overview');
   
   // Portfolio State
   const [projects, setProjects] = useState<Project[]>([]);
@@ -407,8 +408,8 @@ const AdminDashboard = () => {
       </nav>
 
       <main className="container mx-auto px-4 py-8">
-        <Tabs defaultValue="overview" className="space-y-8">
-          <TabsList className="glass-strong flex md:grid md:grid-cols-5 overflow-x-auto md:overflow-hidden w-full h-auto p-1 sticky top-20 z-40 backdrop-blur-xl border border-primary/20 no-scrollbar">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-8">
+          <TabsList className="glass-strong flex md:grid md:grid-cols-5 overflow-x-auto md:overflow-hidden w-full h-auto p-1 sticky top-20 z-40 backdrop-blur-xl border border-primary/20 no-scrollbar touch-pan-x">
             <TabsTrigger value="overview" className="data-[state=active]:gradient-bg h-10 px-4 min-w-[100px]">Overview</TabsTrigger>
             <TabsTrigger value="inquiries" className="data-[state=active]:gradient-bg h-10 px-4 min-w-[100px] flex gap-2 items-center justify-center relative">
               <Mail size={16} /> Messages
@@ -452,13 +453,13 @@ const AdminDashboard = () => {
             <Card className="glass mt-8 border-primary/20">
               <CardHeader>
                 <CardTitle className="gradient-text font-bold">Welcome back, Admin</CardTitle>
-                <CardDescription>Everything is running smoothly. There are {pendingCount} new reviews waiting for your approval.</CardDescription>
+                <CardDescription>Everything is running smoothly. There are {pendingCount} new reviews and {inquiries.filter(i => i.status === 'new').length} new messages.</CardDescription>
               </CardHeader>
               <CardContent className="flex gap-4 flex-wrap">
-                <Button onClick={() => document.querySelector('[value="inquiries"]')?.dispatchEvent(new MouseEvent('mousedown', {bubbles: true}))}>
+                <Button onClick={() => setActiveTab('inquiries')}>
                    View Messages
                 </Button>
-                <Button variant="outline" onClick={() => document.querySelector('[value="settings"]')?.dispatchEvent(new MouseEvent('mousedown', {bubbles: true}))}>
+                <Button variant="outline" onClick={() => setActiveTab('settings')}>
                    Update Contact Info
                 </Button>
               </CardContent>
@@ -490,7 +491,8 @@ const AdminDashboard = () => {
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="overflow-x-auto">
+                {/* Desktop Table View */}
+                <div className="hidden md:block overflow-x-auto">
                   <Table>
                     <TableHeader>
                       <TableRow>
@@ -542,6 +544,51 @@ const AdminDashboard = () => {
                       )}
                     </TableBody>
                   </Table>
+                </div>
+
+                {/* Mobile Card View */}
+                <div className="md:hidden space-y-4">
+                  {inquiries.length === 0 ? (
+                    <div className="text-center py-8 text-muted-foreground">No inquiries yet.</div>
+                  ) : (
+                    inquiries.filter(i => 
+                      i.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                      i.message.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                      i.email.toLowerCase().includes(searchTerm.toLowerCase())
+                    ).map((inquiry) => (
+                      <div key={inquiry.id} className="glass rounded-xl p-5 border border-primary/10 space-y-4">
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <h4 className="font-bold text-lg text-foreground">{inquiry.name}</h4>
+                            <p className="text-xs text-muted-foreground">{new Date(inquiry.created_at).toLocaleString()}</p>
+                          </div>
+                          <Button 
+                            size="icon" 
+                            variant="ghost" 
+                            className="h-9 w-9 text-red-500 bg-red-500/10"
+                            onClick={() => handleDeleteInquiry(inquiry.id)}
+                          >
+                            <Trash2 size={16} />
+                          </Button>
+                        </div>
+                        
+                        <div className="grid grid-cols-1 gap-2 text-sm">
+                          <div className="flex items-center gap-2 text-muted-foreground">
+                            <Mail size={14} className="text-primary" /> {inquiry.email}
+                          </div>
+                          <div className="flex items-center gap-2 text-muted-foreground">
+                            <Phone size={14} className="text-accent" /> {inquiry.phone}
+                          </div>
+                        </div>
+
+                        <div className="bg-secondary/30 p-3 rounded-lg border border-border/50">
+                          <p className="text-sm italic text-foreground leading-relaxed">
+                            "{inquiry.message}"
+                          </p>
+                        </div>
+                      </div>
+                    ))
+                  )}
                 </div>
               </CardContent>
             </Card>
