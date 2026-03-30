@@ -116,6 +116,35 @@ export interface Database {
           updated_at?: string
         }
       }
+      inquiries: {
+        Row: {
+          id: string
+          name: string
+          email: string
+          phone: string
+          message: string
+          status: 'new' | 'read' | 'archived'
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          name: string
+          email: string
+          phone: string
+          message: string
+          status?: 'new' | 'read' | 'archived'
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          name?: string
+          email?: string
+          phone?: string
+          message?: string
+          status?: 'new' | 'read' | 'archived'
+          created_at?: string
+        }
+      }
     }
     Views: {
       [_ in never]: never

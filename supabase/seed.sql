@@ -156,3 +156,29 @@ INSERT INTO public.projects (title, category, description, color_gradient, clien
   ('Social Media Content', 'Content', 'Engaging social media content strategy and production.', 'from-[hsl(43,96%,56%)] to-[hsl(270,70%,60%)]', 'Trendify', '2024-02'),
   ('SaaS Dashboard', 'Web Development', 'Modern analytics dashboard for a B2B SaaS platform.', 'from-[hsl(270,70%,60%)] to-[hsl(43,96%,56%)]', 'DataPulse', '2024-01'),
   ('Healthcare Recruitment', 'Staffing', 'Specialized staffing solution for the healthcare sector.', 'from-[hsl(220,90%,56%)] to-[hsl(43,96%,56%)]', 'MediCare Group', '2023-10');
+
+-- Create inquiries table for contact form messages
+CREATE TABLE IF NOT EXISTS public.inquiries (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  name TEXT NOT NULL,
+  email TEXT NOT NULL,
+  phone TEXT NOT NULL,
+  message TEXT NOT NULL,
+  status TEXT DEFAULT 'new' CHECK (status IN ('new', 'read', 'archived')),
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+-- Enable RLS on inquiries
+ALTER TABLE public.inquiries ENABLE ROW LEVEL SECURITY;
+
+-- Inquiries Policies
+CREATE POLICY "Anyone can insert inquiries" ON public.inquiries
+  FOR INSERT WITH CHECK (true);
+
+CREATE POLICY "Admins can manage inquiries" ON public.inquiries
+  FOR ALL USING (
+    EXISTS (
+      SELECT 1 FROM public.profiles
+      WHERE profiles.id = auth.uid() AND profiles.role = 'admin'
+    )
+  );

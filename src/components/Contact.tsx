@@ -30,24 +30,42 @@ const Contact = () => {
     fetchSettings();
   }, []);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Construct WhatsApp message
-    const message = `*New Inquiry from SA Elevate Website*%0A%0A` +
-      `*Name:* ${formData.name}%0A` +
-      `*Email:* ${formData.email}%0A` +
-      `*Phone:* ${formData.phone}%0A%0A` +
-      `*Message:*%0A${formData.message}`;
+    try {
+      // 1. Store in Supabase first
+      const { error } = await supabase
+        .from('inquiries')
+        .insert([
+          {
+            name: formData.name,
+            email: formData.email,
+            phone: formData.phone,
+            message: formData.message,
+          }
+        ]);
 
-    // Construct WhatsApp URL
-    const whatsappUrl = `https://wa.me/${settings.whatsapp_number.replace(/\D/g, '')}?text=${message}`;
+      if (error) throw error;
 
-    // Redirect to WhatsApp
-    window.open(whatsappUrl, '_blank');
-    
-    // Reset form
-    setFormData({ name: '', email: '', phone: '', message: '' });
+      // 2. Construct WhatsApp message and redirect
+      const whatsappMessage = `*New Inquiry from SA Elevate Website*%0A%0A` +
+        `*Name:* ${formData.name}%0A` +
+        `*Email:* ${formData.email}%0A` +
+        `*Phone:* ${formData.phone}%0A%0A` +
+        `*Message:*%0A${formData.message}`;
+
+      const whatsappUrl = `https://wa.me/${settings.whatsapp_number.replace(/\D/g, '')}?text=${whatsappMessage}`;
+      
+      // Redirect to WhatsApp
+      window.open(whatsappUrl, '_blank');
+      
+      // 3. Reset form
+      setFormData({ name: '', email: '', phone: '', message: '' });
+    } catch (error: any) {
+      console.error('Error sending message:', error);
+      alert('There was an error sending your message. Please try again.');
+    }
   };
 
   return (

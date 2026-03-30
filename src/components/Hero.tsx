@@ -20,9 +20,6 @@ const Hero = () => {
       <div className="absolute bottom-1/4 right-1/4 w-80 h-80 rounded-full bg-[hsl(330,80%,60%)]/20 blur-[120px] animate-float" style={{ animationDelay: '3s' }} />
 
       <div className="relative z-10 container mx-auto text-center px-4">
-        <div className="inline-block mb-6 px-5 py-2 rounded-full glass text-sm text-accent font-medium gold-glow">
-          ✦ Premium Consulting & Staffing Solutions
-        </div>
 
         <h1 className="fluid-h1 font-display font-bold leading-tight mb-6 max-w-5xl mx-auto">
           Empowering Businesses with{' '}

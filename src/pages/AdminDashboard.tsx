@@ -40,11 +40,13 @@ import { Label } from '@/components/ui/label';
 type Profile = Database['public']['Tables']['profiles']['Row'];
 type Review = Database['public']['Tables']['reviews']['Row'];
 type Project = Database['public']['Tables']['projects']['Row'];
+type Inquiry = Database['public']['Tables']['inquiries']['Row'];
 
 const AdminDashboard = () => {
   const { profile, signOut } = useAuth();
   const [users, setUsers] = useState<Profile[]>([]);
   const [reviews, setReviews] = useState<Review[]>([]);
+  const [inquiries, setInquiries] = useState<Inquiry[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const { toast } = useToast();
@@ -79,19 +81,22 @@ const AdminDashboard = () => {
     else setRefreshing(true);
     
     try {
-      const [usersResponse, reviewsResponse, projectsResponse] = await Promise.all([
+      const [usersResponse, reviewsResponse, projectsResponse, inquiriesResponse] = await Promise.all([
         supabase.from('profiles').select('*').order('created_at', { ascending: false }),
         supabase.from('reviews').select('*').order('created_at', { ascending: false }),
         supabase.from('projects').select('*').order('created_at', { ascending: false }),
+        supabase.from('inquiries').select('*').order('created_at', { ascending: false }),
       ]);
 
       if (usersResponse.error) throw usersResponse.error;
       if (reviewsResponse.error) throw reviewsResponse.error;
       if (projectsResponse.error) throw projectsResponse.error;
+      if (inquiriesResponse.error) throw inquiriesResponse.error;
 
       setUsers(usersResponse.data || []);
       setReviews(reviewsResponse.data || []);
       setProjects(projectsResponse.data || []);
+      setInquiries(inquiriesResponse.data || []);
     } catch (error: any) {
       toast({
         variant: "destructive",
@@ -314,10 +319,51 @@ const AdminDashboard = () => {
     document.getElementById('project-form')?.scrollIntoView({ behavior: 'smooth' });
   };
 
+  const handleDeleteInquiry = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this message?')) return;
+    try {
+      const { error } = await supabase.from('inquiries').delete().eq('id', id);
+      if (error) throw error;
+      toast({ title: "Message Deleted", description: "The inquiry has been removed." });
+      fetchAllData(true);
+    } catch (error: any) {
+      toast({ variant: "destructive", title: "Error deleting message", description: error.message });
+    }
+  };
+
+  const exportInquiriesToCSV = () => {
+    if (inquiries.length === 0) return;
+    
+    const headers = ['Date', 'Name', 'Email', 'Phone', 'Message'];
+    const rows = inquiries.map(inq => [
+      new Date(inq.created_at).toLocaleString(),
+      inq.name,
+      inq.email,
+      inq.phone,
+      `"${inq.message.replace(/"/g, '""')}"`
+    ]);
+    
+    const csvContent = [
+      headers.join(','),
+      ...rows.map(row => row.join(','))
+    ].join('\n');
+    
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    
+    link.setAttribute('href', url);
+    link.setAttribute('download', `sa_elevate_inquiries_${new Date().toISOString().split('T')[0]}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   const stats = [
     { label: 'Total Users', value: users.length, icon: Users, color: 'text-blue-500' },
     { label: 'Total Reviews', value: reviews.length, icon: Star, color: 'text-yellow-500' },
-    { label: 'Pending Reviews', value: reviews.filter((r: any) => r.status === 'pending').length, icon: MessageSquare, color: 'text-orange-500' },
+    { label: 'New Messages', value: inquiries.filter(i => i.status === 'new').length, icon: Mail, color: 'text-green-500' },
     { label: 'Staff Admins', value: users.filter((u: any) => u.role === 'admin').length, icon: ShieldCheck, color: 'text-green-500' },
   ];
 
@@ -364,6 +410,14 @@ const AdminDashboard = () => {
         <Tabs defaultValue="overview" className="space-y-8">
           <TabsList className="glass-strong flex md:grid md:grid-cols-5 overflow-x-auto md:overflow-hidden w-full h-auto p-1 sticky top-20 z-40 backdrop-blur-xl border border-primary/20 no-scrollbar">
             <TabsTrigger value="overview" className="data-[state=active]:gradient-bg h-10 px-4 min-w-[100px]">Overview</TabsTrigger>
+            <TabsTrigger value="inquiries" className="data-[state=active]:gradient-bg h-10 px-4 min-w-[100px] flex gap-2 items-center justify-center relative">
+              <Mail size={16} /> Messages
+              {inquiries.filter(i => i.status === 'new').length > 0 && (
+                <span className="absolute top-1 right-1 bg-green-500 text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center animate-pulse border border-background">
+                  {inquiries.filter(i => i.status === 'new').length}
+                </span>
+              )}
+            </TabsTrigger>
             <TabsTrigger value="portfolio" className="data-[state=active]:gradient-bg h-10 px-4 min-w-[100px] flex gap-2 items-center justify-center">
               <Briefcase size={16} /> Portfolio
             </TabsTrigger>
@@ -401,12 +455,94 @@ const AdminDashboard = () => {
                 <CardDescription>Everything is running smoothly. There are {pendingCount} new reviews waiting for your approval.</CardDescription>
               </CardHeader>
               <CardContent className="flex gap-4 flex-wrap">
-                <Button onClick={() => document.querySelector('[value="reviews"]')?.dispatchEvent(new MouseEvent('mousedown', {bubbles: true}))}>
-                   Go to Moderation
+                <Button onClick={() => document.querySelector('[value="inquiries"]')?.dispatchEvent(new MouseEvent('mousedown', {bubbles: true}))}>
+                   View Messages
                 </Button>
                 <Button variant="outline" onClick={() => document.querySelector('[value="settings"]')?.dispatchEvent(new MouseEvent('mousedown', {bubbles: true}))}>
                    Update Contact Info
                 </Button>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="inquiries">
+            <Card className="glass">
+              <CardHeader className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <div>
+                  <CardTitle className="font-display font-bold text-2xl flex items-center gap-2">
+                     <Mail size={24} className="text-primary" /> Client Inquiries
+                  </CardTitle>
+                  <CardDescription>Messages from the "Let's Connect" form.</CardDescription>
+                </div>
+                <div className="flex gap-2 w-full sm:w-auto">
+                   <Button variant="outline" onClick={exportInquiriesToCSV} className="gap-2 shrink-0">
+                     <ExternalLink size={16} /> Export for Excel
+                   </Button>
+                   <div className="relative w-full sm:w-64">
+                      <Search size={16} className="absolute left-3 top-3 text-muted-foreground" />
+                      <Input 
+                         placeholder="Search messages..." 
+                         className="pl-10 h-9"
+                         value={searchTerm}
+                         onChange={(e) => setSearchTerm(e.target.value)}
+                      />
+                   </div>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Date</TableHead>
+                        <TableHead>Client</TableHead>
+                        <TableHead>Contact Info</TableHead>
+                        <TableHead>Message</TableHead>
+                        <TableHead className="text-right">Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {inquiries.length === 0 ? (
+                        <TableRow>
+                          <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
+                            No inquiries yet.
+                          </TableCell>
+                        </TableRow>
+                      ) : (
+                        inquiries.filter(i => 
+                          i.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                          i.message.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                          i.email.toLowerCase().includes(searchTerm.toLowerCase())
+                        ).map((inquiry) => (
+                          <TableRow key={inquiry.id}>
+                            <TableCell className="text-xs text-muted-foreground whitespace-nowrap">
+                              {new Date(inquiry.created_at).toLocaleDateString()}
+                            </TableCell>
+                            <TableCell className="font-medium whitespace-nowrap">{inquiry.name}</TableCell>
+                            <TableCell className="text-xs">
+                              <div className="flex flex-col gap-1">
+                                <span className="flex items-center gap-1"><Mail size={12} className="text-primary" /> {inquiry.email}</span>
+                                <span className="flex items-center gap-1"><Phone size={12} className="text-accent" /> {inquiry.phone}</span>
+                              </div>
+                            </TableCell>
+                            <TableCell className="min-w-[200px] text-sm italic">"{inquiry.message}"</TableCell>
+                            <TableCell className="text-right">
+                              <Button 
+                                size="icon" 
+                                variant="ghost" 
+                                className="h-8 w-8 text-red-500 hover:bg-red-500/10"
+                                onClick={() => handleDeleteInquiry(inquiry.id)}
+                                title="Delete Message"
+                              >
+                                <Trash2 size={14} />
+                              </Button>
+                            </TableCell>
+                          </TableRow>
+                        ))
+                      )}
+                    </TableBody>
+                  </Table>
+                </div>
               </CardContent>
             </Card>
           </TabsContent>
