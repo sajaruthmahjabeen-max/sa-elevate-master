@@ -55,7 +55,7 @@ const Auth = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      const { error } = await supabase.auth.signUp({
+      const { data: authData, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
@@ -63,6 +63,20 @@ const Auth = () => {
         },
       });
       if (error) throw error;
+
+      // Manually create profile if signup was successful
+      if (authData.user) {
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .upsert({
+            id: authData.user.id,
+            name: name,
+            email: email,
+            role: 'user'
+          } as any);
+        if (profileError) console.error("Error creating profile:", profileError);
+      }
+
       toast({
         title: "Account created!",
         description: "Please check your email to verify your account.",

@@ -332,6 +332,33 @@ const AdminDashboard = () => {
     }
   };
 
+  const handleMarkAllAsRead = useCallback(async () => {
+    const newInquiries = inquiries.filter(i => i.status === 'new');
+    if (newInquiries.length === 0) return;
+
+    try {
+      const { error } = await supabase
+        .from('inquiries')
+        .update({ status: 'read' } as any)
+        .eq('status', 'new');
+
+      if (error) throw error;
+
+      // Update local state to reflect changes immediately
+      setInquiries(prev => prev.map(inq => 
+        inq.status === 'new' ? { ...inq, status: 'read' as any } : inq
+      ));
+    } catch (error) {
+      console.error('Error marking messages as read:', error);
+    }
+  }, [inquiries]);
+
+  useEffect(() => {
+    if (activeTab === 'inquiries') {
+      handleMarkAllAsRead();
+    }
+  }, [activeTab, handleMarkAllAsRead]);
+
   const exportInquiriesToCSV = () => {
     if (inquiries.length === 0) return;
     
