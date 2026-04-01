@@ -45,9 +45,9 @@ const Footer = () => {
   return (
     <footer className="border-t border-border/30 py-12 px-4">
       <div className="container mx-auto">
-        <div className="grid md:grid-cols-3 gap-10 mb-10">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 sm:gap-10 mb-10">
           <div>
-            <h3 className="text-xl font-display font-bold gradient-text mb-4">SA Consultant & Staffing Solutions</h3>
+            <h3 className="text-xl font-display font-bold gradient-text mb-4">SA Consultant & Staffing</h3>
             <p className="text-muted-foreground text-sm leading-relaxed">
               Empowering businesses with smart digital and staffing solutions worldwide.
             </p>
@@ -56,7 +56,7 @@ const Footer = () => {
           <div>
             <h4 className="font-semibold mb-4">Quick Links</h4>
             <div className="space-y-2">
-              {['About', 'Services', 'Portfolio', 'Contact'].map((link) => (
+              {['About', 'Services', 'Portfolio'].map((link) => (
                 <a
                   key={link}
                   href={`#${link.toLowerCase()}`}
@@ -65,6 +65,12 @@ const Footer = () => {
                   {link}
                 </a>
               ))}
+              <a
+                href="#contact"
+                className="bg-accent text-accent-foreground px-4 py-2 rounded-lg font-semibold hover:opacity-90 inline-flex items-center justify-center transition-all duration-300 text-sm"
+              >
+                Contact Us
+              </a>
             </div>
           </div>
 
@@ -90,11 +96,11 @@ const Footer = () => {
           </div>
         </div>
 
-        <div className="border-t border-border/30 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
-          <p className="text-sm text-muted-foreground">
-            © 2026 SA Consultant & Staffing Solutions. All rights reserved.
+        <div className="border-t border-border/30 pt-6 flex flex-col items-center gap-2 text-center md:flex-row md:justify-between">
+          <p className="text-xs sm:text-sm text-muted-foreground">
+            © 2026 SA Consultant & Staffing. All rights reserved.
           </p>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-xs sm:text-sm text-muted-foreground">
             Crafted with excellence ✦
           </p>
         </div>
