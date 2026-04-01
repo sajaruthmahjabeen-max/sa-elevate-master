@@ -37,7 +37,7 @@ const Hero = () => {
 
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <a
-            href="#contact"
+            href="#services"
             className="gradient-bg px-8 py-4 rounded-lg font-semibold text-foreground hover-lift hover-glow inline-flex items-center justify-center gap-2 transition-all duration-300"
           >
             Get Started <ArrowRight size={18} />
