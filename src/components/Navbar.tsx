@@ -63,7 +63,7 @@ const Navbar = () => {
   return (
     <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${scrolled ? 'glass-strong py-3 shadow-lg shadow-background/50' : 'py-5 bg-transparent'}`}>
       <div className="container mx-auto flex items-center justify-between">
-        <Link to="/" className="text-base md:text-xl font-display font-bold gradient-text whitespace-normal leading-tight max-w-[160px] sm:max-w-none">
+        <Link to="/" className="text-sm sm:text-base md:text-xl font-display font-bold gradient-text leading-tight whitespace-nowrap">
           SA Consultant & Staffing
         </Link>
 
