@@ -99,13 +99,13 @@ const Contact = () => {
                 { icon: Mail, label: 'Email', value: settings.contact_email },
                 { icon: Phone, label: 'Phone', value: settings.contact_phone },
               ].map((item) => (
-                <div key={item.label} className="flex items-start gap-4">
+                <div key={item.label} className="flex items-start gap-4 overflow-hidden">
                   <div className="w-12 h-12 rounded-xl gradient-bg flex items-center justify-center flex-shrink-0">
                     <item.icon size={20} className="text-foreground" />
                   </div>
-                  <div>
+                  <div className="min-w-0 flex-1">
                     <p className="text-sm text-muted-foreground">{item.label}</p>
-                    <p className="text-foreground font-medium">{item.value}</p>
+                    <p className="text-foreground font-medium break-words md:break-normal whitespace-pre-wrap">{item.value}</p>
                   </div>
                 </div>
               ))}
@@ -113,7 +113,7 @@ const Contact = () => {
           </div>
 
           {/* Form */}
-          <form onSubmit={handleSubmit} className="scroll-reveal glass rounded-2xl p-8 space-y-6">
+          <form onSubmit={handleSubmit} className="scroll-reveal glass rounded-2xl p-5 sm:p-8 space-y-6 max-w-full">
             <div>
               <label className="text-sm text-muted-foreground mb-2 block">Full Name</label>
               <input
