@@ -61,7 +61,7 @@ const Navbar = () => {
   }, []);
 
   return (
-    <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${scrolled ? 'glass-strong py-3 shadow-lg shadow-background/50' : 'py-5 bg-transparent'}`}>
+    <nav className={`fixed top-0 left-0 w-full z-[9999] transition-all duration-300 ${scrolled ? 'glass-strong py-4 shadow-lg shadow-background/50' : 'glass-strong py-4'}`}>
       <div className="container mx-auto flex items-center justify-between">
         <Link to="/" className="text-sm sm:text-base md:text-xl font-display font-bold gradient-text leading-tight whitespace-nowrap">
           SA Consultant & Staffing
