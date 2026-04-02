@@ -69,13 +69,13 @@ const Contact = () => {
   };
 
   return (
-    <section id="contact" className="section-padding relative">
-      <div className="absolute bottom-0 right-0 w-80 h-80 rounded-full bg-primary/10 blur-[120px]" />
+    <section id="contact" className="section-padding relative overflow-hidden w-full">
+      <div className="absolute bottom-0 right-0 w-80 h-80 rounded-full bg-primary/10 blur-[120px] pointer-events-none" />
 
-      <div className="container mx-auto relative z-10">
-        <div className="text-center mb-16 scroll-reveal">
+      <div className="container mx-auto relative z-10 w-full px-4 sm:px-6">
+        <div className="text-center mb-10 lg:mb-16 scroll-reveal">
           <span className="text-accent text-sm font-semibold tracking-widest uppercase">Contact</span>
-          <h2 className="fluid-h2 font-display font-bold mt-3 mb-6">
+          <h2 className="fluid-h2 font-display font-bold mt-3 mb-4 lg:mb-6">
             Let's <span className="gradient-text">Connect</span>
           </h2>
           <p className="text-muted-foreground max-w-2xl mx-auto">
@@ -83,29 +83,29 @@ const Contact = () => {
           </p>
         </div>
 
-        <div className="grid lg:grid-cols-2 gap-12 max-w-5xl mx-auto">
+        <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 max-w-5xl mx-auto w-full">
           {/* Contact info */}
-          <div className="scroll-reveal space-y-8">
+          <div className="scroll-reveal space-y-6 lg:space-y-8 w-full max-w-full">
             <div>
-              <h3 className="text-2xl font-display font-semibold mb-4">Get In Touch</h3>
-              <p className="text-muted-foreground">
+              <h3 className="text-xl md:text-2xl font-display font-semibold mb-3 lg:mb-4">Get In Touch</h3>
+              <p className="text-muted-foreground text-sm md:text-base">
                 We'd love to hear about your project. Reach out and let's create something extraordinary together.
               </p>
             </div>
 
-            <div className="space-y-6">
+            <div className="space-y-4 lg:space-y-6 w-full">
               {[
                 { icon: MapPin, label: 'Address', value: settings.contact_address },
                 { icon: Mail, label: 'Email', value: settings.contact_email },
                 { icon: Phone, label: 'Phone', value: settings.contact_phone },
               ].map((item) => (
-                <div key={item.label} className="flex items-start gap-4 overflow-hidden">
-                  <div className="w-12 h-12 rounded-xl gradient-bg flex items-center justify-center flex-shrink-0">
+                <div key={item.label} className="flex items-start gap-4 overflow-hidden w-full">
+                  <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl gradient-bg flex items-center justify-center flex-shrink-0">
                     <item.icon size={20} className="text-foreground" />
                   </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="text-sm text-muted-foreground">{item.label}</p>
-                    <p className="text-foreground font-medium break-words md:break-normal whitespace-pre-wrap">{item.value}</p>
+                  <div className="min-w-0 flex-1 overflow-hidden">
+                    <p className="text-xs md:text-sm text-muted-foreground">{item.label}</p>
+                    <p className="text-sm md:text-base text-foreground font-medium break-words whitespace-pre-wrap leading-relaxed">{item.value}</p>
                   </div>
                 </div>
               ))}
@@ -113,54 +113,54 @@ const Contact = () => {
           </div>
 
           {/* Form */}
-          <form onSubmit={handleSubmit} className="scroll-reveal glass rounded-2xl p-5 sm:p-8 space-y-6 max-w-full">
-            <div>
-              <label className="text-sm text-muted-foreground mb-2 block">Full Name</label>
+          <form onSubmit={handleSubmit} className="scroll-reveal glass rounded-2xl p-5 md:p-8 space-y-4 lg:space-y-6 w-full max-w-full overflow-hidden box-border">
+            <div className="w-full">
+              <label className="text-sm text-muted-foreground mb-1.5 md:mb-2 block">Full Name</label>
               <input
                 type="text"
                 required
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                className="w-full px-4 py-3 rounded-lg bg-secondary border border-border focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all text-foreground"
+                className="w-full px-4 py-3 rounded-lg bg-secondary border border-border focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all text-foreground text-sm md:text-base box-border"
                 placeholder="John Doe"
               />
             </div>
-            <div>
-              <label className="text-sm text-muted-foreground mb-2 block">Email Address</label>
+            <div className="w-full">
+              <label className="text-sm text-muted-foreground mb-1.5 md:mb-2 block">Email Address</label>
               <input
                 type="email"
                 required
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                className="w-full px-4 py-3 rounded-lg bg-secondary border border-border focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all text-foreground"
+                className="w-full px-4 py-3 rounded-lg bg-secondary border border-border focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all text-foreground text-sm md:text-base box-border"
                 placeholder="john@example.com"
               />
             </div>
-            <div>
-              <label className="text-sm text-muted-foreground mb-2 block">Phone Number</label>
+            <div className="w-full">
+              <label className="text-sm text-muted-foreground mb-1.5 md:mb-2 block">Phone Number</label>
               <input
                 type="tel"
                 required
                 value={formData.phone}
                 onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                className="w-full px-4 py-3 rounded-lg bg-secondary border border-border focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all text-foreground"
+                className="w-full px-4 py-3 rounded-lg bg-secondary border border-border focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all text-foreground text-sm md:text-base box-border"
                 placeholder="+1 (123) 456-7890"
               />
             </div>
-            <div>
-              <label className="text-sm text-muted-foreground mb-2 block">Message</label>
+            <div className="w-full">
+              <label className="text-sm text-muted-foreground mb-1.5 md:mb-2 block">Message</label>
               <textarea
                 required
-                rows={5}
+                rows={4}
                 value={formData.message}
                 onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-                className="w-full px-4 py-3 rounded-lg bg-secondary border border-border focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all resize-none text-foreground"
+                className="w-full px-4 py-3 rounded-lg bg-secondary border border-border focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all resize-none text-foreground text-sm md:text-base box-border"
                 placeholder="Tell us about your project..."
               />
             </div>
             <button
               type="submit"
-              className="w-full gradient-bg py-4 rounded-lg font-semibold text-foreground hover-lift hover-glow flex items-center justify-center gap-2 transition-all duration-300"
+              className="w-full gradient-bg py-3.5 md:py-4 rounded-lg font-semibold text-foreground hover-lift hover-glow flex items-center justify-center gap-2 transition-all duration-300 text-sm md:text-base"
             >
               Send Message <Send size={18} />
             </button>
