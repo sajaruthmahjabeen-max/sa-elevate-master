@@ -3,7 +3,7 @@ import heroBg from '@/assets/hero-bg.jpg';
 
 const Hero = () => {
   return (
-    <section id="home" className="relative min-h-screen md:flex md:items-center md:justify-center overflow-hidden bg-white">
+    <section id="home" className="relative min-h-screen md:flex md:items-center md:justify-center overflow-hidden bg-white pt-20 md:pt-0">
       {/* Background Video Holder */}
       <div className="relative w-full aspect-video md:aspect-auto md:absolute md:inset-0 md:h-full">
         <video
