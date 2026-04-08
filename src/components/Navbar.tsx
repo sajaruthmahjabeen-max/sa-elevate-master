@@ -4,6 +4,8 @@ import { useAuth } from '@/hooks/useAuth';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/lib/supabase';
+import { ThemeToggle } from '@/components/ThemeToggle';
+import logo from '@/assets/logo.png';
 
 const navLinks = [
   { label: 'Home', href: '/#home' },
@@ -63,8 +65,11 @@ const Navbar = () => {
   return (
     <nav className={`fixed top-0 left-0 w-full z-[9999] transition-all duration-300 ${scrolled ? 'glass-strong py-4 shadow-lg shadow-background/50' : 'glass-strong py-4'}`}>
       <div className="container mx-auto flex items-center justify-between">
-        <Link to="/" className="text-lg sm:text-xl md:text-2xl font-display font-bold gradient-text leading-tight whitespace-nowrap">
-          SA Consultant & Staffing
+        <Link to="/" className="flex items-center gap-4">
+          <img src={logo} alt="SA Consultant logo" className="h-24 md:h-32 w-auto object-contain transition-transform duration-300 hover:scale-105" />
+          <span className="text-lg sm:text-xl md:text-2xl font-display font-black tracking-tight gradient-text leading-tight whitespace-nowrap hidden sm:block">
+            SA Consultant & Staffing
+          </span>
         </Link>
 
         {/* Desktop */}
@@ -93,6 +98,8 @@ const Navbar = () => {
             </SocialIcon>
           </div>
 
+          <ThemeToggle />
+
           {!user ? (
             <Button asChild className="gradient-bg border-none">
               <Link to="/auth">Client Access</Link>
@@ -112,12 +119,15 @@ const Navbar = () => {
         </div>
 
         {/* Mobile toggle */}
-        <button
-          className="lg:hidden text-foreground ml-4"
-          onClick={() => setMobileOpen(!mobileOpen)}
-        >
-          {mobileOpen ? <X size={24} /> : <Menu size={24} />}
-        </button>
+        <div className="lg:hidden flex items-center gap-2 ml-auto">
+          <ThemeToggle />
+          <button
+            className="text-foreground p-2"
+            onClick={() => setMobileOpen(!mobileOpen)}
+          >
+            {mobileOpen ? <X size={24} /> : <Menu size={24} />}
+          </button>
+        </div>
       </div>
 
       {/* Mobile menu */}

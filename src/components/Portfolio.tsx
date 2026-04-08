@@ -72,10 +72,10 @@ const Portfolio = () => {
       <div className="container mx-auto">
         <div className="text-center mb-16 scroll-reveal">
           <span className="text-accent text-sm font-semibold tracking-widest uppercase">Portfolio</span>
-          <h2 className="fluid-h2 font-display font-bold mt-3 mb-6">
+          <h2 className="fluid-h2 font-display font-black tracking-tight mt-3 mb-6">
             Our <span className="gradient-text">Work</span>
           </h2>
-          <p className="text-muted-foreground max-w-2xl mx-auto">
+          <p className="text-foreground font-semibold max-w-2xl mx-auto text-lg leading-relaxed">
             Explore our successful implementations across web, mobile, and enterprise solutions.
           </p>
         </div>
@@ -103,8 +103,8 @@ const Portfolio = () => {
                       {project.type === 'web' ? <Globe className="w-3 h-3" /> : <Smartphone className="w-3 h-3" />}
                       {project.category}
                     </span>
-                    <h3 className="text-2xl font-display font-bold text-foreground mb-3">{project.title}</h3>
-                    <p className="text-sm text-foreground/70 mb-6 opacity-0 group-hover:opacity-100 transition-opacity duration-500 delay-100 max-w-[250px]">
+                    <h3 className="text-2xl font-display font-black text-foreground mb-3">{project.title}</h3>
+                    <p className="text-sm font-semibold text-foreground mb-6 opacity-0 group-hover:opacity-100 transition-opacity duration-500 delay-100 max-w-[250px] leading-relaxed">
                       {project.description}
                     </p>
                     

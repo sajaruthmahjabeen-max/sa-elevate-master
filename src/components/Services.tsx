@@ -29,15 +29,15 @@ const services = [
 
 const Services = () => (
   <section id="services" className="section-padding relative">
-    <div className="absolute bottom-0 left-0 w-96 h-96 rounded-full bg-[hsl(330,80%,60%)]/10 blur-[120px]" />
+    <div className="absolute bottom-0 left-0 w-96 h-96 rounded-full bg-[#3b82f6]/10 blur-[120px]" />
 
     <div className="container mx-auto relative z-10">
       <div className="text-center mb-16 scroll-reveal">
         <span className="text-accent text-sm font-semibold tracking-widest uppercase">Our Services</span>
-        <h2 className="fluid-h2 font-display font-bold mt-3 mb-6">
+        <h2 className="fluid-h2 font-display font-black tracking-tight mt-3 mb-6">
           What We <span className="gradient-text">Offer</span>
         </h2>
-        <p className="text-muted-foreground max-w-2xl mx-auto">
+        <p className="text-foreground font-semibold max-w-2xl mx-auto text-lg leading-relaxed">
           Comprehensive solutions designed to elevate your business to new heights.
         </p>
       </div>
@@ -55,11 +55,11 @@ const Services = () => (
             <div className="w-14 h-14 rounded-xl bg-secondary flex items-center justify-center mb-6 group-hover:gradient-bg transition-all duration-500">
               <service.icon size={24} className="text-primary group-hover:text-foreground transition-colors duration-500" />
             </div>
-            <h3 className="text-lg font-display font-semibold mb-3">{service.title}</h3>
-            <p className="text-muted-foreground text-sm leading-relaxed mb-5">{service.description}</p>
+            <h3 className="text-lg font-display font-bold mb-3">{service.title}</h3>
+            <p className="text-foreground font-medium text-sm leading-relaxed mb-5">{service.description}</p>
             <div className="flex flex-wrap gap-2">
               {service.features.map((f) => (
-                <span key={f} className="text-xs px-3 py-1 rounded-full bg-secondary text-muted-foreground">
+                <span key={f} className="text-xs px-3 py-1 rounded-full bg-secondary text-foreground font-bold border border-primary/20">
                   {f}
                 </span>
               ))}

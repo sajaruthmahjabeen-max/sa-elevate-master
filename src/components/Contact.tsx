@@ -75,10 +75,10 @@ const Contact = () => {
       <div className="container mx-auto relative z-10 w-full px-4 sm:px-6">
         <div className="text-center mb-10 lg:mb-16 scroll-reveal">
           <span className="text-accent text-sm font-semibold tracking-widest uppercase">Contact</span>
-          <h2 className="fluid-h2 font-display font-bold mt-3 mb-4 lg:mb-6">
+          <h2 className="fluid-h2 font-display font-black tracking-tight mt-3 mb-4 lg:mb-6">
             Let's <span className="gradient-text">Connect</span>
           </h2>
-          <p className="text-muted-foreground max-w-2xl mx-auto">
+          <p className="text-foreground font-semibold max-w-2xl mx-auto text-lg leading-relaxed">
             Ready to transform your business? Get in touch with us today.
           </p>
         </div>
@@ -87,8 +87,8 @@ const Contact = () => {
           {/* Contact info */}
           <div className="scroll-reveal space-y-6 lg:space-y-8 w-full max-w-full">
             <div>
-              <h3 className="text-xl md:text-2xl font-display font-semibold mb-3 lg:mb-4">Get In Touch</h3>
-              <p className="text-muted-foreground text-sm md:text-base">
+              <h3 className="text-xl md:text-2xl font-display font-black tracking-tight mb-3 lg:mb-4">Get In Touch</h3>
+              <p className="text-foreground font-medium text-sm md:text-base leading-relaxed">
                 We'd love to hear about your project. Reach out and let's create something extraordinary together.
               </p>
             </div>
@@ -104,8 +104,8 @@ const Contact = () => {
                     <item.icon size={20} className="text-foreground" />
                   </div>
                   <div className="min-w-0 flex-1 overflow-hidden">
-                    <p className="text-xs md:text-sm text-muted-foreground">{item.label}</p>
-                    <p className="text-sm md:text-base text-foreground font-medium break-words whitespace-pre-wrap leading-relaxed">{item.value}</p>
+                    <p className="text-xs md:text-sm text-foreground font-black uppercase tracking-tighter opacity-70">{item.label}</p>
+                    <p className="text-sm md:text-base text-foreground font-bold break-words whitespace-pre-wrap leading-relaxed">{item.value}</p>
                   </div>
                 </div>
               ))}
@@ -115,7 +115,7 @@ const Contact = () => {
           {/* Form */}
           <form onSubmit={handleSubmit} className="scroll-reveal glass rounded-2xl p-5 md:p-8 space-y-4 lg:space-y-6 w-full max-w-full overflow-hidden box-border">
             <div className="w-full">
-              <label className="text-sm text-muted-foreground mb-1.5 md:mb-2 block">Full Name</label>
+              <label className="text-sm text-foreground font-bold mb-1.5 md:mb-2 block">Full Name</label>
               <input
                 type="text"
                 required
@@ -126,7 +126,7 @@ const Contact = () => {
               />
             </div>
             <div className="w-full">
-              <label className="text-sm text-muted-foreground mb-1.5 md:mb-2 block">Email Address</label>
+              <label className="text-sm text-foreground font-bold mb-1.5 md:mb-2 block">Email Address</label>
               <input
                 type="email"
                 required
@@ -137,7 +137,7 @@ const Contact = () => {
               />
             </div>
             <div className="w-full">
-              <label className="text-sm text-muted-foreground mb-1.5 md:mb-2 block">Phone Number</label>
+              <label className="text-sm text-foreground font-bold mb-1.5 md:mb-2 block">Phone Number</label>
               <input
                 type="tel"
                 required
@@ -148,7 +148,7 @@ const Contact = () => {
               />
             </div>
             <div className="w-full">
-              <label className="text-sm text-muted-foreground mb-1.5 md:mb-2 block">Message</label>
+              <label className="text-sm text-foreground font-bold mb-1.5 md:mb-2 block">Message</label>
               <textarea
                 required
                 rows={4}
@@ -160,7 +160,7 @@ const Contact = () => {
             </div>
             <button
               type="submit"
-              className="w-full gradient-bg py-3.5 md:py-4 rounded-lg font-semibold text-foreground hover-lift hover-glow flex items-center justify-center gap-2 transition-all duration-300 text-sm md:text-base"
+              className="w-full gradient-bg py-3.5 md:py-4 rounded-lg font-black text-white hover-lift hover-glow flex items-center justify-center gap-2 transition-all duration-300 text-sm md:text-base"
             >
               Send Message <Send size={18} />
             </button>

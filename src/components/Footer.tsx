@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
+import logo from '@/assets/logo.png';
 
 const SocialLink = ({ href, children, label }: { href: string; children: React.ReactNode; label: string }) => (
   <a
@@ -18,7 +19,7 @@ const Footer = () => {
     contact_email: 'mahjabeensajaruth@gmail.com',
     contact_phone: '+1 (609) 313-9192, 9384797751',
     whatsapp_number: '9384797751',
-    linkedin_url: 'https://linkedin.com',
+    linkedin_url: 'https://www.linkedin.com/company/112648936/',
     instagram_url: 'https://instagram.com'
   });
 
@@ -47,37 +48,46 @@ const Footer = () => {
       <div className="container mx-auto">
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 sm:gap-10 mb-10">
           <div>
-            <h3 className="text-xl font-display font-bold gradient-text mb-4">SA Consultant & Staffing</h3>
-            <p className="text-muted-foreground text-sm leading-relaxed">
+            <div className="flex items-center gap-3 mb-6">
+              <img src={logo} alt="SA Consultant & Staffing" className="h-24 md:h-32 w-auto object-contain" />
+            </div>
+            <h3 className="text-xl font-display font-black tracking-tight gradient-text mb-4">SA Consultant & Staffing</h3>
+            <p className="text-foreground font-semibold text-sm leading-relaxed">
               Empowering businesses with smart digital and staffing solutions worldwide.
             </p>
           </div>
 
           <div>
-            <h4 className="font-semibold mb-4">Quick Links</h4>
+            <h4 className="font-black tracking-tight mb-4 uppercase text-sm md:text-base border-b-2 border-accent w-fit pb-1">Quick Links</h4>
             <div className="space-y-2">
               {['About', 'Services', 'Portfolio'].map((link) => (
                 <a
                   key={link}
                   href={`#${link.toLowerCase()}`}
-                  className="block text-sm text-muted-foreground hover:text-foreground transition-colors"
+                  className="block text-base text-foreground font-black hover:text-accent transition-colors py-1"
                 >
                   {link}
                 </a>
               ))}
-              <a
-                href="#contact"
-                className="bg-accent text-accent-foreground px-4 py-2 rounded-lg font-semibold hover:opacity-90 inline-flex items-center justify-center transition-all duration-300 text-sm"
-              >
-                Contact Us
-              </a>
             </div>
           </div>
 
           <div>
-            <div className="space-y-2 text-sm text-muted-foreground">
-              <p>{settings.contact_email}</p>
-              <p>{settings.contact_phone}</p>
+            <div className="space-y-4 text-sm text-foreground font-bold">
+              <a
+                href="#contact"
+                className="gradient-bg-animated text-white px-6 py-3 rounded-xl font-black hover:scale-105 inline-flex items-center justify-center transition-all duration-300 text-base shadow-lg shadow-primary/20 w-full"
+              >
+                Contact Us
+              </a>
+              <div>
+                <p className="text-accent uppercase text-[10px] tracking-widest mb-1">Email Us</p>
+                <p>{settings.contact_email}</p>
+              </div>
+              <div>
+                <p className="text-accent uppercase text-[10px] tracking-widest mb-1">Call Us</p>
+                <p>{settings.contact_phone}</p>
+              </div>
             </div>
             <div className="flex gap-3 mt-4">
               <SocialLink href={settings.linkedin_url} label="LinkedIn">

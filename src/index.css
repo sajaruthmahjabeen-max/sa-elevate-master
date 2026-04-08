@@ -6,50 +6,93 @@
 
 @layer base {
   :root {
-    --background: 225 43% 7%;
-    --foreground: 210 40% 98%;
+    /* White theme — always light */
+    --background: 0 0% 100%;
+    --foreground: 0 0% 7%;
 
-    --card: 225 40% 10%;
-    --card-foreground: 210 40% 98%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 7%;
 
-    --popover: 225 40% 10%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 7%;
 
-    --primary: 270 70% 60%;
-    --primary-foreground: 210 40% 98%;
+    --primary: 221 83% 53%;
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 225 30% 16%;
-    --secondary-foreground: 210 40% 98%;
+    --secondary: 210 25% 97%;
+    --secondary-foreground: 0 0% 7%;
 
-    --muted: 225 25% 14%;
-    --muted-foreground: 220 15% 55%;
+    --muted: 210 25% 97%;
+    --muted-foreground: 0 0% 42%;
 
-    --accent: 43 96% 56%;
-    --accent-foreground: 225 43% 7%;
+    --accent: 221 83% 53%;
+    --accent-foreground: 0 0% 100%;
 
     --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 225 20% 18%;
-    --input: 225 20% 18%;
-    --ring: 270 70% 60%;
+    --border: 210 20% 91%;
+    --input: 210 20% 91%;
+    --ring: 221 83% 53%;
 
     --radius: 0.75rem;
 
-    --gradient-purple: 270 70% 60%;
-    --gradient-blue: 220 90% 56%;
-    --gradient-pink: 330 80% 60%;
-    --gold: 43 96% 56%;
-    --gold-light: 43 96% 70%;
+    --gradient-start: 221 83% 53%;
+    --gradient-mid: 210 90% 58%;
+    --gradient-end: 199 89% 48%;
 
-    --sidebar-background: 225 40% 10%;
-    --sidebar-foreground: 210 40% 98%;
-    --sidebar-primary: 270 70% 60%;
-    --sidebar-primary-foreground: 210 40% 98%;
-    --sidebar-accent: 225 30% 16%;
-    --sidebar-accent-foreground: 210 40% 98%;
-    --sidebar-border: 225 20% 18%;
-    --sidebar-ring: 270 70% 60%;
+    --sidebar-background: 210 25% 97%;
+    --sidebar-foreground: 0 0% 7%;
+    --sidebar-primary: 221 83% 53%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 210 20% 94%;
+    --sidebar-accent-foreground: 0 0% 7%;
+    --sidebar-border: 210 20% 91%;
+    --sidebar-ring: 221 83% 53%;
+  }
+
+  /* Force light theme even when .dark class is applied */
+  .dark {
+    --background: 0 0% 100%;
+    --foreground: 0 0% 7%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 7%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 7%;
+
+    --primary: 221 83% 53%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 210 25% 97%;
+    --secondary-foreground: 0 0% 7%;
+
+    --muted: 210 25% 97%;
+    --muted-foreground: 0 0% 42%;
+
+    --accent: 221 83% 53%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 210 20% 91%;
+    --input: 210 20% 91%;
+    --ring: 221 83% 53%;
+
+    --gradient-start: 221 83% 53%;
+    --gradient-mid: 210 90% 58%;
+    --gradient-end: 199 89% 48%;
+
+    --sidebar-background: 210 25% 97%;
+    --sidebar-foreground: 0 0% 7%;
+    --sidebar-primary: 221 83% 53%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 210 20% 94%;
+    --sidebar-accent-foreground: 0 0% 7%;
+    --sidebar-border: 210 20% 91%;
+    --sidebar-ring: 221 83% 53%;
   }
 }
 
@@ -62,6 +105,8 @@
     @apply bg-background text-foreground font-sans;
     font-family: 'Inter', sans-serif;
     overflow-x: hidden;
+    background-color: #ffffff;
+    color: #111111;
   }
 
   html {
@@ -70,50 +115,71 @@
   }
 
   h1, h2, h3, h4, h5, h6 {
+    @apply font-black tracking-tight;
     font-family: 'Playfair Display', serif;
+    color: #111111;
   }
 }
 
 @layer components {
+  /* Light-mode glass: subtle white card with border + shadow */
   .glass {
-    @apply bg-card/30 backdrop-blur-xl border border-border/30;
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(0, 0, 0, 0.07);
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
   }
 
   .glass-strong {
-    @apply bg-card/50 backdrop-blur-2xl border border-border/40;
+    background: rgba(255, 255, 255, 0.92);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid rgba(0, 0, 0, 0.09);
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.07);
   }
 
+  /* Blue gradient text */
   .gradient-text {
-    @apply bg-clip-text text-transparent bg-gradient-to-r from-[hsl(270,70%,60%)] via-[hsl(220,90%,56%)] to-[hsl(330,80%,60%)];
+    @apply bg-clip-text text-transparent;
+    background-image: linear-gradient(135deg, #1e3a8a, #1d4ed8, #2563eb);
   }
 
+  /* Blue gradient background */
   .gradient-bg {
-    @apply bg-gradient-to-r from-[hsl(270,70%,60%)] via-[hsl(220,90%,56%)] to-[hsl(330,80%,60%)];
+    background-image: linear-gradient(135deg, #1e3a8a, #1d4ed8, #2563eb);
+    color: #ffffff;
   }
 
   .gradient-bg-animated {
-    background: linear-gradient(135deg, hsl(270 70% 60%), hsl(220 90% 56%), hsl(330 80% 60%), hsl(270 70% 60%));
+    background: linear-gradient(135deg, #1e3a8a, #1d4ed8, #2563eb, #1e3a8a);
     background-size: 300% 300%;
     animation: gradient-shift 8s ease infinite;
+    color: #ffffff;
   }
 
   .gold-text {
-    @apply text-accent;
+    color: #2563eb;
   }
 
   .gold-glow {
-    text-shadow: 0 0 20px hsl(43 96% 56% / 0.4);
+    text-shadow: 0 0 20px rgba(37, 99, 235, 0.3);
   }
 
   .hover-lift {
-    @apply transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl;
+    @apply transition-all duration-300 hover:-translate-y-2;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  .hover-lift:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 12px 40px rgba(37, 99, 235, 0.15);
   }
 
   .hover-glow {
     @apply transition-all duration-300;
   }
   .hover-glow:hover {
-    box-shadow: 0 0 30px hsl(270 70% 60% / 0.3), 0 0 60px hsl(220 90% 56% / 0.1);
+    box-shadow: 0 0 24px rgba(37, 99, 235, 0.18), 0 4px 20px rgba(37, 99, 235, 0.08);
   }
 
   .section-padding {
@@ -153,8 +219,8 @@
   }
 
   @keyframes pulse-glow {
-    0%, 100% { box-shadow: 0 0 20px hsl(270 70% 60% / 0.3); }
-    50% { box-shadow: 0 0 40px hsl(270 70% 60% / 0.6); }
+    0%, 100% { box-shadow: 0 0 16px rgba(37, 99, 235, 0.15); }
+    50% { box-shadow: 0 0 32px rgba(37, 99, 235, 0.3); }
   }
 
   @keyframes typewriter {
@@ -176,7 +242,7 @@
   }
 
   .animate-shimmer {
-    background: linear-gradient(90deg, transparent, hsl(43 96% 56% / 0.1), transparent);
+    background: linear-gradient(90deg, transparent, rgba(37, 99, 235, 0.07), transparent);
     background-size: 200% 100%;
     animation: shimmer 3s infinite;
   }

@@ -91,7 +91,7 @@ const Testimonials = () => {
       <div className="container mx-auto relative z-10">
         <div className="text-center mb-16 revealed"> {/* Using 'revealed' to ensure visibility */}
           <span className="text-accent text-sm font-semibold tracking-widest uppercase">Testimonials</span>
-          <h2 className="text-3xl md:text-5xl font-display font-bold mt-3 mb-6">
+          <h2 className="text-3xl md:text-5xl font-display font-black tracking-tight mt-3 mb-6">
             Client <span className="gradient-text">Stories</span>
           </h2>
         </div>
@@ -110,12 +110,12 @@ const Testimonials = () => {
               ))}
             </div>
 
-            <p className="text-lg md:text-xl text-foreground/90 leading-relaxed mb-8 font-light italic">
+            <p className="text-lg md:text-xl text-foreground leading-relaxed mb-8 font-semibold italic">
               "{reviews[current]?.message || 'Loading client stories...'}"
             </p>
 
             <div>
-              <p className="font-display font-semibold text-foreground">{reviews[current]?.name}</p>
+              <p className="font-display font-black text-foreground text-lg">{reviews[current]?.name}</p>
               <p className="text-sm text-muted-foreground uppercase tracking-widest text-[10px] mt-1">Verified Client</p>
             </div>
 
