@@ -11,8 +11,8 @@ const Hero = () => {
         muted
         playsInline
         poster={heroBg}
-        className="absolute inset-0 w-full h-full object-cover"
-        style={{ filter: 'brightness(1.1) saturate(1.05)' }}
+        className="absolute inset-0 w-full h-full object-contain md:object-cover bg-white"
+        style={{ filter: 'brightness(1.05) saturate(1.02)' }}
       >
         {/* Primary: local video — always works, no CDN dependency */}
         <source src="/office-bg.mp4" type="video/mp4" />

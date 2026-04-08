@@ -65,9 +65,9 @@ const Navbar = () => {
   return (
     <nav className={`fixed top-0 left-0 w-full z-[9999] transition-all duration-300 ${scrolled ? 'glass-strong py-4 shadow-lg shadow-background/50' : 'glass-strong py-4'}`}>
       <div className="container mx-auto flex items-center justify-between">
-        <Link to="/" className="flex items-center gap-4">
-          <img src={logo} alt="SA Consultant logo" className="h-24 md:h-32 w-auto object-contain transition-transform duration-300 hover:scale-105" />
-          <span className="text-lg sm:text-xl md:text-2xl font-display font-black tracking-tight gradient-text leading-tight whitespace-nowrap hidden sm:block">
+        <Link to="/" className="flex items-center gap-2 sm:gap-4">
+          <img src={logo} alt="SA Consultant logo" className="h-10 sm:h-12 md:h-32 w-auto object-contain transition-transform duration-300 hover:scale-105" />
+          <span className="text-[10px] sm:text-sm md:text-2xl font-display font-black tracking-tight gradient-text leading-tight uppercase sm:capitalize">
             SA Consultant & Staffing
           </span>
         </Link>
