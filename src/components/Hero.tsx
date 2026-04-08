@@ -11,25 +11,22 @@ const Hero = () => {
         muted
         playsInline
         poster={heroBg}
-        className="absolute inset-0 w-full h-full object-contain md:object-cover bg-white"
+        className="absolute inset-0 w-full h-full object-cover sm:object-cover bg-white"
         style={{ filter: 'brightness(1.05) saturate(1.02)' }}
       >
         {/* Primary: local video — always works, no CDN dependency */}
         <source src="/office-bg.mp4" type="video/mp4" />
-        {/* Fallback: Pexels people brainstorming in bright meeting room */}
+        {/* Fallback settings */}
         <source src="https://videos.pexels.com/video-files/8125803/8125803-hd_1920_1080_25fps.mp4" type="video/mp4" />
-        <source src="https://assets.mixkit.co/videos/preview/mixkit-open-office-space-914-large.mp4" type="video/mp4" />
       </video>
-      {/* Overlay — subtle white gradient: video stays vivid, bottom fade keeps text legible */}
-      <div className="absolute inset-0 bg-gradient-to-b from-white/5 via-white/20 to-white/80" />
+      {/* Overlay — more vibrant white gradient on mobile */}
+      <div className="absolute inset-0 bg-gradient-to-b from-white/10 via-white/30 to-white/90" />
 
       {/* Animated blue glow orbs */}
-
-
       <div className="absolute top-1/4 left-1/4 w-96 h-96 rounded-full bg-primary/20 blur-[120px] animate-float" />
       <div className="absolute bottom-1/4 right-1/4 w-80 h-80 rounded-full bg-[#3b82f6]/15 blur-[120px] animate-float" style={{ animationDelay: '3s' }} />
 
-      <div className="relative z-10 container mx-auto text-center px-4 sm:px-6 mt-16 md:mt-24">
+      <div className="relative z-10 container mx-auto text-center px-4 sm:px-6 pt-24 sm:pt-32 md:pt-48">
 
         {/* Badge */}
         <div className="inline-flex items-center gap-2 px-3 py-1.5 sm:px-4 sm:py-2 rounded-full glass border border-primary/20 mb-4 sm:mb-6 animate-fade-in text-foreground">

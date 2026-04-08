@@ -67,7 +67,7 @@ const Navbar = () => {
       <div className="container mx-auto flex items-center justify-between">
         <Link to="/" className="flex items-center gap-2 sm:gap-4">
           <img src={logo} alt="SA Consultant logo" className="h-10 sm:h-12 md:h-32 w-auto object-contain transition-transform duration-300 hover:scale-105" />
-          <span className="text-[10px] sm:text-sm md:text-2xl font-display font-black tracking-tight gradient-text leading-tight uppercase sm:capitalize">
+          <span className="text-[9px] sm:text-xs md:text-2xl font-display font-black tracking-[0.15em] sm:tracking-widest gradient-text leading-tight uppercase">
             SA Consultant & Staffing
           </span>
         </Link>
