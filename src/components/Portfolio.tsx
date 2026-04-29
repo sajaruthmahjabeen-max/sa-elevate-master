@@ -92,9 +92,13 @@ const Portfolio = () => {
                 className="scroll-reveal group relative rounded-[2rem] overflow-hidden aspect-[4/5] md:aspect-[4/3] cursor-pointer bg-card hover-lift border border-border/40"
                 style={{ transitionDelay: `${i * 100}ms` }}
               >
-                {/* Background Gradient & Overlay */}
-                <div className={`absolute inset-0 bg-gradient-to-br ${project.color || 'from-primary/20 to-accent/20'} opacity-40 group-hover:opacity-60 transition-opacity duration-700`} />
-                <div className="absolute inset-0 bg-background/20 backdrop-blur-[2px] group-hover:backdrop-blur-none transition-all duration-700" />
+                {/* Background Image, Gradient & Overlay */}
+                {project.image_url ? (
+                  <img src={project.image_url} alt={project.title} className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
+                ) : (
+                  <div className={`absolute inset-0 bg-gradient-to-br ${project.color || 'from-primary/20 to-accent/20'} opacity-40 group-hover:opacity-60 transition-opacity duration-700`} />
+                )}
+                <div className={`absolute inset-0 ${project.image_url ? 'bg-gradient-to-t from-background/95 via-background/60 to-background/10 group-hover:via-background/40' : 'bg-background/20 backdrop-blur-[2px] group-hover:backdrop-blur-none'} transition-all duration-700`} />
                 
                 {/* Project Content */}
                 <div className="absolute inset-0 p-8 flex flex-col justify-end">
