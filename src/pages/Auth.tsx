@@ -23,7 +23,11 @@ const Auth = () => {
   // Initialize view based on hash immediately
   const getInitialView = (): AuthView => {
     const hash = window.location.hash;
+    const searchParams = new URLSearchParams(window.location.search);
     if (hash && (hash.includes('type=recovery') || hash.includes('access_token'))) {
+      return 'update_password';
+    }
+    if (searchParams.get('type') === 'recovery') {
       return 'update_password';
     }
     return 'login';
@@ -35,8 +39,9 @@ const Auth = () => {
 
   useEffect(() => {
     // Listen for the PASSWORD_RECOVERY event specifically
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
-      if (event === "PASSWORD_RECOVERY") {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      console.log("Auth event:", event);
+      if (event === "PASSWORD_RECOVERY" || (event === "SIGNED_IN" && window.location.hash.includes('type=recovery'))) {
         setView('update_password');
       }
     });

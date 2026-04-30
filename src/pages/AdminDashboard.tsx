@@ -31,7 +31,8 @@ import {
   Edit,
   Globe,
   Instagram,
-  Linkedin
+  Linkedin,
+  Upload
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Input } from '@/components/ui/input';
@@ -74,6 +75,7 @@ const AdminDashboard = () => {
     type: 'web' as 'web' | 'mobile' | 'other',
     live_url: '',
     apk_url: '',
+    image_url: '',
     color: 'from-[hsl(220,90%,56%)] to-[hsl(270,70%,60%)]'
   });
 
@@ -258,6 +260,44 @@ const AdminDashboard = () => {
     navigate('/');
   };
 
+  const [uploading, setUploading] = useState(false);
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploading(true);
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Math.random().toString(36).substring(2)}.${fileExt}`;
+      const filePath = `${fileName}`;
+
+      const { data, error } = await supabase.storage
+        .from('projects')
+        .upload(filePath, file);
+
+      if (error) throw error;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('projects')
+        .getPublicUrl(filePath);
+
+      setProjectForm({ ...projectForm, image_url: publicUrl });
+      toast({
+        title: "Image Uploaded",
+        description: "The image has been uploaded successfully.",
+      });
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Upload failed",
+        description: error.message + " (Make sure a public bucket named 'projects' exists in Supabase)",
+      });
+    } finally {
+      setUploading(false);
+    }
+  };
+
   const handleSaveProject = async (e: React.FormEvent) => {
     e.preventDefault();
     setSavingProject(true);
@@ -283,6 +323,7 @@ const AdminDashboard = () => {
         type: 'web',
         live_url: '',
         apk_url: '',
+        image_url: '',
         color: 'from-[hsl(220,90%,56%)] to-[hsl(270,70%,60%)]'
       });
       setIsEditingProject(null);
@@ -314,6 +355,7 @@ const AdminDashboard = () => {
       type: project.type,
       live_url: project.live_url || '',
       apk_url: project.apk_url || '',
+      image_url: project.image_url || '',
       color: project.color || 'from-[hsl(220,90%,56%)] to-[hsl(270,70%,60%)]'
     });
     setIsEditingProject(project.id);
@@ -862,6 +904,49 @@ const AdminDashboard = () => {
                       />
                     </div>
                     <div className="space-y-2">
+                      <Label>Image URL (Optional)</Label>
+                      <div className="flex gap-2">
+                        <Input 
+                          value={projectForm.image_url}
+                          onChange={(e) => setProjectForm({...projectForm, image_url: e.target.value})}
+                          placeholder="https://.../image.png"
+                          className="bg-secondary/50 flex-1"
+                        />
+                        <div className="relative">
+                          <input
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            id="image-upload"
+                            onChange={handleFileUpload}
+                            disabled={uploading}
+                          />
+                          <Button 
+                            type="button" 
+                            variant="outline" 
+                            size="icon"
+                            disabled={uploading}
+                            onClick={() => document.getElementById('image-upload')?.click()}
+                            title="Upload from computer"
+                          >
+                            <Upload size={18} className={uploading ? "animate-bounce" : ""} />
+                          </Button>
+                        </div>
+                      </div>
+                      {projectForm.image_url && (
+                        <div className="mt-2 relative rounded-lg overflow-hidden h-32 border border-border">
+                          <img src={projectForm.image_url} alt="Preview" className="w-full h-full object-cover" />
+                          <button 
+                            type="button"
+                            onClick={() => setProjectForm({...projectForm, image_url: ''})}
+                            className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition-colors"
+                          >
+                            <XCircle size={14} />
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                    <div className="space-y-2">
                       <Label>Description</Label>
                       <textarea 
                         className="w-full min-h-[100px] rounded-md border border-input bg-secondary/50 px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
@@ -875,7 +960,7 @@ const AdminDashboard = () => {
                     {isEditingProject && (
                       <Button variant="outline" type="button" onClick={() => {
                         setIsEditingProject(null);
-                        setProjectForm({ title: '', category: '', description: '', type: 'web', live_url: '', apk_url: '', color: 'from-[hsl(220,90%,56%)] to-[hsl(270,70%,60%)]' });
+                        setProjectForm({ title: '', category: '', description: '', type: 'web', live_url: '', apk_url: '', image_url: '', color: 'from-[hsl(220,90%,56%)] to-[hsl(270,70%,60%)]' });
                       }}>Cancel</Button>
                     )}
                     <Button type="submit" disabled={savingProject} className="flex-1 gradient-bg border-none gap-2">
