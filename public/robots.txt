@@ -4,4 +4,4 @@ Disallow: /admin
 Disallow: /dashboard
 Disallow: /auth
 
-Sitemap: https://sa-elevate-master.vercel.app/sitemap.xml
+Sitemap: https://www.saconsultantandstaffing.com/sitemap.xml
