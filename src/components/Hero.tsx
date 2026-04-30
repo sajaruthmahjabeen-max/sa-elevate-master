@@ -30,9 +30,9 @@ const Hero = () => {
       <div className="relative z-10 container mx-auto text-center px-4 sm:px-6 pt-10 pb-20 md:pt-48 md:pb-0">
         <div className="max-w-5xl mx-auto">
           {/* Badge */}
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 sm:px-4 sm:py-2 rounded-full glass border border-primary/20 mb-6 sm:mb-8 animate-fade-in text-foreground">
-            <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
-            <span className="text-xs sm:text-sm font-semibold tracking-wide">SA Consultant & Staffing</span>
+          <div className="inline-flex items-center gap-3 px-6 py-3 sm:px-10 sm:py-5 rounded-full glass border border-primary/20 mb-6 sm:mb-8 animate-fade-in text-foreground shadow-2xl">
+            <span className="w-4 h-4 rounded-full bg-primary animate-pulse" />
+            <span className="text-lg sm:text-3xl font-black tracking-widest uppercase">SA Consultant & Staffing</span>
           </div>
 
           <h1 className="fluid-h1 font-display font-black tracking-tight leading-tight mb-6 sm:mb-8 text-gray-900 drop-shadow-sm text-3xl sm:text-5xl md:text-7xl">
