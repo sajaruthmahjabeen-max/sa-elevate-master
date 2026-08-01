@@ -728,18 +728,6 @@ const normalizeSkills = (rawSkills: any): string[] => {
                   <CalendarIcon className="w-4 h-4" />
                   <span>Calendar</span>
                 </button>
-
-                <button
-                  onClick={() => setActiveTab("pricing")}
-                  className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-semibold text-xs transition-all ${
-                    activeTab === "pricing"
-                      ? "gradient-bg text-white font-bold shadow-md"
-                      : "text-muted-foreground hover:text-foreground hover:bg-primary/10"
-                  }`}
-                >
-                  <CreditCard className="w-4 h-4" />
-                  <span>Pricing & Billing</span>
-                </button>
               </nav>
 
               <hr className="my-4 border-border" />
