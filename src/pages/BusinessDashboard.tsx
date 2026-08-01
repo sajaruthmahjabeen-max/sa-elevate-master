@@ -54,74 +54,6 @@ import { supabase } from "@/lib/supabase";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 
-const DEFAULT_CANDIDATES = [
-  {
-    id: "c1",
-    name: "Nikhil G.",
-    title: "Full Stack Developer",
-    location: "Seattle, WA",
-    experience: "5 years",
-    skills: ["React", "TypeScript", "Node.js", "PostgreSQL", "AWS"],
-    status: "Verified",
-    email: "nikhil.g@example.com",
-    phone: "+1 (206) 555-0192",
-    summary: "Experienced Full Stack Developer with 5+ years building scalable web apps with React & Node.",
-    education: "B.S. Computer Science - University of Washington",
-  },
-  {
-    id: "c2",
-    name: "Walter H.",
-    title: "Senior DevOps Engineer",
-    location: "Seattle, WA",
-    experience: "7 years",
-    skills: ["Kubernetes", "Docker", "Terraform", "CI/CD", "Python"],
-    status: "Verified",
-    email: "walter.h@example.com",
-    phone: "+1 (206) 555-0144",
-    summary: "Senior DevOps Engineer specializing in cloud infrastructure, Kubernetes & CI/CD automation.",
-    education: "M.S. Software Engineering - Washington State University",
-  },
-  {
-    id: "c3",
-    name: "Alice P.",
-    title: "Product Manager",
-    location: "Bellevue, WA",
-    experience: "4 years",
-    skills: ["Product Strategy", "Agile", "User Research", "SQL", "Figma"],
-    status: "Verified",
-    email: "alice.p@example.com",
-    phone: "+1 (425) 555-0188",
-    summary: "Customer-obsessed Product Manager with a track record of shipping top-rated SaaS features.",
-    education: "B.A. Business Administration - Seattle University",
-  },
-  {
-    id: "c4",
-    name: "Marcus T.",
-    title: "Data Engineer & Analyst",
-    location: "Redmond, WA",
-    experience: "6 years",
-    skills: ["Python", "PySpark", "Snowflake", "SQL", "PowerBI"],
-    status: "Verified",
-    email: "marcus.t@example.com",
-    phone: "+1 (425) 555-0199",
-    summary: "Data Engineer with expertise in building big data pipelines and real-time analytics dashboards.",
-    education: "M.S. Data Analytics - Northeastern University",
-  },
-  {
-    id: "c5",
-    name: "Sarah K.",
-    title: "UI/UX Product Designer",
-    location: "Seattle, WA",
-    experience: "5 years",
-    skills: ["Figma", "Design Systems", "User Testing", "Prototyping", "HTML/CSS"],
-    status: "Verified",
-    email: "sarah.k@example.com",
-    phone: "+1 (206) 555-0177",
-    summary: "Senior UX Designer passionate about creating accessible, beautiful digital product experiences.",
-    education: "B.F.A. Interaction Design - Cornish College of the Arts",
-  }
-];
-
 export default function BusinessDashboard() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -259,8 +191,7 @@ export default function BusinessDashboard() {
   const [filterUnlockedOnly, setFilterUnlockedOnly] = useState(false);
   const [filterWithResume, setFilterWithResume] = useState(false);
   const [filterFullTime, setFilterFullTime] = useState(false);
-
-  const [searchCandidatesList, setSearchCandidatesList] = useState<any[]>(DEFAULT_CANDIDATES);
+  const [searchCandidatesList, setSearchCandidatesList] = useState<any[]>([]);
 
   const handleUnlockProfile = (candidateId: string, candidateName: string) => {
     if (unlockedCandidateIds.includes(candidateId)) {
@@ -441,17 +372,10 @@ const normalizeSkills = (rawSkills: any): string[] => {
         console.warn('Assignments table fetch error:', err);
       }
 
-      // Merge with defaults
-      const seenNames = new Set(fetchedCandidates.map((c) => (c.name || '').toLowerCase()));
-      const nonDuplicateDefaults = DEFAULT_CANDIDATES.filter(
-        (d) => !seenNames.has(d.name.toLowerCase())
-      );
-
-      const combined = [...fetchedCandidates, ...nonDuplicateDefaults];
-      setSearchCandidatesList(combined);
+      setSearchCandidatesList(fetchedCandidates);
     } catch (err) {
       console.error('Error loading candidate database pool:', err);
-      setSearchCandidatesList(DEFAULT_CANDIDATES);
+      setSearchCandidatesList([]);
     }
   };
 

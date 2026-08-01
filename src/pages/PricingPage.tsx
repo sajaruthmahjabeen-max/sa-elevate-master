@@ -12,58 +12,44 @@ import { PricingFAQ } from "@/components/pricing/PricingFAQ";
 import { ArrowRight, CheckCircle2, Search, MapPin, Briefcase, Lock, Sparkles, UserCheck, ShieldCheck, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-const SAMPLE_CANDIDATES = [
-  {
-    id: "c1",
-    name: "Nikhil G.",
-    title: "Full Stack Developer",
-    location: "Seattle, WA",
-    experience: "5 years",
-    skills: ["React", "TypeScript", "Node.js", "PostgreSQL", "AWS"],
-    status: "Verified",
-    maskedEmail: "n***@example.com",
-    maskedPhone: "+1 (206) ***-0192",
-  },
-  {
-    id: "c2",
-    name: "Walter H.",
-    title: "Senior DevOps Engineer",
-    location: "Seattle, WA",
-    experience: "7 years",
-    skills: ["Kubernetes", "Docker", "Terraform", "CI/CD", "Python"],
-    status: "Verified",
-    maskedEmail: "w***@example.com",
-    maskedPhone: "+1 (206) ***-0144",
-  },
-  {
-    id: "c3",
-    name: "Alice P.",
-    title: "Product Manager",
-    location: "Bellevue, WA",
-    experience: "4 years",
-    skills: ["Product Strategy", "Agile", "User Research", "SQL", "Figma"],
-    status: "Verified",
-    maskedEmail: "a***@example.com",
-    maskedPhone: "+1 (425) ***-0188",
-  },
-  {
-    id: "c4",
-    name: "Marcus T.",
-    title: "Data Engineer & Analyst",
-    location: "Redmond, WA",
-    experience: "6 years",
-    skills: ["Python", "PySpark", "Snowflake", "SQL", "PowerBI"],
-    status: "Verified",
-    maskedEmail: "m***@example.com",
-    maskedPhone: "+1 (425) ***-0199",
-  },
-];
+import { supabase } from "@/lib/supabase";
 
 const PricingPage: React.FC = () => {
   const navigate = useNavigate();
   const [isYearly, setIsYearly] = useState(false);
   const [searchKeyword, setSearchKeyword] = useState("");
   const [searchLocation, setSearchLocation] = useState("");
+  const [previewCandidates, setPreviewCandidates] = useState<any[]>([]);
+
+  React.useEffect(() => {
+    const fetchLivePreviewCandidates = async () => {
+      try {
+        const fetched: any[] = [];
+        const { data: cData } = await supabase.from('candidates').select('*').limit(10);
+        if (cData && Array.isArray(cData)) {
+          cData.forEach((c: any) => {
+            const skills = Array.isArray(c.skills) ? c.skills : typeof c.skills === 'string' ? c.skills.split(',') : [];
+            fetched.push({
+              id: c.id,
+              name: c.name || c.full_name || 'Candidate',
+              title: c.title || c.job_title || 'Professional',
+              location: c.location || 'Local Area',
+              experience: c.experience || 'Experienced',
+              skills: skills.map((s: any) => typeof s === 'string' ? s.trim() : (s.name || s.category || '')).filter(Boolean),
+              status: c.status || 'Verified',
+              maskedEmail: c.maskedEmail || (c.email ? c.email.replace(/(.{2})(.*)(?=@)/, '$1***') : 'c***@email.com'),
+              maskedPhone: c.maskedPhone || (c.phone ? c.phone.slice(0, 6) + '****' : '+1 (***) ***-****'),
+            });
+          });
+        }
+        setPreviewCandidates(fetched);
+      } catch (err) {
+        console.warn('Error fetching preview candidates:', err);
+        setPreviewCandidates([]);
+      }
+    };
+    fetchLivePreviewCandidates();
+  }, []);
 
   const handlePerformSearch = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
@@ -74,12 +60,12 @@ const PricingPage: React.FC = () => {
     navigate(`/business/dashboard?${query.toString()}`);
   };
 
-  const filteredPreviewCandidates = SAMPLE_CANDIDATES.filter((c) => {
+  const filteredPreviewCandidates = (previewCandidates || []).filter((c) => {
     const matchesKeyword =
       !searchKeyword ||
       c.name.toLowerCase().includes(searchKeyword.toLowerCase()) ||
       c.title.toLowerCase().includes(searchKeyword.toLowerCase()) ||
-      c.skills.some((s) => s.toLowerCase().includes(searchKeyword.toLowerCase()));
+      c.skills.some((s: string) => s.toLowerCase().includes(searchKeyword.toLowerCase()));
     const matchesLocation =
       !searchLocation || c.location.toLowerCase().includes(searchLocation.toLowerCase());
     return matchesKeyword && matchesLocation;
