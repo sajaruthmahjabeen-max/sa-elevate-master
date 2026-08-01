@@ -42,6 +42,12 @@ import {
   Pencil,
   Upload,
   Loader2,
+  CreditCard,
+  ShieldCheck,
+  DollarSign,
+  Award,
+  Zap,
+  ArrowUpRight,
 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/lib/supabase";
@@ -121,22 +127,30 @@ export default function BusinessDashboard() {
   const [searchParams] = useSearchParams();
   const keywordParam = searchParams.get("keyword");
   const locationParam = searchParams.get("location");
+  const tabParam = searchParams.get("tab");
+  const planParam = searchParams.get("plan");
+
+  const [subscriptionPlan, setSubscriptionPlan] = useState<"free" | "starter">("starter");
 
   const [activeTab, setActiveTab] = useState<
-    "dashboard" | "jobshare" | "candidatesearch" | "candidatehub" | "recruiting" | "calendar"
+    "dashboard" | "jobshare" | "candidatesearch" | "candidatehub" | "recruiting" | "calendar" | "pricing"
   >(
-    tabParam && ["dashboard", "jobshare", "candidatesearch", "candidatehub", "recruiting", "calendar"].includes(tabParam)
+    tabParam && ["dashboard", "jobshare", "candidatesearch", "candidatehub", "recruiting", "calendar", "pricing"].includes(tabParam)
       ? (tabParam as any)
       : "dashboard"
   );
 
   useEffect(() => {
-    if (tabParam && ["dashboard", "jobshare", "candidatesearch", "candidatehub", "recruiting", "calendar"].includes(tabParam)) {
+    if (tabParam && ["dashboard", "jobshare", "candidatesearch", "candidatehub", "recruiting", "calendar", "pricing"].includes(tabParam)) {
       setActiveTab(tabParam as any);
+    }
+    if (planParam === "starter") {
+      setSubscriptionPlan("starter");
+      toast.success("Starter Plan activated with 14-day free trial!");
     }
     if (keywordParam) setSearchKeyword(keywordParam);
     if (locationParam) setSearchLocation(locationParam);
-  }, [tabParam, keywordParam, locationParam]);
+  }, [tabParam, keywordParam, locationParam, planParam]);
 
   const [createJobOpen, setCreateJobOpen] = useState(false);
   const [createCandidateOpen, setCreateCandidateOpen] = useState(false);
@@ -548,6 +562,18 @@ export default function BusinessDashboard() {
                 >
                   <CalendarIcon className="w-4 h-4" />
                   <span>Calendar</span>
+                </button>
+
+                <button
+                  onClick={() => setActiveTab("pricing")}
+                  className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-semibold text-xs transition-all ${
+                    activeTab === "pricing"
+                      ? "gradient-bg text-white font-bold shadow-md"
+                      : "text-muted-foreground hover:text-foreground hover:bg-primary/10"
+                  }`}
+                >
+                  <CreditCard className="w-4 h-4" />
+                  <span>Pricing & Billing</span>
                 </button>
               </nav>
 
@@ -1272,6 +1298,221 @@ export default function BusinessDashboard() {
                     ))}
                   </div>
                 )}
+              </div>
+            )}
+
+            {/* TAB 7: PRICING & BILLING DASHBOARD */}
+            {activeTab === "pricing" && (
+              <div className="space-y-6 w-full">
+                {/* Header Banner */}
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                  <div>
+                    <h1 className="text-2xl font-display font-bold gradient-text flex items-center gap-2">
+                      <CreditCard className="w-6 h-6 text-primary" /> Subscription & Billing Dashboard
+                    </h1>
+                    <p className="text-xs md:text-sm text-muted-foreground mt-0.5">
+                      Manage your active hiring plan, upgrade features, buy resume unlock credits, and download receipts.
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/30 px-4 py-2 rounded-2xl">
+                    <ShieldCheck className="w-4 h-4 text-emerald-500" />
+                    <span className="text-xs font-bold text-emerald-700 dark:text-emerald-300 capitalize">
+                      Active Plan: {subscriptionPlan === "starter" ? "Starter (14-Day Free Trial)" : "Free Tier"}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Plan Overview & Credits Card */}
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                  {/* Left: Active Subscription Overview */}
+                  <Card className="glass border-primary/20 p-6 rounded-2xl shadow-md space-y-4 lg:col-span-2">
+                    <div className="flex items-center justify-between border-b border-border pb-4">
+                      <div>
+                        <Badge className="bg-primary/10 text-primary border-none font-bold text-xs mb-1">
+                          Current Subscription
+                        </Badge>
+                        <h3 className="text-xl font-bold text-foreground">
+                          {subscriptionPlan === "starter" ? "Starter Plan — $39/month" : "Free Plan — $0/month"}
+                        </h3>
+                        <p className="text-xs text-muted-foreground mt-0.5">
+                          {subscriptionPlan === "starter"
+                            ? "Next billing date: Aug 15, 2026 (14-Day Trial Period Active)"
+                            : "Basic access with 3 free profile unlocks."}
+                        </p>
+                      </div>
+                      {subscriptionPlan === "free" ? (
+                        <Button
+                          onClick={() => {
+                            setSubscriptionPlan("starter");
+                            toast.success("Upgraded to Starter 14-Day Free Trial!");
+                          }}
+                          className="gradient-bg text-white font-bold text-xs h-10 px-5 rounded-xl shadow-md"
+                        >
+                          <Zap className="w-3.5 h-3.5 mr-1.5" /> Upgrade to Starter
+                        </Button>
+                      ) : (
+                        <Badge className="bg-emerald-500 text-white font-bold text-xs px-3 py-1">
+                          ✓ Active Trial
+                        </Badge>
+                      )}
+                    </div>
+
+                    {/* Features included */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                      <div className="flex items-center gap-2 font-medium text-foreground">
+                        <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" /> Post Unlimited Job Vacancies
+                      </div>
+                      <div className="flex items-center gap-2 font-medium text-foreground">
+                        <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" /> AI Resume Auto-parsing
+                      </div>
+                      <div className="flex items-center gap-2 font-medium text-foreground">
+                        <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" /> Unlimited Candidate Messaging
+                      </div>
+                      <div className="flex items-center gap-2 font-medium text-foreground">
+                        <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" /> 50% Off Resume Unlocks ($2/resume)
+                      </div>
+                    </div>
+                  </Card>
+
+                  {/* Right: Credits Wallet Box */}
+                  <Card className="glass border-primary/20 p-6 rounded-2xl shadow-md space-y-4 flex flex-col justify-between">
+                    <div>
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-xs font-bold text-muted-foreground uppercase">Unlock Credits</span>
+                        <Sparkles className="w-4 h-4 text-amber-500" />
+                      </div>
+                      <h3 className="text-3xl font-black text-foreground">{credits} Credits</h3>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Use credits to unlock candidate phone numbers, emails & PDF resumes.
+                      </p>
+                    </div>
+
+                    <div className="space-y-2 pt-2 border-t border-border">
+                      <p className="text-[11px] font-bold text-foreground">Top-Up Credit Packs:</p>
+                      <div className="flex gap-2">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => {
+                            setCredits((prev) => prev + 5);
+                            toast.success("Added 5 Unlock Credits ($10)!");
+                          }}
+                          className="flex-1 text-xs font-bold rounded-xl h-9 border-amber-500/40 text-amber-600 hover:bg-amber-500/10"
+                        >
+                          +5 Credits ($10)
+                        </Button>
+                        <Button
+                          size="sm"
+                          onClick={() => {
+                            setCredits((prev) => prev + 15);
+                            toast.success("Added 15 Unlock Credits ($25)!");
+                          }}
+                          className="flex-1 gradient-bg text-white font-bold text-xs rounded-xl h-9 shadow-sm"
+                        >
+                          +15 Credits ($25)
+                        </Button>
+                      </div>
+                    </div>
+                  </Card>
+                </div>
+
+                {/* Plan Upgrade Selector Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4">
+                  {/* Free Card */}
+                  <Card className={`glass p-6 rounded-2xl border ${subscriptionPlan === "free" ? "border-primary shadow-md" : "border-border"}`}>
+                    <div className="flex justify-between items-start mb-3">
+                      <div>
+                        <h3 className="text-lg font-bold text-foreground">Free Plan</h3>
+                        <p className="text-xs text-muted-foreground">Try out hiring with zero risk</p>
+                      </div>
+                      <span className="text-2xl font-black text-foreground">$0<span className="text-xs text-muted-foreground">/mo</span></span>
+                    </div>
+
+                    <ul className="space-y-2 text-xs text-muted-foreground my-4">
+                      <li className="flex items-center gap-2">✓ Unlimited Job Listings</li>
+                      <li className="flex items-center gap-2">✓ Basic Applicant Management</li>
+                      <li className="flex items-center gap-2">✓ 3 Free Candidate Profile Unlocks</li>
+                    </ul>
+
+                    {subscriptionPlan === "free" ? (
+                      <Button disabled variant="outline" className="w-full h-10 text-xs font-bold rounded-xl">Current Plan</Button>
+                    ) : (
+                      <Button
+                        variant="outline"
+                        onClick={() => { setSubscriptionPlan("free"); toast.info("Switched to Free Plan."); }}
+                        className="w-full h-10 text-xs font-bold rounded-xl"
+                      >
+                        Switch to Free
+                      </Button>
+                    )}
+                  </Card>
+
+                  {/* Starter Card */}
+                  <Card className={`glass p-6 rounded-2xl border ${subscriptionPlan === "starter" ? "border-primary shadow-lg ring-1 ring-primary/30" : "border-border"}`}>
+                    <div className="flex justify-between items-start mb-3">
+                      <div>
+                        <Badge className="bg-primary text-primary-foreground font-bold text-[10px] mb-1">Recommended</Badge>
+                        <h3 className="text-lg font-bold text-foreground">Starter Plan</h3>
+                        <p className="text-xs text-muted-foreground">For growing businesses actively hiring</p>
+                      </div>
+                      <span className="text-2xl font-black text-primary">$39<span className="text-xs text-muted-foreground">/mo</span></span>
+                    </div>
+
+                    <ul className="space-y-2 text-xs text-foreground font-medium my-4">
+                      <li className="flex items-center gap-2"><CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" /> AI Resume Auto-parsing</li>
+                      <li className="flex items-center gap-2"><CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" /> Unlimited Candidate Messaging</li>
+                      <li className="flex items-center gap-2"><CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" /> 50% Off Database Unlocks ($2/resume)</li>
+                      <li className="flex items-center gap-2"><CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" /> Priority Support</li>
+                    </ul>
+
+                    {subscriptionPlan === "starter" ? (
+                      <Button disabled className="w-full h-10 text-xs font-bold rounded-xl bg-emerald-600 text-white">✓ Active (14-Day Free Trial)</Button>
+                    ) : (
+                      <Button
+                        onClick={() => { setSubscriptionPlan("starter"); toast.success("Started Starter 14-Day Free Trial!"); }}
+                        className="w-full h-10 text-xs font-bold rounded-xl gradient-bg text-white shadow-md"
+                      >
+                        Start 14-Day Free Trial
+                      </Button>
+                    )}
+                  </Card>
+                </div>
+
+                {/* Billing History Table */}
+                <Card className="glass border-primary/20 p-6 rounded-2xl shadow-md space-y-4">
+                  <h3 className="font-bold text-base text-foreground flex items-center gap-2">
+                    <FileText className="w-4 h-4 text-primary" /> Billing & Payment Receipts
+                  </h3>
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-xs text-left">
+                      <thead>
+                        <tr className="border-b border-border text-muted-foreground font-semibold">
+                          <th className="py-2.5 px-3">Date</th>
+                          <th className="py-2.5 px-3">Description</th>
+                          <th className="py-2.5 px-3">Amount</th>
+                          <th className="py-2.5 px-3">Status</th>
+                          <th className="py-2.5 px-3 text-right">Receipt</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-border/60">
+                        <tr>
+                          <td className="py-3 px-3 font-medium">Aug 01, 2026</td>
+                          <td className="py-3 px-3 font-bold text-foreground">Starter Plan — 14-Day Free Trial</td>
+                          <td className="py-3 px-3 font-mono">$0.00</td>
+                          <td className="py-3 px-3"><Badge className="bg-emerald-500/10 text-emerald-600 border-emerald-500/30 text-[10px]">Active Trial</Badge></td>
+                          <td className="py-3 px-3 text-right"><Button size="sm" variant="ghost" className="h-7 text-[11px]"><Download className="w-3 h-3 mr-1" /> PDF</Button></td>
+                        </tr>
+                        <tr>
+                          <td className="py-3 px-3 font-medium">Aug 01, 2026</td>
+                          <td className="py-3 px-3 font-bold text-foreground">Business Account Registration (3 Free Credits)</td>
+                          <td className="py-3 px-3 font-mono">$0.00</td>
+                          <td className="py-3 px-3"><Badge variant="outline" className="text-[10px]">Completed</Badge></td>
+                          <td className="py-3 px-3 text-right"><Button size="sm" variant="ghost" className="h-7 text-[11px]"><Download className="w-3 h-3 mr-1" /> PDF</Button></td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </Card>
               </div>
             )}
           </main>
