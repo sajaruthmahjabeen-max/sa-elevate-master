@@ -257,6 +257,8 @@ export default function BusinessDashboard() {
   const [credits, setCredits] = useState<number>(3);
   const [selectedCandidate, setSelectedCandidate] = useState<any | null>(null);
   const [filterUnlockedOnly, setFilterUnlockedOnly] = useState(false);
+  const [filterWithResume, setFilterWithResume] = useState(false);
+  const [filterFullTime, setFilterFullTime] = useState(false);
 
   const [searchCandidatesList, setSearchCandidatesList] = useState<any[]>(DEFAULT_CANDIDATES);
 
@@ -321,8 +323,10 @@ const normalizeSkills = (rawSkills: any): string[] => {
 
     const matchesLocation = !searchLocation || location.toLowerCase().includes(searchLocation.toLowerCase());
     const matchesUnlocked = !filterUnlockedOnly || unlockedCandidateIds.includes(c.id);
+    const matchesResume = !filterWithResume || Boolean(c.resume_url);
+    const matchesFullTime = !filterFullTime || (c.type || "Full-Time").toLowerCase().includes("full-time");
 
-    return matchesKeyword && matchesLocation && matchesUnlocked;
+    return matchesKeyword && matchesLocation && matchesUnlocked && matchesResume && matchesFullTime;
   });
 
 
@@ -330,77 +334,123 @@ const normalizeSkills = (rawSkills: any): string[] => {
     setCandidates((prev) => [newCandidate, ...prev]);
   };
 
-  // Load admin-assigned candidates from Supabase
+  // Load all candidates from Supabase (candidates, vendor_candidates, assignments)
   const loadAdminAssignedCandidates = async () => {
     try {
-      const { data, error } = await supabase
-        .from('business_candidate_assignments')
-        .select(`
-          candidate_id,
-          note,
-          assigned_at,
-          candidates (
-            id, name, email, phone, job_title,
-            experience_years, location, skills,
-            resume_url, status
-          )
-        `)
-        .eq('business_user_id', 'all')
-        .order('assigned_at', { ascending: false });
+      const fetchedCandidates: any[] = [];
 
-      if (error) throw error;
-
-      const normalized = (data || []).map((row: any) => {
-        let c = row.candidates;
-
-        // Fallback: parse snapshot stored in note field if join returned null (e.g. RLS)
-        if (!c && row.note) {
-          try {
-            c = JSON.parse(row.note);
-          } catch {
-            c = null;
-          }
+      // 1. Fetch direct candidates table
+      try {
+        const { data: cData } = await supabase.from('candidates').select('*').order('created_at', { ascending: false });
+        if (cData && Array.isArray(cData)) {
+          cData.forEach((c: any) => {
+            const skills = normalizeSkills(c.skills);
+            const candidateName = c.name || c.full_name || 'Candidate';
+            const candidateEmail = c.email || 'candidate@example.com';
+            const candidatePhone = c.phone || '+1 (555) 000-0000';
+            fetchedCandidates.push({
+              id: c.id || `direct_${Math.random()}`,
+              name: candidateName,
+              title: c.title || c.job_title || 'Professional',
+              location: c.location || 'Location not specified',
+              experience: c.experience || (c.experience_years ? `${c.experience_years} years` : 'Experience not listed'),
+              skills: skills.length > 0 ? skills : ['Professional'],
+              status: c.status || 'Verified',
+              email: candidateEmail,
+              phone: candidatePhone,
+              maskedEmail: c.maskedEmail || candidateEmail.replace(/(.{2})(.*)(?=@)/, '$1***'),
+              maskedPhone: c.maskedPhone || (candidatePhone.length > 6 ? candidatePhone.slice(0, 6) + '****' : '+1 (***) ***-****'),
+              resume_url: c.resume_url || null,
+              summary: c.summary || c.bio || 'Verified candidate available for hire.',
+            });
+          });
         }
-
-        if (!c) return null;
-
-        const skills: string[] = normalizeSkills(c.skills);
-
-        const candidateName = c.name || c.full_name || 'Candidate';
-        const candidateEmail = c.email || 'candidate@example.com';
-        const candidatePhone = c.phone || '+1 (555) 000-0000';
-        const maskedEmail = c.maskedEmail || candidateEmail.replace(/(.{2})(.*)(?=@)/, '$1***');
-        const maskedPhone = c.maskedPhone || (candidatePhone.length > 6 ? candidatePhone.slice(0, 6) + '****' : '+1 (***) ***-****');
-
-        return {
-          id: c.id || row.candidate_id,
-          name: candidateName,
-          title: c.title || c.job_title || 'Professional',
-          location: c.location || 'Location not specified',
-          experience: c.experience || (c.experience_years ? `${c.experience_years} years` : 'Experience not listed'),
-          skills: skills.length > 0 ? skills : ['Professional'],
-          status: c.status || 'New',
-          email: candidateEmail,
-          phone: candidatePhone,
-          maskedEmail,
-          maskedPhone,
-          resume_url: c.resume_url || null,
-          avatar: null,
-          assignedByAdmin: true,
-          assignedAt: row.assigned_at,
-        };
-      }).filter(Boolean);
-
-
-      if (normalized.length > 0) {
-        const existingIds = new Set(normalized.map((n: any) => n.id));
-        const nonDuplicateDefaults = DEFAULT_CANDIDATES.filter((d) => !existingIds.has(d.id));
-        setSearchCandidatesList([...normalized, ...nonDuplicateDefaults]);
-      } else {
-        setSearchCandidatesList(DEFAULT_CANDIDATES);
+      } catch (err) {
+        console.warn('Candidates table fetch error:', err);
       }
+
+      // 2. Fetch vendor candidates table
+      try {
+        const { data: vData } = await supabase.from('vendor_candidates').select('*').order('created_at', { ascending: false });
+        if (vData && Array.isArray(vData)) {
+          vData.forEach((c: any) => {
+            const skills = normalizeSkills(c.skills);
+            const candidateName = c.name || c.full_name || 'Candidate';
+            const candidateEmail = c.email || 'candidate@example.com';
+            const candidatePhone = c.phone || '+1 (555) 000-0000';
+            fetchedCandidates.push({
+              id: c.id || `vendor_${Math.random()}`,
+              name: candidateName,
+              title: c.title || c.job_title || 'Professional',
+              location: c.location || 'Location not specified',
+              experience: c.experience || (c.experience_years ? `${c.experience_years} years` : 'Experience not listed'),
+              skills: skills.length > 0 ? skills : ['Vendor Candidate'],
+              status: c.status || 'Verified',
+              email: candidateEmail,
+              phone: candidatePhone,
+              maskedEmail: c.maskedEmail || candidateEmail.replace(/(.{2})(.*)(?=@)/, '$1***'),
+              maskedPhone: c.maskedPhone || (candidatePhone.length > 6 ? candidatePhone.slice(0, 6) + '****' : '+1 (***) ***-****'),
+              resume_url: c.resume_url || null,
+              summary: c.summary || 'Verified partner candidate.',
+            });
+          });
+        }
+      } catch (err) {
+        console.warn('Vendor candidates table fetch error:', err);
+      }
+
+      // 3. Fetch business candidate assignments
+      try {
+        const { data: aData } = await supabase
+          .from('business_candidate_assignments')
+          .select(`
+            candidate_id, note, assigned_at,
+            candidates ( id, name, email, phone, job_title, experience_years, location, skills, resume_url, status )
+          `)
+          .order('assigned_at', { ascending: false });
+
+        if (aData && Array.isArray(aData)) {
+          aData.forEach((row: any) => {
+            let c = row.candidates;
+            if (!c && row.note) {
+              try { c = JSON.parse(row.note); } catch { c = null; }
+            }
+            if (c) {
+              const skills = normalizeSkills(c.skills);
+              const candidateName = c.name || c.full_name || 'Candidate';
+              const candidateEmail = c.email || 'candidate@example.com';
+              const candidatePhone = c.phone || '+1 (555) 000-0000';
+              fetchedCandidates.push({
+                id: c.id || row.candidate_id,
+                name: candidateName,
+                title: c.title || c.job_title || 'Professional',
+                location: c.location || 'Location not specified',
+                experience: c.experience || (c.experience_years ? `${c.experience_years} years` : 'Experience not listed'),
+                skills: skills.length > 0 ? skills : ['Assigned Candidate'],
+                status: c.status || 'Verified',
+                email: candidateEmail,
+                phone: candidatePhone,
+                maskedEmail: c.maskedEmail || candidateEmail.replace(/(.{2})(.*)(?=@)/, '$1***'),
+                maskedPhone: c.maskedPhone || (candidatePhone.length > 6 ? candidatePhone.slice(0, 6) + '****' : '+1 (***) ***-****'),
+                resume_url: c.resume_url || null,
+              });
+            }
+          });
+        }
+      } catch (err) {
+        console.warn('Assignments table fetch error:', err);
+      }
+
+      // Merge with defaults
+      const seenNames = new Set(fetchedCandidates.map((c) => (c.name || '').toLowerCase()));
+      const nonDuplicateDefaults = DEFAULT_CANDIDATES.filter(
+        (d) => !seenNames.has(d.name.toLowerCase())
+      );
+
+      const combined = [...fetchedCandidates, ...nonDuplicateDefaults];
+      setSearchCandidatesList(combined);
     } catch (err) {
-      console.error('Failed to load assigned candidates:', err);
+      console.error('Error loading candidate database pool:', err);
       setSearchCandidatesList(DEFAULT_CANDIDATES);
     }
   };
@@ -818,8 +868,14 @@ const normalizeSkills = (rawSkills: any): string[] => {
                   </div>
                 </div>
 
-                {/* WorkOnward Dual Input Search Bar */}
-                <Card className="glass border-primary/20 p-4 rounded-2xl shadow-md space-y-3">
+                {/* Dual Input Search Bar & Filter Controls */}
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    toast.success(`Search applied: ${filteredCandidates.length} candidate profiles match.`);
+                  }}
+                  className="glass border-primary/20 p-4 rounded-2xl shadow-md space-y-3"
+                >
                   <div className="grid grid-cols-1 md:grid-cols-12 gap-3">
                     <div className="relative md:col-span-4">
                       <MapPin className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-primary" />
@@ -840,7 +896,7 @@ const normalizeSkills = (rawSkills: any): string[] => {
                       />
                     </div>
                     <div className="md:col-span-2 flex gap-2">
-                      <Button className="w-full gradient-bg text-white font-bold h-11 rounded-xl text-xs shadow-md">
+                      <Button type="submit" className="w-full gradient-bg text-white font-bold h-11 rounded-xl text-xs shadow-md">
                         <Search className="w-4 h-4 mr-1.5" /> Search
                       </Button>
                     </div>
@@ -862,18 +918,50 @@ const normalizeSkills = (rawSkills: any): string[] => {
                       >
                         {filterUnlockedOnly ? "✓ Unlocked Only" : "Unlocked Only"}
                       </Badge>
-                      <Badge variant="secondary" className="px-3 py-1 font-semibold cursor-pointer">
-                        With Resume
+                      <Badge
+                        onClick={() => setFilterWithResume(!filterWithResume)}
+                        className={`cursor-pointer px-3 py-1 font-semibold transition-all ${
+                          filterWithResume
+                            ? "bg-primary text-white border-primary"
+                            : "bg-muted text-muted-foreground hover:bg-muted/80"
+                        }`}
+                      >
+                        {filterWithResume ? "✓ With Resume" : "With Resume"}
                       </Badge>
-                      <Badge variant="secondary" className="px-3 py-1 font-semibold cursor-pointer">
-                        Full-Time
+                      <Badge
+                        onClick={() => setFilterFullTime(!filterFullTime)}
+                        className={`cursor-pointer px-3 py-1 font-semibold transition-all ${
+                          filterFullTime
+                            ? "bg-primary text-white border-primary"
+                            : "bg-muted text-muted-foreground hover:bg-muted/80"
+                        }`}
+                      >
+                        {filterFullTime ? "✓ Full-Time" : "Full-Time"}
                       </Badge>
+                      {(searchKeyword || searchLocation || filterUnlockedOnly || filterWithResume || filterFullTime) && (
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => {
+                            setSearchKeyword("");
+                            setSearchLocation("");
+                            setFilterUnlockedOnly(false);
+                            setFilterWithResume(false);
+                            setFilterFullTime(false);
+                            toast.info("Search & filters reset.");
+                          }}
+                          className="h-7 text-[11px] font-bold text-primary hover:bg-primary/10 px-2.5 rounded-lg"
+                        >
+                          Reset Filters
+                        </Button>
+                      )}
                     </div>
                     <p className="text-xs font-semibold text-muted-foreground">
                       Showing {filteredCandidates.length} candidate profiles
                     </p>
                   </div>
-                </Card>
+                </form>
 
                 {/* Candidate List Cards Grid */}
                 {filteredCandidates.length === 0 ? (
