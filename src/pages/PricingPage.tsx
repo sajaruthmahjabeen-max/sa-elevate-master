@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Switch } from "@/components/ui/switch";
@@ -59,9 +60,19 @@ const SAMPLE_CANDIDATES = [
 ];
 
 const PricingPage: React.FC = () => {
+  const navigate = useNavigate();
   const [isYearly, setIsYearly] = useState(false);
   const [searchKeyword, setSearchKeyword] = useState("");
   const [searchLocation, setSearchLocation] = useState("");
+
+  const handlePerformSearch = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    const query = new URLSearchParams();
+    query.set("tab", "candidatesearch");
+    if (searchKeyword.trim()) query.set("keyword", searchKeyword.trim());
+    if (searchLocation.trim()) query.set("location", searchLocation.trim());
+    navigate(`/business/dashboard?${query.toString()}`);
+  };
 
   const filteredPreviewCandidates = SAMPLE_CANDIDATES.filter((c) => {
     const matchesKeyword =
@@ -145,9 +156,9 @@ const PricingPage: React.FC = () => {
             </p>
           </div>
 
-          {/* Search Bar Inputs */}
+          {/* Search Bar Inputs Form */}
           <Card className="glass border-primary/20 p-4 rounded-2xl shadow-md mb-6">
-            <div className="grid grid-cols-1 md:grid-cols-12 gap-3">
+            <form onSubmit={handlePerformSearch} className="grid grid-cols-1 md:grid-cols-12 gap-3">
               <div className="relative md:col-span-4">
                 <MapPin className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-primary" />
                 <Input
@@ -168,15 +179,13 @@ const PricingPage: React.FC = () => {
               </div>
               <div className="md:col-span-2">
                 <Button
-                  asChild
-                  className="w-full gradient-bg text-white font-bold h-11 rounded-xl text-xs shadow-md"
+                  type="submit"
+                  className="w-full gradient-bg text-white font-bold h-11 rounded-xl text-xs shadow-md flex items-center justify-center gap-1.5"
                 >
-                  <a href="/business/dashboard?tab=candidatesearch">
-                    <Search className="w-4 h-4 mr-1.5" /> Search
-                  </a>
+                  <Search className="w-4 h-4" /> Search
                 </Button>
               </div>
-            </div>
+            </form>
           </Card>
 
           {/* Candidate Grid */}
@@ -232,13 +241,11 @@ const PricingPage: React.FC = () => {
                       <ShieldCheck className="w-3.5 h-3.5 text-emerald-500" /> Pre-Screened Candidate
                     </span>
                     <Button
-                      asChild
                       size="sm"
-                      className="gradient-bg text-white font-bold text-xs h-8 rounded-lg shadow-sm"
+                      onClick={() => handlePerformSearch()}
+                      className="gradient-bg text-white font-bold text-xs h-8 rounded-lg shadow-sm flex items-center gap-1"
                     >
-                      <a href="/business/dashboard?tab=candidatesearch" className="flex items-center gap-1">
-                        <span>Unlock in Portal</span> <ArrowRight className="w-3.5 h-3.5" />
-                      </a>
+                      <span>Unlock in Portal</span> <ArrowRight className="w-3.5 h-3.5" />
                     </Button>
                   </div>
                 </Card>
@@ -255,12 +262,10 @@ const PricingPage: React.FC = () => {
               </p>
             </div>
             <Button
-              asChild
-              className="gradient-bg text-white font-extrabold text-xs h-10 px-6 rounded-xl shadow-md shrink-0"
+              onClick={() => handlePerformSearch()}
+              className="gradient-bg text-white font-extrabold text-xs h-10 px-6 rounded-xl shadow-md shrink-0 flex items-center gap-1.5"
             >
-              <a href="/business/dashboard?tab=candidatesearch" className="flex items-center gap-1.5">
-                <span>Go to Candidate Search</span> <ExternalLink className="w-3.5 h-3.5" />
-              </a>
+              <span>Go to Candidate Search</span> <ExternalLink className="w-3.5 h-3.5" />
             </Button>
           </div>
         </section>

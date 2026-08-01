@@ -119,7 +119,8 @@ const DEFAULT_CANDIDATES = [
 export default function BusinessDashboard() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const tabParam = searchParams.get("tab");
+  const keywordParam = searchParams.get("keyword");
+  const locationParam = searchParams.get("location");
 
   const [activeTab, setActiveTab] = useState<
     "dashboard" | "jobshare" | "candidatesearch" | "candidatehub" | "recruiting" | "calendar"
@@ -133,7 +134,9 @@ export default function BusinessDashboard() {
     if (tabParam && ["dashboard", "jobshare", "candidatesearch", "candidatehub", "recruiting", "calendar"].includes(tabParam)) {
       setActiveTab(tabParam as any);
     }
-  }, [tabParam]);
+    if (keywordParam) setSearchKeyword(keywordParam);
+    if (locationParam) setSearchLocation(locationParam);
+  }, [tabParam, keywordParam, locationParam]);
 
   const [createJobOpen, setCreateJobOpen] = useState(false);
   const [createCandidateOpen, setCreateCandidateOpen] = useState(false);
