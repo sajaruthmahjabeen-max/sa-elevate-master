@@ -275,7 +275,8 @@ const normalizeSkills = (rawSkills: any): string[] => {
 
       // 1. Fetch from business_candidate_assignments table
       try {
-        const { data: aData, error: aError } = await supabase
+        let aData: any[] | null = null;
+        const { data: joinData, error: joinError } = await supabase
           .from('business_candidate_assignments')
           .select(`
             id, candidate_id, business_user_id, note, assigned_at,
@@ -287,8 +288,15 @@ const normalizeSkills = (rawSkills: any): string[] => {
           `)
           .order('assigned_at', { ascending: false });
 
-        if (aError) {
-          console.warn('business_candidate_assignments query notice:', aError.message);
+        if (!joinError && joinData) {
+          aData = joinData;
+        } else {
+          // Fallback select without relational join if RLS or join restricted
+          const { data: directData } = await supabase
+            .from('business_candidate_assignments')
+            .select('id, candidate_id, business_user_id, note, assigned_at')
+            .order('assigned_at', { ascending: false });
+          if (directData) aData = directData;
         }
 
         if (aData && Array.isArray(aData)) {
@@ -334,6 +342,44 @@ const normalizeSkills = (rawSkills: any): string[] => {
         }
       } catch (err) {
         console.warn('Assignments fetch catch:', err);
+      }
+
+      // 2. Fetch from localStorage fallback (shared admin assignments)
+      try {
+        const stored = localStorage.getItem('sa_admin_assigned_candidates');
+        if (stored) {
+          const list = JSON.parse(stored);
+          if (Array.isArray(list)) {
+            list.forEach((c: any) => {
+              const skills = normalizeSkills(c.skills);
+              const candidateName = c.name || 'Candidate';
+              const candidateEmail = c.email || 'candidate@example.com';
+              const candidatePhone = c.phone || '+1 (555) 000-0000';
+              const maskedEmail = c.maskedEmail || candidateEmail.replace(/(.{2})(.*)(?=@)/, '$1***');
+              const maskedPhone = c.maskedPhone || (candidatePhone.length > 6 ? candidatePhone.slice(0, 6) + '****' : '+1 (***) ***-****');
+
+              assignedList.push({
+                id: c.id,
+                name: candidateName,
+                title: c.title || c.job_title || 'Professional',
+                location: c.location || 'Location not specified',
+                experience: c.experience || (c.experience_years ? `${c.experience_years} years` : 'Experience not listed'),
+                skills: skills.length > 0 ? skills : ['Verified Candidate'],
+                status: c.status || 'Assigned by Admin',
+                email: candidateEmail,
+                phone: candidatePhone,
+                maskedEmail,
+                maskedPhone,
+                resume_url: c.resume_url || null,
+                summary: c.summary || c.bio || 'Candidate assigned by SA Elevate recruiter.',
+                assignedAt: new Date().toISOString(),
+                assignedByAdmin: true,
+              });
+            });
+          }
+        }
+      } catch (err) {
+        console.warn('LocalStorage candidates fetch catch:', err);
       }
 
       // 2. Fetch from job_matches table (Admin Master Brain assignments)

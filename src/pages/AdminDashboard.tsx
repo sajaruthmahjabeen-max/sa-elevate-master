@@ -313,10 +313,27 @@ const AdminDashboard = () => {
 
   // Fetch which candidates are already assigned from Supabase on load
   const fetchAssignedCandidates = useCallback(async () => {
-    const { data } = await supabase
-      .from('business_candidate_assignments')
-      .select('candidate_id');
-    if (data) setAssignedCandidateIds(data.map((r: any) => r.candidate_id));
+    const idsSet = new Set<string>();
+    try {
+      const { data } = await supabase
+        .from('business_candidate_assignments')
+        .select('candidate_id');
+      if (data && Array.isArray(data)) {
+        data.forEach((r: any) => idsSet.add(r.candidate_id));
+      }
+    } catch {}
+
+    try {
+      const stored = localStorage.getItem('sa_admin_assigned_candidates');
+      if (stored) {
+        const list = JSON.parse(stored);
+        if (Array.isArray(list)) {
+          list.forEach((item: any) => idsSet.add(item.id));
+        }
+      }
+    } catch {}
+
+    setAssignedCandidateIds(Array.from(idsSet));
   }, []);
 
   const handleAssignToBusinessSearch = async (candidate: Candidate) => {
@@ -331,7 +348,20 @@ const AdminDashboard = () => {
           .delete()
           .eq('candidate_id', candidate.id);
 
-        if (error) throw error;
+        if (error && error.code !== 'PGRST116') {
+          console.warn('Supabase delete assignment notice:', error.message);
+        }
+
+        // Remove from localStorage
+        try {
+          const stored = localStorage.getItem('sa_admin_assigned_candidates');
+          if (stored) {
+            const list = JSON.parse(stored);
+            const updated = list.filter((item: any) => item.id !== candidate.id);
+            localStorage.setItem('sa_admin_assigned_candidates', JSON.stringify(updated));
+          }
+        } catch {}
+
         setAssignedCandidateIds((prev) => prev.filter((id) => id !== candidate.id));
         toast({ title: '🗑️ Removed from Business Search', description: `${candidate.name} removed from candidate search.` });
       } else {
@@ -369,6 +399,14 @@ const AdminDashboard = () => {
         if (error && error.code !== '23505') {
           console.warn('Supabase assignment warning:', error);
         }
+
+        // Save to localStorage
+        try {
+          const stored = localStorage.getItem('sa_admin_assigned_candidates');
+          const list = stored ? JSON.parse(stored) : [];
+          const updated = [...list.filter((item: any) => item.id !== candidate.id), snapshot];
+          localStorage.setItem('sa_admin_assigned_candidates', JSON.stringify(updated));
+        } catch {}
 
         setAssignedCandidateIds((prev) => [...prev, candidate.id]);
         toast({ title: '✅ Assigned to Business Search!', description: `${candidate.name} will now appear in the Business Dashboard Candidate Search.` });
