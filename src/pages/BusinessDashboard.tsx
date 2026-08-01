@@ -281,18 +281,43 @@ export default function BusinessDashboard() {
     toast.success("Candidate bookmark updated!");
   };
 
+const normalizeSkills = (rawSkills: any): string[] => {
+  if (!rawSkills) return [];
+  if (Array.isArray(rawSkills)) {
+    const list: string[] = [];
+    rawSkills.forEach((item) => {
+      if (typeof item === "string" && item.trim()) {
+        list.push(item.trim());
+      } else if (typeof item === "object" && item !== null) {
+        if (Array.isArray(item.items)) {
+          item.items.forEach((sub: any) => {
+            if (typeof sub === "string" && sub.trim()) list.push(sub.trim());
+          });
+        } else if (typeof item.category === "string" && item.category.trim()) {
+          list.push(item.category.trim());
+        }
+      }
+    });
+    return list;
+  }
+  if (typeof rawSkills === "string") {
+    return rawSkills.split(",").map((s) => s.trim()).filter(Boolean);
+  }
+  return [];
+};
+
   const filteredCandidates = (searchCandidatesList || []).filter((c) => {
     if (!c) return false;
     const name = (c.name || "Candidate").toString();
     const title = (c.title || c.job_title || "Professional").toString();
     const location = (c.location || "").toString();
-    const skills = Array.isArray(c.skills) ? c.skills : [];
+    const skillsList = normalizeSkills(c.skills);
 
     const matchesKeyword =
       !searchKeyword ||
       name.toLowerCase().includes(searchKeyword.toLowerCase()) ||
       title.toLowerCase().includes(searchKeyword.toLowerCase()) ||
-      skills.some((s: string) => (s || "").toString().toLowerCase().includes(searchKeyword.toLowerCase()));
+      skillsList.some((s: string) => s.toLowerCase().includes(searchKeyword.toLowerCase()));
 
     const matchesLocation = !searchLocation || location.toLowerCase().includes(searchLocation.toLowerCase());
     const matchesUnlocked = !filterUnlockedOnly || unlockedCandidateIds.includes(c.id);
@@ -339,11 +364,7 @@ export default function BusinessDashboard() {
 
         if (!c) return null;
 
-        const skills: string[] = Array.isArray(c.skills)
-          ? c.skills
-          : typeof c.skills === 'string'
-          ? c.skills.split(',').map((s: string) => s.trim()).filter(Boolean)
-          : [];
+        const skills: string[] = normalizeSkills(c.skills);
 
         const candidateName = c.name || c.full_name || 'Candidate';
         const candidateEmail = c.email || 'candidate@example.com';
@@ -876,7 +897,7 @@ export default function BusinessDashboard() {
                     {filteredCandidates.map((c) => {
                     const isUnlocked = unlockedCandidateIds.includes(c.id);
                     const isBookmarked = bookmarkedCandidateIds.includes(c.id);
-                    const skillsList: string[] = Array.isArray(c.skills) ? c.skills : [];
+                    const skillsList: string[] = normalizeSkills(c.skills);
                     const initials = (c.name || "Candidate")
                       .split(" ")
                       .map((n: string) => n[0] || "")
@@ -1660,7 +1681,7 @@ export default function BusinessDashboard() {
                     <GraduationCap className="w-4 h-4 text-primary" /> Education & Qualifications
                   </h3>
                   <p className="text-xs text-foreground font-semibold bg-muted/50 p-3 rounded-xl border border-border">
-                    🎓 {selectedCandidate.education || "Bachelor Degree / Higher Qualification"}
+                    🎓 {typeof selectedCandidate.education === 'string' ? selectedCandidate.education : (Array.isArray(selectedCandidate.education) ? selectedCandidate.education.join(' • ') : "Bachelor Degree / Higher Qualification")}
                   </p>
                 </Card>
 
@@ -1670,7 +1691,7 @@ export default function BusinessDashboard() {
                     <Sparkles className="w-4 h-4 text-primary" /> Top Skills & Competencies
                   </h3>
                   <div className="flex flex-wrap gap-2">
-                    {(Array.isArray(selectedCandidate.skills) ? selectedCandidate.skills : []).map((s: string, idx: number) => (
+                    {normalizeSkills(selectedCandidate.skills).map((s: string, idx: number) => (
                       <Badge key={idx} className="bg-primary/10 text-primary border-primary/20 text-xs px-3 py-1 font-semibold">
                         {s}
                       </Badge>
