@@ -271,77 +271,139 @@ const normalizeSkills = (rawSkills: any): string[] => {
       const { data: { user } } = await supabase.auth.getUser();
       const currentUserId = user?.id || '';
 
-      // Query business_candidate_assignments assigned to 'all' or specific business user_id
-      let query = supabase
-        .from('business_candidate_assignments')
-        .select(`
-          id,
-          candidate_id,
-          business_user_id,
-          note,
-          assigned_at,
-          candidates (
-            id, name, full_name, email, phone, job_title, title,
-            experience_years, experience, location, skills,
-            resume_url, status, summary, bio
-          )
-        `)
-        .order('assigned_at', { ascending: false });
-
-      if (currentUserId) {
-        query = query.or(`business_user_id.eq.all,business_user_id.eq.${currentUserId}`);
-      } else {
-        query = query.eq('business_user_id', 'all');
-      }
-
-      const { data, error } = await query;
-      if (error) {
-        console.warn('Assignments fetch error:', error);
-      }
-
       const assignedList: any[] = [];
 
-      (data || []).forEach((row: any) => {
-        let c = row.candidates;
+      // 1. Fetch from business_candidate_assignments table
+      try {
+        const { data: aData, error: aError } = await supabase
+          .from('business_candidate_assignments')
+          .select(`
+            id, candidate_id, business_user_id, note, assigned_at,
+            candidates (
+              id, name, full_name, email, phone, job_title, title,
+              experience_years, experience, location, skills,
+              resume_url, status, summary, bio
+            )
+          `)
+          .order('assigned_at', { ascending: false });
 
-        // Fallback: parse snapshot stored in note field if join returned null
-        if (!c && row.note) {
-          try {
-            c = typeof row.note === 'string' ? JSON.parse(row.note) : row.note;
-          } catch {
-            c = null;
-          }
+        if (aError) {
+          console.warn('business_candidate_assignments query notice:', aError.message);
         }
 
-        if (!c) return;
+        if (aData && Array.isArray(aData)) {
+          aData.forEach((row: any) => {
+            let c = row.candidates;
 
-        const skills = normalizeSkills(c.skills);
-        const candidateName = c.name || c.full_name || 'Candidate';
-        const candidateEmail = c.email || 'candidate@example.com';
-        const candidatePhone = c.phone || '+1 (555) 000-0000';
-        const maskedEmail = c.maskedEmail || candidateEmail.replace(/(.{2})(.*)(?=@)/, '$1***');
-        const maskedPhone = c.maskedPhone || (candidatePhone.length > 6 ? candidatePhone.slice(0, 6) + '****' : '+1 (***) ***-****');
+            // Parse snapshot JSON stored in note field if join returned null
+            if (!c && row.note) {
+              try {
+                c = typeof row.note === 'string' ? JSON.parse(row.note) : row.note;
+              } catch {
+                c = null;
+              }
+            }
 
-        assignedList.push({
-          id: c.id || row.candidate_id || row.id,
-          name: candidateName,
-          title: c.title || c.job_title || 'Professional',
-          location: c.location || 'Location not specified',
-          experience: c.experience || (c.experience_years ? `${c.experience_years} years` : 'Experience not listed'),
-          skills: skills.length > 0 ? skills : ['Verified Candidate'],
-          status: c.status || 'Assigned by Admin',
-          email: candidateEmail,
-          phone: candidatePhone,
-          maskedEmail,
-          maskedPhone,
-          resume_url: c.resume_url || null,
-          summary: c.summary || c.bio || 'Candidate assigned by SA Elevate recruiter.',
-          assignedAt: row.assigned_at,
-          assignedByAdmin: true,
-        });
+            if (c) {
+              const skills = normalizeSkills(c.skills);
+              const candidateName = c.name || c.full_name || 'Candidate';
+              const candidateEmail = c.email || 'candidate@example.com';
+              const candidatePhone = c.phone || '+1 (555) 000-0000';
+              const maskedEmail = c.maskedEmail || candidateEmail.replace(/(.{2})(.*)(?=@)/, '$1***');
+              const maskedPhone = c.maskedPhone || (candidatePhone.length > 6 ? candidatePhone.slice(0, 6) + '****' : '+1 (***) ***-****');
+
+              assignedList.push({
+                id: c.id || row.candidate_id || row.id,
+                name: candidateName,
+                title: c.title || c.job_title || 'Professional',
+                location: c.location || 'Location not specified',
+                experience: c.experience || (c.experience_years ? `${c.experience_years} years` : 'Experience not listed'),
+                skills: skills.length > 0 ? skills : ['Verified Candidate'],
+                status: c.status || 'Assigned by Admin',
+                email: candidateEmail,
+                phone: candidatePhone,
+                maskedEmail,
+                maskedPhone,
+                resume_url: c.resume_url || null,
+                summary: c.summary || c.bio || 'Candidate assigned by SA Elevate recruiter.',
+                assignedAt: row.assigned_at,
+                assignedByAdmin: true,
+              });
+            }
+          });
+        }
+      } catch (err) {
+        console.warn('Assignments fetch catch:', err);
+      }
+
+      // 2. Fetch from job_matches table (Admin Master Brain assignments)
+      try {
+        const { data: mData, error: mError } = await supabase
+          .from('job_matches')
+          .select(`
+            id, candidate_id, job_id, company_name, match_percentage, location_fit, status, created_at,
+            vendor_candidates ( id, name, email, phone, skills, resume_url, location, experience_years )
+          `)
+          .order('created_at', { ascending: false });
+
+        if (!mError && mData && Array.isArray(mData)) {
+          mData.forEach((row: any) => {
+            let c = row.vendor_candidates;
+            if (!c && row.location_fit && String(row.location_fit).startsWith('{')) {
+              try {
+                c = JSON.parse(row.location_fit);
+              } catch {
+                c = null;
+              }
+            }
+
+            if (c) {
+              const skills = normalizeSkills(c.skills || c.skills_list);
+              const candidateName = c.name || c.cand_name || 'Candidate';
+              const candidateEmail = c.email || c.cand_email || 'candidate@example.com';
+              const candidatePhone = c.phone || c.cand_phone || '+1 (555) 000-0000';
+              const maskedEmail = candidateEmail.replace(/(.{2})(.*)(?=@)/, '$1***');
+              const maskedPhone = candidatePhone.length > 6 ? candidatePhone.slice(0, 6) + '****' : '+1 (***) ***-****';
+
+              assignedList.push({
+                id: c.id || row.candidate_id || row.id,
+                name: candidateName,
+                title: c.title || c.job_title || 'Matched Candidate',
+                location: c.location || 'Location not specified',
+                experience: c.experience || (c.experience_years ? `${c.experience_years} years` : 'Experienced'),
+                skills: skills.length > 0 ? skills : ['Matched Candidate'],
+                status: row.status || 'Match Assigned',
+                email: candidateEmail,
+                phone: candidatePhone,
+                maskedEmail,
+                maskedPhone,
+                resume_url: c.resume_url || null,
+                summary: `Assigned candidate match (${row.match_percentage || '95'}% Match Fit)`,
+                assignedAt: row.created_at,
+                assignedByAdmin: true,
+              });
+            }
+          });
+        }
+      } catch (err) {
+        console.warn('Job matches fetch catch:', err);
+      }
+
+      // Deduplicate assigned candidates by id or candidate name
+      const uniqueAssigned: any[] = [];
+      const seenIds = new Set();
+      const seenNames = new Set();
+
+      assignedList.forEach((item) => {
+        const nameKey = (item.name || '').toLowerCase().trim();
+        if (!seenIds.has(item.id) && !seenNames.has(nameKey)) {
+          seenIds.add(item.id);
+          seenNames.add(nameKey);
+          uniqueAssigned.push(item);
+        }
       });
 
-      setSearchCandidatesList(assignedList);
+      setSearchCandidatesList(uniqueAssigned);
     } catch (err) {
       console.error('Error loading admin-assigned candidates:', err);
       setSearchCandidatesList([]);
