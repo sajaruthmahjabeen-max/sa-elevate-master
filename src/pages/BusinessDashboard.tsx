@@ -265,116 +265,85 @@ const normalizeSkills = (rawSkills: any): string[] => {
     setCandidates((prev) => [newCandidate, ...prev]);
   };
 
-  // Load all candidates from Supabase (candidates, vendor_candidates, assignments)
+  // Load admin-assigned candidates ONLY from Supabase
   const loadAdminAssignedCandidates = async () => {
     try {
-      const fetchedCandidates: any[] = [];
+      const { data: { user } } = await supabase.auth.getUser();
+      const currentUserId = user?.id || '';
 
-      // 1. Fetch direct candidates table
-      try {
-        const { data: cData } = await supabase.from('candidates').select('*').order('created_at', { ascending: false });
-        if (cData && Array.isArray(cData)) {
-          cData.forEach((c: any) => {
-            const skills = normalizeSkills(c.skills);
-            const candidateName = c.name || c.full_name || 'Candidate';
-            const candidateEmail = c.email || 'candidate@example.com';
-            const candidatePhone = c.phone || '+1 (555) 000-0000';
-            fetchedCandidates.push({
-              id: c.id || `direct_${Math.random()}`,
-              name: candidateName,
-              title: c.title || c.job_title || 'Professional',
-              location: c.location || 'Location not specified',
-              experience: c.experience || (c.experience_years ? `${c.experience_years} years` : 'Experience not listed'),
-              skills: skills.length > 0 ? skills : ['Professional'],
-              status: c.status || 'Verified',
-              email: candidateEmail,
-              phone: candidatePhone,
-              maskedEmail: c.maskedEmail || candidateEmail.replace(/(.{2})(.*)(?=@)/, '$1***'),
-              maskedPhone: c.maskedPhone || (candidatePhone.length > 6 ? candidatePhone.slice(0, 6) + '****' : '+1 (***) ***-****'),
-              resume_url: c.resume_url || null,
-              summary: c.summary || c.bio || 'Verified candidate available for hire.',
-            });
-          });
-        }
-      } catch (err) {
-        console.warn('Candidates table fetch error:', err);
+      // Query business_candidate_assignments assigned to 'all' or specific business user_id
+      let query = supabase
+        .from('business_candidate_assignments')
+        .select(`
+          id,
+          candidate_id,
+          business_user_id,
+          note,
+          assigned_at,
+          candidates (
+            id, name, full_name, email, phone, job_title, title,
+            experience_years, experience, location, skills,
+            resume_url, status, summary, bio
+          )
+        `)
+        .order('assigned_at', { ascending: false });
+
+      if (currentUserId) {
+        query = query.or(`business_user_id.eq.all,business_user_id.eq.${currentUserId}`);
+      } else {
+        query = query.eq('business_user_id', 'all');
       }
 
-      // 2. Fetch vendor candidates table
-      try {
-        const { data: vData } = await supabase.from('vendor_candidates').select('*').order('created_at', { ascending: false });
-        if (vData && Array.isArray(vData)) {
-          vData.forEach((c: any) => {
-            const skills = normalizeSkills(c.skills);
-            const candidateName = c.name || c.full_name || 'Candidate';
-            const candidateEmail = c.email || 'candidate@example.com';
-            const candidatePhone = c.phone || '+1 (555) 000-0000';
-            fetchedCandidates.push({
-              id: c.id || `vendor_${Math.random()}`,
-              name: candidateName,
-              title: c.title || c.job_title || 'Professional',
-              location: c.location || 'Location not specified',
-              experience: c.experience || (c.experience_years ? `${c.experience_years} years` : 'Experience not listed'),
-              skills: skills.length > 0 ? skills : ['Vendor Candidate'],
-              status: c.status || 'Verified',
-              email: candidateEmail,
-              phone: candidatePhone,
-              maskedEmail: c.maskedEmail || candidateEmail.replace(/(.{2})(.*)(?=@)/, '$1***'),
-              maskedPhone: c.maskedPhone || (candidatePhone.length > 6 ? candidatePhone.slice(0, 6) + '****' : '+1 (***) ***-****'),
-              resume_url: c.resume_url || null,
-              summary: c.summary || 'Verified partner candidate.',
-            });
-          });
-        }
-      } catch (err) {
-        console.warn('Vendor candidates table fetch error:', err);
+      const { data, error } = await query;
+      if (error) {
+        console.warn('Assignments fetch error:', error);
       }
 
-      // 3. Fetch business candidate assignments
-      try {
-        const { data: aData } = await supabase
-          .from('business_candidate_assignments')
-          .select(`
-            candidate_id, note, assigned_at,
-            candidates ( id, name, email, phone, job_title, experience_years, location, skills, resume_url, status )
-          `)
-          .order('assigned_at', { ascending: false });
+      const assignedList: any[] = [];
 
-        if (aData && Array.isArray(aData)) {
-          aData.forEach((row: any) => {
-            let c = row.candidates;
-            if (!c && row.note) {
-              try { c = JSON.parse(row.note); } catch { c = null; }
-            }
-            if (c) {
-              const skills = normalizeSkills(c.skills);
-              const candidateName = c.name || c.full_name || 'Candidate';
-              const candidateEmail = c.email || 'candidate@example.com';
-              const candidatePhone = c.phone || '+1 (555) 000-0000';
-              fetchedCandidates.push({
-                id: c.id || row.candidate_id,
-                name: candidateName,
-                title: c.title || c.job_title || 'Professional',
-                location: c.location || 'Location not specified',
-                experience: c.experience || (c.experience_years ? `${c.experience_years} years` : 'Experience not listed'),
-                skills: skills.length > 0 ? skills : ['Assigned Candidate'],
-                status: c.status || 'Verified',
-                email: candidateEmail,
-                phone: candidatePhone,
-                maskedEmail: c.maskedEmail || candidateEmail.replace(/(.{2})(.*)(?=@)/, '$1***'),
-                maskedPhone: c.maskedPhone || (candidatePhone.length > 6 ? candidatePhone.slice(0, 6) + '****' : '+1 (***) ***-****'),
-                resume_url: c.resume_url || null,
-              });
-            }
-          });
+      (data || []).forEach((row: any) => {
+        let c = row.candidates;
+
+        // Fallback: parse snapshot stored in note field if join returned null
+        if (!c && row.note) {
+          try {
+            c = typeof row.note === 'string' ? JSON.parse(row.note) : row.note;
+          } catch {
+            c = null;
+          }
         }
-      } catch (err) {
-        console.warn('Assignments table fetch error:', err);
-      }
 
-      setSearchCandidatesList(fetchedCandidates);
+        if (!c) return;
+
+        const skills = normalizeSkills(c.skills);
+        const candidateName = c.name || c.full_name || 'Candidate';
+        const candidateEmail = c.email || 'candidate@example.com';
+        const candidatePhone = c.phone || '+1 (555) 000-0000';
+        const maskedEmail = c.maskedEmail || candidateEmail.replace(/(.{2})(.*)(?=@)/, '$1***');
+        const maskedPhone = c.maskedPhone || (candidatePhone.length > 6 ? candidatePhone.slice(0, 6) + '****' : '+1 (***) ***-****');
+
+        assignedList.push({
+          id: c.id || row.candidate_id || row.id,
+          name: candidateName,
+          title: c.title || c.job_title || 'Professional',
+          location: c.location || 'Location not specified',
+          experience: c.experience || (c.experience_years ? `${c.experience_years} years` : 'Experience not listed'),
+          skills: skills.length > 0 ? skills : ['Verified Candidate'],
+          status: c.status || 'Assigned by Admin',
+          email: candidateEmail,
+          phone: candidatePhone,
+          maskedEmail,
+          maskedPhone,
+          resume_url: c.resume_url || null,
+          summary: c.summary || c.bio || 'Candidate assigned by SA Elevate recruiter.',
+          assignedAt: row.assigned_at,
+          assignedByAdmin: true,
+        });
+      });
+
+      setSearchCandidatesList(assignedList);
     } catch (err) {
-      console.error('Error loading candidate database pool:', err);
+      console.error('Error loading admin-assigned candidates:', err);
       setSearchCandidatesList([]);
     }
   };
