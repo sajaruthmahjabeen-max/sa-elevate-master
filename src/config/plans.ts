@@ -51,7 +51,6 @@ export const PRICING_PLANS: PlanTier[] = [
     featuresHeader: "Everything in Free, plus",
     features: [
       "AI Resume Auto-parsing (autofills candidate details)",
-      "Full Candidate Hub pipeline management",
       "Add direct apply link & email for direct resumes",
       "Message candidates anytime via portal",
       "Resume database access at 50% off ($2/resume)",
@@ -62,10 +61,6 @@ export const PRICING_PLANS: PlanTier[] = [
 ];
 
 export const PRICING_FAQS: PricingFAQItem[] = [
-  {
-    question: "What is included in the Candidate Hub?",
-    answer: "Candidate Hub allows you to create candidate profiles, upload resumes (PDF, DOCX, TXT, JPG, PNG up to 2MB), automatically extract candidate information, assign candidates to job requisitions, and track applicants across pipeline stages.",
-  },
   {
     question: "Can I switch or cancel my plan anytime?",
     answer: "Yes, absolutely! You can upgrade, downgrade, or cancel your subscription at any time directly from your account settings.",
