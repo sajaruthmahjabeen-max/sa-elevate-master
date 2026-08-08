@@ -142,7 +142,7 @@ export const ResumeServiceModal: React.FC<ResumeServiceModalProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto p-6 md:p-8 rounded-3xl glass-strong border border-primary/20 shadow-2xl">
+      <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto p-6 md:p-8 rounded-3xl glass-strong border border-primary/20 shadow-2xl z-[10001]">
         {!isSubmitted ? (
           <>
             <DialogHeader className="text-left space-y-2 pb-4 border-b border-border/60">
