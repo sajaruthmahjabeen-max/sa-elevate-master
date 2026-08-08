@@ -48,6 +48,7 @@ import { Label } from '@/components/ui/label';
 import { CandidateProfileDialog } from '@/components/CandidateProfileDialog';
 import { AdminPartnerCRM } from '@/components/AdminPartnerCRM';
 import { AdminMasterBrain } from '@/components/AdminMasterBrain';
+import { AdminCareerServices } from '@/components/AdminCareerServices';
 import { useSEO } from '@/hooks/useSEO';
 
 type Profile = Database['public']['Tables']['profiles']['Row'];
@@ -1285,6 +1286,9 @@ SA Consultant & Staffing Team`
                 </span>
               )}
             </TabsTrigger>
+            <TabsTrigger value="career_services" className="data-[state=active]:gradient-bg h-10 px-4 min-w-[150px] flex-shrink-0 flex gap-2 items-center justify-center font-bold text-amber-500">
+              <FileText size={16} /> 📄 Career Services
+            </TabsTrigger>
             <TabsTrigger value="inquiries" className="data-[state=active]:gradient-bg h-10 px-4 min-w-[120px] flex-shrink-0 flex gap-2 items-center justify-center relative">
               <Mail size={16} /> Messages
               {inquiries.filter(i => i.status === 'new').length > 0 && (
@@ -1363,6 +1367,10 @@ SA Consultant & Staffing Team`
                 </Button>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          <TabsContent value="career_services">
+            <AdminCareerServices />
           </TabsContent>
 
           <TabsContent value="candidates">

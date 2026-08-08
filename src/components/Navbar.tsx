@@ -41,7 +41,13 @@ const navItems: NavItem[] = [
       { label: 'Appointment Booking', href: '/book', isRoute: true },
     ],
   },
-  { label: 'Pricing', href: '/pricing', isRoute: true },
+  {
+    label: 'For Business',
+    children: [
+      { label: 'Pricing', href: '/pricing', isRoute: true },
+      { label: 'Career Services', href: '/career-services', isRoute: true },
+    ],
+  },
   { label: 'Contact', href: '/contact', isRoute: true },
 ];
 
