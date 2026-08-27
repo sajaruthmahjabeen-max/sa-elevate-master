@@ -22,17 +22,11 @@ export const PricingCard: React.FC<PricingCardProps> = ({ plan, isYearly, isAdmi
           : "border-primary shadow-lg ring-1 ring-primary/20"
       }`}
     >
-      {/* Top Badges */}
-      {isStarter ? (
+      {/* Top Badge for Starter */}
+      {isStarter && (
         <div className="absolute -top-3 left-1/2 -translate-x-1/2">
           <Badge className="bg-amber-500/15 text-amber-600 border border-amber-500/30 font-bold px-2.5 py-0.5 shadow-sm flex items-center gap-1 rounded-full text-[11px]">
             <Clock className="w-3 h-3 animate-pulse" /> Under Development
-          </Badge>
-        </div>
-      ) : (
-        <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-          <Badge className="bg-emerald-500/15 text-emerald-600 border border-emerald-500/30 font-bold px-2.5 py-0.5 shadow-sm flex items-center gap-1 rounded-full text-[11px]">
-            <Sparkles className="w-3 h-3" /> Fully Available
           </Badge>
         </div>
       )}
