@@ -286,6 +286,51 @@ export const AIChatbot: React.FC = () => {
     // 🌐 CORE DOMAIN KNOWLEDGE & SPECIFIC TOPICS
     // ==========================================
 
+    // 0. WHAT SERVICES DO WE PROVIDE / OUR SERVICES
+    if (
+      q.includes('what are the services') ||
+      q.includes('what services') ||
+      q.includes('our services') ||
+      q.includes('services provided') ||
+      q.includes('services we offer') ||
+      q.includes('services we provide') ||
+      q.includes('what do you provide') ||
+      q.includes('what do you offer') ||
+      q === 'services'
+    ) {
+      reply = {
+        id: `bot-${Date.now()}`,
+        sender: 'bot',
+        text: `🌟 **Our Core Services at SA Consultant & Staffing:**
+
+We offer 4 comprehensive solutions designed to elevate your business:
+
+### 1️⃣ 🌐 Website Creation
+• Stunning, high-performance websites and web applications tailored to your brand and built for high conversion.
+• **Key Features**: Custom Design, SEO Optimized, Mobile-First Architecture.
+
+### 2️⃣ 📢 Digital Marketing
+• Data-driven marketing strategies that amplify your brand presence and deliver measurable ROI.
+• **Key Features**: Social Media Campaigns, PPC Ads, Analytics & Conversion Tracking.
+
+### 3️⃣ 👥 Staffing Solutions
+• Connect with vetted, top-tier technical talent to build high-performing engineering squads.
+• **Key Features**: Executive Search, Contract / C2C Staffing, Direct Placement, RPO.
+
+### 4️⃣ 🎨 Content Creation
+• Engaging digital content that tells your story, captivates audiences, and builds brand authority.
+• **Key Features**: Video Production, High-Converting Copywriting, Brand Identity.`,
+        timestamp: now,
+        cta: { label: 'Explore Services Page', path: '/services' },
+        quickReplies: [
+          { label: '🌐 Web Development Procedure', action: 'web_dev' },
+          { label: '👥 Find Technical Talent', action: 'find_candidates' },
+          { label: '🏢 Client Portal (Post Job)', action: 'client_portal' },
+          { label: '🤝 Talent Partner Program', action: 'partner_portal' },
+        ],
+      };
+    }
+
     // 1. WEBSITE DEVELOPMENT PROCEDURE & SOFTWARE ENGINEERING
     else if (
       q.includes('website development') ||
