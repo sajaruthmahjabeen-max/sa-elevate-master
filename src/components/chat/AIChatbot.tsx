@@ -478,38 +478,79 @@ We collaborate closely with leading IT staffing agencies, prime vendors, and spe
       reply = {
         id: `bot-${Date.now()}`,
         sender: 'bot',
-        text: `👤 **Candidate Portal Overview & Job Seeker Workflow:**
+        text: `👤 **Candidate Portal & Job Application Procedure:**
 
-The **Candidate Portal** is designed to accelerate job seekers into high-paying contract, remote, and full-time tech roles.
+Our **Candidate Portal** helps job seekers find top tech positions in 4 simple steps:
 
-### 🚀 How Candidates Use the Portal:
-1. **Profile Creation & Resume Parsing**:
-   • Sign up and upload your latest resume (PDF/Word).
-   • Our system automatically parses your technical skills, work history, and job titles.
+### 1️⃣ Step 1: Upload Your Resume
+• Sign in to your Candidate Portal and upload your PDF or DOCX resume.
 
-2. **Explore & 1-Click Apply**:
-   • Browse verified open positions across engineering, design, data, and management.
-   • Apply with 1 click using your pre-verified profile credentials.
+### 2️⃣ Step 2: AI Auto-Parsing & Profile Creation
+• Our AI automatically extracts your name, skills, work history, education, and portfolio links directly into your profile.
 
-3. **Real-Time Application Status Tracker**:
-   • Monitor your applications live: \`Applied\` ➔ \`Under Review\` ➔ \`Interview Scheduled\` ➔ \`Offer Extended\`.
+### 3️⃣ Step 3: 1-Click Job Applications
+• Browse verified active roles on the **Jobs Board** and apply with 1 click using your pre-verified credentials.
 
-4. **Career Support Upgrades**:
-   • Access Professional Resume Packages ($99), 1-on-1 Mock Interview Prep ($79), and targeted Job Search Assistance ($79).`,
+### 4️⃣ Step 4: Real-Time Application Tracking
+• Track your application stage live: \`New\` ➔ \`Under Review\` ➔ \`Interview Scheduled\` ➔ \`Offer Extended\`.
+
+### 📄 Career Growth Services:
+• **Professional Resume Package ($99)**: ATS-optimized formatting
+• **1-on-1 Mock Interview Prep ($79)**: Technical & behavioral preparation
+• **Job Search Assistance ($79)**: Targeted matching and outreach`,
         timestamp: now,
         cta: { label: 'Go to Candidate Portal', path: '/candidate-portal' },
         quickReplies: [
           { label: '💼 Browse Open Jobs', action: 'jobs' },
+          { label: '👤 Open Candidate Portal', action: 'candidate_portal' },
           { label: '📄 Resume Services ($99)', action: 'career_services' },
-          { label: '👤 Candidate Portal Login', action: 'candidate_portal' },
         ],
       };
     }
-    // 4. CLIENT PORTAL & EMPLOYER WORKFLOW
+    // 4A. JOB POSTING PROCEDURE
     else if (
-      q.includes('client portal') ||
+      q.includes('job posting') ||
       q.includes('post job') ||
       q.includes('post a job') ||
+      q.includes('how to post a job') ||
+      q.includes('post vacancy') ||
+      q.includes('create job post')
+    ) {
+      reply = {
+        id: `bot-${Date.now()}`,
+        sender: 'bot',
+        text: `📝 **Job Posting Procedure at SA Consultant:**
+
+Employers can post job openings and start receiving candidate matches in 4 easy steps:
+
+### 1️⃣ Step 1: Access Client Portal
+• Navigate to **For Business ➔ Client Portal** (\`/client-portal\`) and open the **"Post a Job Requirement"** tab.
+
+### 2️⃣ Step 2: Fill Job Specifications
+• Enter **Job Title**, **Department**, and **Company Details** (Name, Contact Email, Phone).
+• Select **Job Type** (Full-Time, Contract / C2C, Contract-to-Hire, Part-Time).
+• Specify **Workplace Type** (Remote, Hybrid, On-Site) and **Experience Level**.
+• Set **Salary / Hourly Rate Budget**, **Urgency**, **Key Skills**, and **Job Description**.
+
+### 3️⃣ Step 3: Instant Submission & Cloud Sync
+• Click **"Submit Job Requirement"**.
+• The job is instantly synced with our database and delivered to the Admin recruitment desk.
+
+### 4️⃣ Step 4: Review Matched Candidates
+• View your job in **"My Posted Jobs"** and explore pre-screened talent in **"Find Candidates"**.
+• Click *"Request Candidate Profile & Intro"* to receive full resumes and schedule interviews within 2 hours!`,
+        timestamp: now,
+        cta: { label: 'Post a Job Now', path: '/client-portal' },
+        quickReplies: [
+          { label: '🏢 Open Client Portal', action: 'client_portal' },
+          { label: '👥 Search Talent Database', action: 'find_candidates' },
+          { label: '📅 Book Hiring Strategy Call', action: 'book_call' },
+        ],
+      };
+    }
+    // 4B. CLIENT PORTAL & EMPLOYER OVERVIEW
+    else if (
+      q.includes('client portal') ||
       q.includes('hire candidate') ||
       q.includes('hire developer') ||
       q.includes('employer portal') ||
@@ -521,22 +562,21 @@ The **Candidate Portal** is designed to accelerate job seekers into high-paying 
         sender: 'bot',
         text: `🏢 **Client Portal for Employers & Hiring Teams:**
 
-The **Client Portal** gives hiring managers and business clients immediate access to our verified technical talent pool.
+The **Client Portal** provides a complete hiring suite with 4 core tabs:
 
-### ⚡ Client Portal Core Capabilities:
-1. **Rapid Job Posting (< 2 Minutes)**:
-   • Submit role title, required skills, experience level, salary/rate budget, and hiring urgency.
-   • Instant real-time cloud synchronization with our Admin recruitment team.
+### 1️⃣ 📝 Post a Job Requirement
+• Post full-time, contract (C2C), or contract-to-hire positions in under 2 minutes.
+• Direct real-time cloud synchronization with our recruitment team.
 
-2. **Pre-Screened Candidate Database**:
-   • Discover pre-vetted engineers (React, Node.js, Python, Java, DevOps, UI/UX).
-   • View verified competencies, years of experience, and location availability.
+### 2️⃣ 📋 My Posted Jobs
+• View all your submitted job openings and live fulfillment status (\`New\`, \`Reviewing\`, \`Matched\`, \`In Interview\`, \`Fulfilled\`).
 
-3. **1-Click Profile & Interview Requests**:
-   • Click *"Request Candidate Profile & Intro"* to receive full resumes and schedule screening calls within 2 business hours.
+### 3️⃣ 👥 Find Pre-Vetted Candidates
+• Search our verified talent database across React, Node, Python, Java, AWS, DevOps, and UI/UX.
+• 1-click *"Request Candidate Profile & Intro"* to connect with candidates immediately.
 
-4. **Direct Recruitment Support**:
-   • Dedicated client desk support at \`support@saconsultantandstaffing.com\`.`,
+### 4️⃣ 🎧 Hiring Support
+• Direct client assistance: \`support@saconsultantandstaffing.com\`.`,
         timestamp: now,
         cta: { label: 'Go to Client Portal', path: '/client-portal' },
         quickReplies: [
