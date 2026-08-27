@@ -23,7 +23,7 @@ const navItems: NavItem[] = [
   {
     label: 'Jobs',
     children: [
-      { label: 'Candidate Search', href: '/business/dashboard?tab=candidatesearch', isRoute: true },
+      { label: 'Career Services', href: '/career-services', isRoute: true },
       { label: 'Candidate Portal', href: '/candidate-portal', isRoute: true },
       { label: 'Job Posting', href: '/jobs', isRoute: true },
     ],
@@ -45,7 +45,6 @@ const navItems: NavItem[] = [
     label: 'For Business',
     children: [
       { label: 'Pricing', href: '/pricing', isRoute: true },
-      { label: 'Career Services', href: '/career-services', isRoute: true },
     ],
   },
   { label: 'Contact', href: '/contact', isRoute: true },
