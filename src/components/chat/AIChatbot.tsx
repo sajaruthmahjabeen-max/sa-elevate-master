@@ -794,9 +794,7 @@ Speak directly with our Senior Talent Director to discuss:
         sender: 'bot',
         text: `✉️ **Contact SA Consultant & Staffing:**
 
-• **General & Technical Support**: \`support@saconsultantandstaffing.com\`
-• **Client & Hiring Desk**: \`clients@saconsultantandstaffing.com\`
-• **Operating Hours**: Monday – Friday, 8:00 AM – 6:00 PM EST
+• **Email Support**: \`support@saconsultantandstaffing.com\`
 • **Coverage**: Serving clients and candidates across the United States.`,
         timestamp: now,
         cta: { label: 'Go to Contact Page', path: '/contact' },
