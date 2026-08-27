@@ -42,30 +42,6 @@ const CAREER_PLANS: ResumePlan[] = [
     ],
   },
   {
-    id: "career-coaching",
-    name: "Career Coaching",
-    price: "$99",
-    features: [
-      "Career Goal Planning",
-      "Job Search Strategy",
-      "LinkedIn Guidance",
-      "Personalized Career Advice",
-      "60-Minute Coaching Session",
-    ],
-  },
-  {
-    id: "training-programs",
-    name: "Training Programs",
-    price: "$149",
-    features: [
-      "Job-Relevant Skill Training",
-      "Practical Learning",
-      "Expert Guidance",
-      "Career-Focused Skills",
-      "Certificate of Completion",
-    ],
-  },
-  {
     id: "job-search-assistance",
     name: "Job Search Assistance",
     price: "$79",
@@ -103,16 +79,16 @@ const CareerServicesPage: React.FC = () => {
             Career Services
           </h1>
           <p className="text-xl md:text-2xl font-bold text-primary mt-3">
-            Resume Building, Coaching, Training & Job Assistance
+            Resume Building, Interview Preparation & Job Search Assistance
           </p>
           <p className="text-muted-foreground text-base md:text-lg mt-4 max-w-2xl mx-auto leading-relaxed">
-            Get professional resume support, interview coaching, career strategy, skill training, and job search guidance to achieve your goals.
+            Get professional resume support, interview coaching, and targeted job search guidance to accelerate your career.
           </p>
         </section>
 
         {/* Pricing Cards Section */}
-        <section className="px-4 sm:px-6 max-w-[1440px] mx-auto w-full">
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 lg:gap-3 xl:gap-5 items-stretch">
+        <section className="px-4 sm:px-6 max-w-5xl mx-auto w-full">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-stretch">
             {CAREER_PLANS.map((plan) => (
               <Card
                 key={plan.id}
