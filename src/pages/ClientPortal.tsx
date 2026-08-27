@@ -397,11 +397,11 @@ export default function ClientPortal() {
           <div className="max-w-4xl mx-auto text-center space-y-4">
             <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-semibold uppercase tracking-wider animate-fade-in">
               <Building2 className="w-4 h-4" />
-              <span>For Business & Employers</span>
+              <span>Client Portal</span>
             </div>
 
             <h1 className="text-3xl sm:text-5xl font-extrabold text-foreground tracking-tight leading-tight">
-              Client & Employer <span className="text-primary gradient-text">Talent Portal</span>
+              Client <span className="text-primary gradient-text">Portal</span>
             </h1>
 
             <p className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">
