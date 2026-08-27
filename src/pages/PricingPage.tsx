@@ -78,92 +78,57 @@ const PricingPage: React.FC = () => {
       <Navbar />
 
       <main className="flex-1 pt-24 pb-16">
-        {!isAdmin ? (
-          /* Restricted Access / In Progress View for Non-Admins */
-          <section className="px-4 max-w-3xl mx-auto my-12 text-center">
-            <Card className="glass border-primary/20 p-10 md:p-14 rounded-3xl shadow-xl space-y-6">
-              <div className="w-16 h-16 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-500 flex items-center justify-center mx-auto shadow-sm">
-                <Clock className="w-8 h-8 animate-pulse" />
-              </div>
-              <Badge className="bg-amber-500/10 text-amber-600 border-amber-500/20 font-bold px-3 py-1 rounded-full text-xs uppercase tracking-wide">
-                Under Development
-              </Badge>
-              <h2 className="text-3xl md:text-4xl font-extrabold text-foreground tracking-tight">
-                Pricing Section In Progress
-              </h2>
-              <p className="text-muted-foreground text-sm md:text-base leading-relaxed max-w-lg mx-auto">
-                We are currently updating our subscription plans and pricing options. Full details will be available soon.
-              </p>
-              <div className="pt-4 flex flex-col sm:flex-row items-center justify-center gap-3">
-                <Button
-                  onClick={() => navigate("/")}
-                  className="gradient-bg text-white font-bold text-xs h-11 px-6 rounded-xl shadow-md"
-                >
-                  Return to Home
-                </Button>
-                <Button
-                  variant="outline"
-                  onClick={() => navigate("/contact")}
-                  className="font-bold text-xs h-11 px-6 rounded-xl"
-                >
-                  Contact Support
-                </Button>
-              </div>
-            </Card>
-          </section>
-        ) : (
-          <>
-            {/* Header Hero Section */}
-            <section className="px-4 text-center max-w-4xl mx-auto mb-10">
-              <Badge className="bg-primary/10 text-primary hover:bg-primary/15 border-none font-semibold px-3 py-1 mb-4 rounded-full text-xs uppercase tracking-wide">
-                Transparent Pricing
-              </Badge>
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-foreground tracking-tight leading-tight">
-                Hire local. <span className="text-primary">Start free.</span>
-              </h1>
-              <p className="text-muted-foreground text-base md:text-lg mt-4 max-w-xl mx-auto leading-relaxed">
-                Try SA Elevate free for 14 days — connect with real local candidates from day one. Upgrade only when you're ready.
-              </p>
+        {/* Header Hero Section */}
+        <section className="px-4 text-center max-w-4xl mx-auto mb-10">
+          <Badge className="bg-primary/10 text-primary hover:bg-primary/15 border-none font-semibold px-3 py-1 mb-4 rounded-full text-xs uppercase tracking-wide">
+            Transparent Pricing
+          </Badge>
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-foreground tracking-tight leading-tight">
+            Hire local. <span className="text-primary">Start free.</span>
+          </h1>
+          <p className="text-muted-foreground text-base md:text-lg mt-4 max-w-xl mx-auto leading-relaxed">
+            Try SA Elevate free — connect with real candidates from day one. Upgrade when you're ready.
+          </p>
 
-              {/* Billing Switch */}
-              <div className="flex items-center justify-center gap-3 mt-8">
-                <span
-                  onClick={() => setIsYearly(false)}
-                  className={`text-sm font-semibold cursor-pointer transition-colors ${
-                    !isYearly ? "text-foreground font-bold" : "text-muted-foreground"
-                  }`}
-                >
-                  Monthly
-                </span>
+          {/* Billing Switch */}
+          <div className="flex items-center justify-center gap-3 mt-8">
+            <span
+              onClick={() => setIsYearly(false)}
+              className={`text-sm font-semibold cursor-pointer transition-colors ${
+                !isYearly ? "text-foreground font-bold" : "text-muted-foreground"
+              }`}
+            >
+              Monthly
+            </span>
 
-                <Switch
-                  checked={isYearly}
-                  onCheckedChange={setIsYearly}
-                  aria-label="Toggle annual billing"
-                />
+            <Switch
+              checked={isYearly}
+              onCheckedChange={setIsYearly}
+              aria-label="Toggle annual billing"
+            />
 
-                <span
-                  onClick={() => setIsYearly(true)}
-                  className={`text-sm font-semibold cursor-pointer flex items-center gap-1.5 transition-colors ${
-                    isYearly ? "text-foreground font-bold" : "text-muted-foreground"
-                  }`}
-                >
-                  Yearly
-                  <span className="bg-emerald-500 text-white rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wide">
-                    Save 20%
-                  </span>
-                </span>
-              </div>
-            </section>
+            <span
+              onClick={() => setIsYearly(true)}
+              className={`text-sm font-semibold cursor-pointer flex items-center gap-1.5 transition-colors ${
+                isYearly ? "text-foreground font-bold" : "text-muted-foreground"
+              }`}
+            >
+              Yearly
+              <span className="bg-emerald-500 text-white rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wide">
+                Save 20%
+              </span>
+            </span>
+          </div>
+        </section>
 
-            {/* Pricing Cards Grid - Free & Starter */}
-            <section className="px-4 sm:px-6 max-w-4xl mx-auto w-full">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch">
-                {PRICING_PLANS.map((plan) => (
-                  <PricingCard key={plan.id} plan={plan} isYearly={isYearly} />
-                ))}
-              </div>
-            </section>
+        {/* Pricing Cards Grid - Free & Starter */}
+        <section className="px-4 sm:px-6 max-w-4xl mx-auto w-full">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch">
+            {PRICING_PLANS.map((plan) => (
+              <PricingCard key={plan.id} plan={plan} isYearly={isYearly} isAdmin={isAdmin} />
+            ))}
+          </div>
+        </section>
 
             {/* Live Candidate Search Preview Section */}
             <section className="px-4 sm:px-6 max-w-5xl mx-auto w-full mt-20">
@@ -338,9 +303,8 @@ const PricingPage: React.FC = () => {
                 </div>
               </div>
             </section>
-          </>
-        )}
       </main>
+      <Footer />
     </div>
   );
 };
