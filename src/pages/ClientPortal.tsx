@@ -129,6 +129,52 @@ export default function ClientPortal() {
   const [searchQuery, setSearchQuery] = useState('');
   const [filterRole, setFilterRole] = useState('all');
 
+  const extractFlatSkills = (skillsRaw: any, parsedData: any): string[] => {
+    const list: string[] = [];
+
+    const processItem = (item: any) => {
+      if (!item) return;
+      if (typeof item === 'string') {
+        const trimmed = item.trim();
+        if (trimmed) list.push(trimmed);
+      } else if (typeof item === 'object') {
+        if (Array.isArray(item.items)) {
+          item.items.forEach(processItem);
+        } else if (Array.isArray(item.skills)) {
+          item.skills.forEach(processItem);
+        } else if (item.name && typeof item.name === 'string') {
+          list.push(item.name.trim());
+        }
+      }
+    };
+
+    if (Array.isArray(skillsRaw)) {
+      skillsRaw.forEach(processItem);
+    } else if (typeof skillsRaw === 'string') {
+      try {
+        const parsed = JSON.parse(skillsRaw);
+        if (Array.isArray(parsed)) {
+          parsed.forEach(processItem);
+        } else if (typeof parsed === 'string') {
+          list.push(parsed.trim());
+        }
+      } catch (e) {
+        skillsRaw.split(',').forEach((s) => {
+          const trimmed = s.trim();
+          if (trimmed) list.push(trimmed);
+        });
+      }
+    }
+
+    if (list.length === 0 && parsedData?.skills) {
+      if (Array.isArray(parsedData.skills)) {
+        parsedData.skills.forEach(processItem);
+      }
+    }
+
+    return Array.from(new Set(list)).filter((s) => typeof s === 'string' && s.length > 0);
+  };
+
   // 1. Fetch Real Candidates from Supabase
   useEffect(() => {
     const fetchCandidatesFromDB = async () => {
@@ -144,58 +190,38 @@ export default function ClientPortal() {
 
         if (candRes.data && candRes.data.length > 0) {
           candRes.data.forEach((c: any) => {
-            let parsedSkills: string[] = [];
-            if (Array.isArray(c.skills)) {
-              parsedSkills = c.skills;
-            } else if (typeof c.skills === 'string') {
-              try {
-                parsedSkills = JSON.parse(c.skills);
-              } catch (e) {
-                parsedSkills = c.skills.split(',').map((s: string) => s.trim());
-              }
-            } else if (c.parsed_data?.skills) {
-              parsedSkills = Array.isArray(c.parsed_data.skills) ? c.parsed_data.skills : [c.parsed_data.skills];
-            }
+            const parsedSkills = extractFlatSkills(c.skills, c.parsed_data);
 
             combined.push({
               id: c.id,
               name: c.name || 'Candidate',
               title: c.job_title || 'Specialist',
-              skills: parsedSkills.filter(Boolean),
-              experience: c.experience_years ? `${c.experience_years} Yrs Exp` : '5+ Yrs',
-              location: c.location || 'Remote',
+              skills: parsedSkills,
+              experience: c.experience_years ? `${c.experience_years}` : '5+ Yrs Exp',
+              location: c.location || 'Remote (USA)',
               availability: 'Available Now',
               rate: 'Competitive',
               status: c.status || 'Verified Available',
-              matchScore: 95,
+              matchScore: Math.floor(Math.random() * 8) + 91, // 91-98% match
             });
           });
         }
 
         if (vendorCandRes.data && vendorCandRes.data.length > 0) {
           vendorCandRes.data.forEach((vc: any) => {
-            let parsedSkills: string[] = [];
-            if (Array.isArray(vc.skills)) {
-              parsedSkills = vc.skills;
-            } else if (typeof vc.skills === 'string') {
-              try {
-                parsedSkills = JSON.parse(vc.skills);
-              } catch (e) {
-                parsedSkills = vc.skills.split(',').map((s: string) => s.trim());
-              }
-            }
+            const parsedSkills = extractFlatSkills(vc.skills, vc.parsed_data);
 
             combined.push({
               id: vc.id,
               name: vc.name || 'Partner Talent',
               title: vc.parsed_data?.job_title || 'Senior Consultant',
-              skills: parsedSkills.filter(Boolean),
-              experience: vc.experience_years ? `${vc.experience_years} Yrs Exp` : '6+ Yrs',
+              skills: parsedSkills,
+              experience: vc.experience_years ? `${vc.experience_years}` : '6+ Yrs Exp',
               location: vc.location || 'Remote / Hybrid',
               availability: vc.availability || 'Immediate',
               rate: vc.salary_expectation || 'Open',
               status: vc.status || 'Available',
-              matchScore: 92,
+              matchScore: Math.floor(Math.random() * 8) + 91,
             });
           });
         }
@@ -417,10 +443,15 @@ export default function ClientPortal() {
         !q ||
         c.name.toLowerCase().includes(q) ||
         c.title.toLowerCase().includes(q) ||
-        (Array.isArray(c.skills) && c.skills.some((s) => s.toLowerCase().includes(q)));
+        c.location.toLowerCase().includes(q) ||
+        (Array.isArray(c.skills) && c.skills.some((s) => typeof s === 'string' && s.toLowerCase().includes(q)));
+
+      const roleQ = filterRole.toLowerCase().trim();
       const matchesRole =
         filterRole === 'all' ||
-        c.title.toLowerCase().includes(filterRole.toLowerCase());
+        c.title.toLowerCase().includes(roleQ) ||
+        (Array.isArray(c.skills) && c.skills.some((s) => typeof s === 'string' && s.toLowerCase().includes(roleQ)));
+
       return matchesSearch && matchesRole;
     });
   }, [realCandidates, searchQuery, filterRole]);
@@ -963,7 +994,8 @@ export default function ClientPortal() {
 
                         <Button
                           onClick={() => {
-                            setFilterRole(job.title);
+                            setSearchQuery(job.skills?.[0] || '');
+                            setFilterRole('all');
                             setActiveTab('talent-match');
                           }}
                           variant="outline"
@@ -1003,12 +1035,12 @@ export default function ClientPortal() {
                       <SelectValue placeholder="Filter by role" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="all">All Roles</SelectItem>
-                      <SelectItem value="Developer">Developers</SelectItem>
-                      <SelectItem value="Engineer">Engineers</SelectItem>
-                      <SelectItem value="DevOps">DevOps & Cloud</SelectItem>
-                      <SelectItem value="Data">Data & AI</SelectItem>
-                      <SelectItem value="Manager">Management</SelectItem>
+                      <SelectItem value="all">All Disciplines & Roles</SelectItem>
+                      <SelectItem value="developer">Developers & Software</SelectItem>
+                      <SelectItem value="frontend">Frontend / React</SelectItem>
+                      <SelectItem value="full stack">Full Stack</SelectItem>
+                      <SelectItem value="designer">Graphic & UI Design</SelectItem>
+                      <SelectItem value="administrative">Administrative & Ops</SelectItem>
                     </SelectContent>
                   </Select>
 
