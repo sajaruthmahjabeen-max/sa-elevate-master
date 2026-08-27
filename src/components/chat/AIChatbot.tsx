@@ -110,7 +110,8 @@ export const AIChatbot: React.FC = () => {
   // Universal ChatGPT-Style Intelligent Conversation Engine
   const generateBotReply = async (userText: string) => {
     const rawQ = userText.trim();
-    const q = rawQ.toLowerCase().replace(/[?!.,]/g, '');
+    // Normalize string: lowercase, remove non-alphanumeric except spaces, trim extra whitespace
+    const q = rawQ.toLowerCase().replace(/[^a-z0-9\s]/g, ' ').replace(/\s+/g, ' ').trim();
 
     // Natural typing delay simulation
     setIsTyping(true);
@@ -124,21 +125,32 @@ export const AIChatbot: React.FC = () => {
     // 🍕 CASUAL & CHATGPT-STYLE CONVERSATIONS
     // ==========================================
 
-    // Warm Welcome on Hi / Hello / Hey
-    if (
+    // Warm Welcome on Hi / Hello / Hey / Greetings
+    const isGreeting =
       q === 'hi' ||
+      q === 'hii' ||
+      q === 'hiii' ||
       q === 'hello' ||
+      q === 'helloo' ||
       q === 'hey' ||
+      q === 'heyy' ||
       q === 'hi there' ||
       q === 'hello there' ||
       q === 'hey there' ||
+      q === 'greetings' ||
+      q === 'welcome' ||
       q === 'good morning' ||
       q === 'good afternoon' ||
       q === 'good evening' ||
       q.startsWith('hi ') ||
+      q.startsWith('hii ') ||
       q.startsWith('hello ') ||
-      q.startsWith('hey ')
-    ) {
+      q.startsWith('hey ') ||
+      q.includes('good morning') ||
+      q.includes('good afternoon') ||
+      q.includes('good evening');
+
+    if (isGreeting) {
       reply = {
         id: `bot-${Date.now()}`,
         sender: 'bot',
