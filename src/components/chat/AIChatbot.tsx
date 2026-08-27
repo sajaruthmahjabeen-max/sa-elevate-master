@@ -329,7 +329,7 @@ export const AIChatbot: React.FC = () => {
     // ==========================================
 
     // 0A. ABOUT SA CONSULTANT / WHO WE ARE
-    if (
+    else if (
       q.includes('about sa consultant') ||
       q.includes('about us') ||
       q.includes('who is sa consultant') ||
