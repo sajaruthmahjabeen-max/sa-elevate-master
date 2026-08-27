@@ -19,6 +19,7 @@ import PartnershipPage from "./pages/PartnershipPage.tsx";
 import BookingPage from "./pages/BookingPage.tsx";
 import PricingPage from "./pages/PricingPage.tsx";
 import CareerServicesPage from "./pages/CareerServicesPage.tsx";
+import ClientPortal from "./pages/ClientPortal.tsx";
 import BusinessOnboarding from "./pages/BusinessOnboarding.tsx";
 import BusinessDashboard from "./pages/BusinessDashboard.tsx";
 import NotFound from "./pages/NotFound.tsx";
@@ -100,6 +101,7 @@ const App = () => (
               <Route path="/book" element={<BookingPage />} />
               <Route path="/pricing" element={<PricingPage />} />
               <Route path="/career-services" element={<CareerServicesPage />} />
+              <Route path="/client-portal" element={<ClientPortal />} />
               <Route
                 path="/business/onboarding"
                 element={

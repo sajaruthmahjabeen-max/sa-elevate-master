@@ -45,6 +45,7 @@ const navItems: NavItem[] = [
     label: 'For Business',
     children: [
       { label: 'Pricing', href: '/pricing', isRoute: true },
+      { label: 'Client Portal', href: '/client-portal', isRoute: true },
     ],
   },
   { label: 'Contact', href: '/contact', isRoute: true },
