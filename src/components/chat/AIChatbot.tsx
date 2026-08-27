@@ -124,8 +124,38 @@ export const AIChatbot: React.FC = () => {
     // 🍕 CASUAL & CHATGPT-STYLE CONVERSATIONS
     // ==========================================
 
-    // What do you eat?
+    // Warm Welcome on Hi / Hello / Hey
     if (
+      q === 'hi' ||
+      q === 'hello' ||
+      q === 'hey' ||
+      q === 'hi there' ||
+      q === 'hello there' ||
+      q === 'hey there' ||
+      q === 'good morning' ||
+      q === 'good afternoon' ||
+      q === 'good evening' ||
+      q.startsWith('hi ') ||
+      q.startsWith('hello ') ||
+      q.startsWith('hey ')
+    ) {
+      reply = {
+        id: `bot-${Date.now()}`,
+        sender: 'bot',
+        text: `👋 **Warm Welcome to SA Consultant & Staffing!** ✨\n\nI am thrilled to have you here! I am **SA Elevate AI**, your intelligent Assistant.\n\nWhether you are a **student or job seeker** looking for your dream job, an **employer/client** searching for top talent, or looking for **website development**, I'm here to assist you!\n\nHow can I help you today?`,
+        timestamp: now,
+        quickReplies: [
+          { label: '👤 Candidate Portal (Find a Job)', action: 'candidate_portal' },
+          { label: '🏢 Client Portal (Hire Talent)', action: 'client_portal' },
+          { label: '💼 View Job Postings', action: 'jobs' },
+          { label: '🌐 Web Development Procedure', action: 'web_dev' },
+          { label: '🌟 Our Services', action: 'services_info' },
+        ],
+      };
+    }
+
+    // What do you eat?
+    else if (
       q.includes('what you eat') ||
       q.includes('what do you eat') ||
       q.includes('do you eat') ||
@@ -470,119 +500,98 @@ We collaborate closely with leading IT staffing agencies, prime vendors, and spe
       q.includes('candidate portal') ||
       q.includes('candidate account') ||
       q.includes('job seeker') ||
+      q.includes('student') ||
       q.includes('how to apply') ||
       q.includes('apply for job') ||
       q.includes('upload resume') ||
+      q.includes('submit resume') ||
       q.includes('job portal')
     ) {
       reply = {
         id: `bot-${Date.now()}`,
         sender: 'bot',
-        text: `👤 **Candidate Portal & Job Application Procedure:**
+        text: `👤 **Candidate Portal at SA Consultant:**
 
-Our **Candidate Portal** helps job seekers find top tech positions in 4 simple steps:
+The **Candidate Portal** is where **students and job seekers submit their resumes**, and **we will find the right job for you!**
 
-### 1️⃣ Step 1: Upload Your Resume
-• Sign in to your Candidate Portal and upload your PDF or DOCX resume.
-
-### 2️⃣ Step 2: AI Auto-Parsing & Profile Creation
-• Our AI automatically extracts your name, skills, work history, education, and portfolio links directly into your profile.
-
-### 3️⃣ Step 3: 1-Click Job Applications
-• Browse verified active roles on the **Jobs Board** and apply with 1 click using your pre-verified credentials.
-
-### 4️⃣ Step 4: Real-Time Application Tracking
-• Track your application stage live: \`New\` ➔ \`Under Review\` ➔ \`Interview Scheduled\` ➔ \`Offer Extended\`.
+### 🚀 How It Works:
+1. **Submit Your Resume**: Sign up and upload your resume (PDF/Word).
+2. **AI Profile Matching**: Our system organizes your skills, education, and experience.
+3. **We Find the Right Job**: Our recruitment team matches your profile with top open tech roles.
+4. **Track Your Application**: Live status tracking from review to interview and offer!
 
 ### 📄 Career Growth Services:
-• **Professional Resume Package ($99)**: ATS-optimized formatting
-• **1-on-1 Mock Interview Prep ($79)**: Technical & behavioral preparation
-• **Job Search Assistance ($79)**: Targeted matching and outreach`,
+• **Professional Resume Package ($99)**: ATS-optimized layout
+• **1-on-1 Mock Interview Prep ($79)**: Practice with technical mentors
+• **Job Search Assistance ($79)**: Targeted career guidance and matching`,
         timestamp: now,
-        cta: { label: 'Go to Candidate Portal', path: '/candidate-portal' },
+        cta: { label: 'Submit Resume in Candidate Portal', path: '/candidate-portal' },
         quickReplies: [
-          { label: '💼 Browse Open Jobs', action: 'jobs' },
           { label: '👤 Open Candidate Portal', action: 'candidate_portal' },
+          { label: '💼 View Job Postings', action: 'jobs' },
           { label: '📄 Resume Services ($99)', action: 'career_services' },
         ],
       };
     }
-    // 4A. JOB POSTING PROCEDURE
+    // 4A. JOB POSTING (SA CONSULTANT OPENINGS)
     else if (
       q.includes('job posting') ||
-      q.includes('post job') ||
-      q.includes('post a job') ||
-      q.includes('how to post a job') ||
-      q.includes('post vacancy') ||
-      q.includes('create job post')
+      q.includes('job postings') ||
+      q.includes('open jobs') ||
+      q.includes('vacancies') ||
+      q.includes('active jobs') ||
+      q.includes('postings')
     ) {
       reply = {
         id: `bot-${Date.now()}`,
         sender: 'bot',
-        text: `📝 **Job Posting Procedure at SA Consultant:**
+        text: `💼 **Job Postings at SA Consultant:**
 
-Employers can post job openings and start receiving candidate matches in 4 easy steps:
+Whenever **SA Consultant has any job openings**, we **post them on our platform** so students and professionals can view and apply!
 
-### 1️⃣ Step 1: Access Client Portal
-• Navigate to **For Business ➔ Client Portal** (\`/client-portal\`) and open the **"Post a Job Requirement"** tab.
-
-### 2️⃣ Step 2: Fill Job Specifications
-• Enter **Job Title**, **Department**, and **Company Details** (Name, Contact Email, Phone).
-• Select **Job Type** (Full-Time, Contract / C2C, Contract-to-Hire, Part-Time).
-• Specify **Workplace Type** (Remote, Hybrid, On-Site) and **Experience Level**.
-• Set **Salary / Hourly Rate Budget**, **Urgency**, **Key Skills**, and **Job Description**.
-
-### 3️⃣ Step 3: Instant Submission & Cloud Sync
-• Click **"Submit Job Requirement"**.
-• The job is instantly synced with our database and delivered to the Admin recruitment desk.
-
-### 4️⃣ Step 4: Review Matched Candidates
-• View your job in **"My Posted Jobs"** and explore pre-screened talent in **"Find Candidates"**.
-• Click *"Request Candidate Profile & Intro"* to receive full resumes and schedule interviews within 2 hours!`,
+### 🔍 How Job Postings Work:
+• **Active Openings**: Explore verified vacancies across Software Development, Full Stack, Cloud, DevOps, UI/UX, and more.
+• **1-Click Apply**: Easily submit your profile for any open role directly through the platform.
+• **Direct Review**: Our hiring team evaluates incoming applications and contacts qualified candidates for interviews.`,
         timestamp: now,
-        cta: { label: 'Post a Job Now', path: '/client-portal' },
+        cta: { label: 'Explore Active Job Postings', path: '/jobs' },
         quickReplies: [
-          { label: '🏢 Open Client Portal', action: 'client_portal' },
-          { label: '👥 Search Talent Database', action: 'find_candidates' },
-          { label: '📅 Book Hiring Strategy Call', action: 'book_call' },
+          { label: '💼 View Active Jobs', action: 'jobs' },
+          { label: '👤 Candidate Portal', action: 'candidate_portal' },
+          { label: '🏢 Client Portal', action: 'client_portal' },
         ],
       };
     }
-    // 4B. CLIENT PORTAL & EMPLOYER OVERVIEW
+    // 4B. CLIENT PORTAL (FOR CLIENTS POSTING JOBS)
     else if (
       q.includes('client portal') ||
+      q.includes('post job') ||
+      q.includes('post a job') ||
       q.includes('hire candidate') ||
       q.includes('hire developer') ||
       q.includes('employer portal') ||
       q.includes('employer') ||
-      q.includes('hiring manager')
+      q.includes('hiring manager') ||
+      q.includes('client')
     ) {
       reply = {
         id: `bot-${Date.now()}`,
         sender: 'bot',
-        text: `🏢 **Client Portal for Employers & Hiring Teams:**
+        text: `🏢 **Client Portal at SA Consultant:**
 
-The **Client Portal** provides a complete hiring suite with 4 core tabs:
+If any **client or employer has a job opening**, they can **post it in the Client Portal**, and **we will search and find the best pre-vetted candidates for them!**
 
-### 1️⃣ 📝 Post a Job Requirement
-• Post full-time, contract (C2C), or contract-to-hire positions in under 2 minutes.
-• Direct real-time cloud synchronization with our recruitment team.
-
-### 2️⃣ 📋 My Posted Jobs
-• View all your submitted job openings and live fulfillment status (\`New\`, \`Reviewing\`, \`Matched\`, \`In Interview\`, \`Fulfilled\`).
-
-### 3️⃣ 👥 Find Pre-Vetted Candidates
-• Search our verified talent database across React, Node, Python, Java, AWS, DevOps, and UI/UX.
-• 1-click *"Request Candidate Profile & Intro"* to connect with candidates immediately.
-
-### 4️⃣ 🎧 Hiring Support
-• Direct client assistance: \`support@saconsultantandstaffing.com\`.`,
+### ⚡ How the Client Portal Works for Clients:
+1. **Post Your Job**: Enter your job requirements, skills, experience level, budget, and urgency.
+2. **Instant Sync**: Your job is immediately submitted to our specialized recruiting team.
+3. **We Search Candidates For You**: We review our vetted candidate database and identify top-tier talent matching your requirements.
+4. **Direct Intro & Interviews**: Request candidate intros and start interviewing top candidates quickly!`,
         timestamp: now,
         cta: { label: 'Go to Client Portal', path: '/client-portal' },
         quickReplies: [
-          { label: '🏢 Post a Job in Portal', action: 'client_portal' },
+          { label: '🏢 Post a Job in Client Portal', action: 'client_portal' },
           { label: '👥 Search Talent Database', action: 'find_candidates' },
-          { label: '📅 Book Hiring Strategy Call', action: 'book_call' },
+          { label: '📅 Book a Hiring Call', action: 'book_call' },
         ],
       };
     }
