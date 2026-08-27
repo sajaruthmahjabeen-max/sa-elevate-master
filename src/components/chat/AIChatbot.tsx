@@ -303,34 +303,25 @@ export const AIChatbot: React.FC = () => {
       reply = {
         id: `bot-${Date.now()}`,
         sender: 'bot',
-        text: `🌐 **Comprehensive Website Development Procedure at SA Consultant:**
+        text: `🌐 **Website Development Procedure at SA Consultant:**
 
-We follow a rigorous, enterprise-grade 5-phase Software Development Lifecycle (SDLC):
+We follow a structured 4-step procedure to deliver high-quality websites and applications:
 
-### 1️⃣ Phase 1: Requirements Discovery & Technical Architecture
-• **Stakeholder Workshops**: Define core business goals, target audience, and feature roadmaps.
-• **Tech Stack Selection**: High-performance stack choices (React / Next.js / TypeScript for frontend; Node.js / Python / Spring Boot for backend; PostgreSQL / Supabase for database).
-• **System Architecture**: API blueprinting (REST/GraphQL), cloud topology, and security standards.
+### 1️⃣ Step 1: Client Requirements
+• Gathering your business goals, target audience, branding, and feature specifications.
+• Defining project scope, timeline, and technology stack.
 
-### 2️⃣ Phase 2: UI/UX Design & Interactive Prototyping
-• **Wireframing**: User journey maps, information hierarchy, and layout structures.
-• **High-Fidelity UI**: Modern aesthetics in Figma featuring accessible color systems, dark/light modes, and responsive breakpoints.
-• **Interactive Click-Through Prototype**: Validated with clients prior to writing code.
+### 2️⃣ Step 2: Development
+• Crafting responsive UI/UX designs and writing clean, modern, and scalable code.
+• Full-stack frontend and backend engineering with database and API integrations.
 
-### 3️⃣ Phase 3: Agile Full-Stack Development
-• **Modular Component Architecture**: Reusable UI components styled with Vanilla CSS / Tailwind.
-• **Backend & Database Integration**: Secure authentication, role-based access control (RBAC), and low-latency database queries.
-• **Sprint Cycles**: Bi-weekly sprint demos to review functional increments.
+### 3️⃣ Step 3: Testing
+• Comprehensive quality assurance (QA), cross-browser, and mobile device testing.
+• Security checks, performance optimization, and bug fixing.
 
-### 4️⃣ Phase 4: Quality Assurance, Security & Performance Testing
-• **Automated & Manual QA**: Unit testing, cross-browser compatibility, and mobile responsiveness.
-• **Security Hardening**: Data encryption, SQL injection prevention, and SSL/TLS configuration.
-• **Performance Audits**: Lighthouse 90+ scores, optimized asset bundles, and Core Web Vitals compliance.
-
-### 5️⃣ Phase 5: Cloud Deployment & Continuous Maintenance
-• **Automated CI/CD**: Seamless deployment pipelines with AWS, Vercel, or Docker containerization.
-• **SEO & Analytics**: Metadata optimization, search engine indexing, and real-time monitoring.
-• **Post-Launch Support**: SLA monitoring, periodic upgrades, and feature expansions.`,
+### 4️⃣ Step 4: Deploy
+• Cloud server configuration, SSL certificate setup, and live launch.
+• Final client walkthrough, go-live verification, and ongoing maintenance support.`,
         timestamp: now,
         cta: { label: 'Explore Engineering Services', path: '/services' },
         quickReplies: [
