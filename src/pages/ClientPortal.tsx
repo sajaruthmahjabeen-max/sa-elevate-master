@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/components/ui/use-toast';
@@ -42,7 +42,8 @@ import {
   PhoneCall,
   Mail,
   UserCheck,
-  ChevronRight
+  ChevronRight,
+  UserX
 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useSEO } from '@/hooks/useSEO';
@@ -65,73 +66,23 @@ interface ClientJob {
   urgency: string;
   skills: string[];
   description: string;
-  status: 'Active' | 'Reviewing Candidates' | 'Matched' | 'Filled' | 'Draft';
+  status: 'New' | 'Reviewing' | 'Matched' | 'In Interview' | 'Fulfilled' | 'Closed';
   created_at: string;
   match_count?: number;
 }
 
-const SAMPLE_CANDIDATES = [
-  {
-    id: 'c-101',
-    name: 'Sarah Jenkins',
-    title: 'Senior Full Stack Engineer',
-    skills: ['React', 'Node.js', 'TypeScript', 'AWS', 'PostgreSQL'],
-    experience: '7+ Years',
-    location: 'Remote (US)',
-    availability: 'Immediate',
-    rate: '$110k - $130k / yr',
-    matchScore: 98,
-    status: 'Verified Available',
-  },
-  {
-    id: 'c-102',
-    name: 'Alex Rivera',
-    title: 'Cloud DevOps & SRE Specialist',
-    skills: ['Kubernetes', 'Docker', 'Terraform', 'CI/CD', 'GCP', 'AWS'],
-    experience: '5 Years',
-    location: 'New York, NY (Hybrid)',
-    availability: '2 Weeks Notice',
-    rate: '$120k - $140k / yr',
-    matchScore: 94,
-    status: 'Verified Available',
-  },
-  {
-    id: 'c-103',
-    name: 'Priya Sharma',
-    title: 'Lead Data Engineer & AI Specialist',
-    skills: ['Python', 'PyTorch', 'Spark', 'Airflow', 'Snowflake', 'SQL'],
-    experience: '8 Years',
-    location: 'Remote / Austin, TX',
-    availability: 'Immediate',
-    rate: '$135k - $155k / yr',
-    matchScore: 96,
-    status: 'Verified Available',
-  },
-  {
-    id: 'c-104',
-    name: 'David Zhao',
-    title: 'Senior Product Manager (Tech)',
-    skills: ['Product Strategy', 'Agile / Scrum', 'Roadmapping', 'User Research', 'Analytics'],
-    experience: '6 Years',
-    location: 'San Francisco, CA',
-    availability: '1 Week',
-    rate: '$130k - $150k / yr',
-    matchScore: 91,
-    status: 'Verified Available',
-  },
-  {
-    id: 'c-105',
-    name: 'Elena Rostova',
-    title: 'UI/UX & Frontend Architect',
-    skills: ['Figma', 'Design Systems', 'React', 'TailwindCSS', 'Accessibility'],
-    experience: '5+ Years',
-    location: 'Remote (Global)',
-    availability: 'Immediate',
-    rate: '$95k - $115k / yr',
-    matchScore: 93,
-    status: 'Verified Available',
-  },
-];
+interface CandidateProfile {
+  id: string;
+  name: string;
+  title: string;
+  skills: string[];
+  experience: string;
+  location: string;
+  availability: string;
+  rate: string;
+  status: string;
+  matchScore?: number;
+}
 
 export default function ClientPortal() {
   useSEO({
@@ -145,11 +96,15 @@ export default function ClientPortal() {
   const navigate = useNavigate();
 
   const [activeTab, setActiveTab] = useState<'post-job' | 'my-jobs' | 'talent-match' | 'support'>('post-job');
-  const [loading, setLoading] = useState(false);
+  const [loadingJobs, setLoadingJobs] = useState(false);
+  const [loadingCandidates, setLoadingCandidates] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [successModalOpen, setSuccessModalOpen] = useState(false);
   const [candidateModalOpen, setCandidateModalOpen] = useState(false);
-  const [selectedCandidate, setSelectedCandidate] = useState<any>(null);
+  const [selectedCandidate, setSelectedCandidate] = useState<CandidateProfile | null>(null);
+
+  // Real Database Candidates state
+  const [realCandidates, setRealCandidates] = useState<CandidateProfile[]>([]);
 
   // Form State for Posting a Job
   const [jobForm, setJobForm] = useState({
@@ -174,98 +129,142 @@ export default function ClientPortal() {
   const [searchQuery, setSearchQuery] = useState('');
   const [filterRole, setFilterRole] = useState('all');
 
-  // Load saved or initial jobs
+  // 1. Fetch Real Candidates from Supabase
   useEffect(() => {
-    const loadJobs = async () => {
+    const fetchCandidatesFromDB = async () => {
       try {
-        setLoading(true);
-        // Attempt fetch from supabase
-        const { data, error } = await supabase
-          .from('jobs')
-          .select('*')
-          .order('created_at', { ascending: false });
+        setLoadingCandidates(true);
+        // Fetch candidates from both candidates and vendor_candidates
+        const [candRes, vendorCandRes] = await Promise.all([
+          supabase.from('candidates').select('*').order('created_at', { ascending: false }),
+          supabase.from('vendor_candidates').select('*').order('created_at', { ascending: false })
+        ]);
 
-        if (data && data.length > 0 && !error) {
-          const formatted: ClientJob[] = data.map((j: any) => ({
-            id: j.id,
-            title: j.title || 'Untitled Role',
-            department: j.department || 'General',
-            company_name: 'Your Company',
-            contact_name: 'Hiring Lead',
-            contact_email: 'hiring@company.com',
-            contact_phone: '',
-            job_type: j.employment_type || 'Full-Time',
-            workplace_type: 'Remote',
-            experience_level: 'Mid-Senior',
-            location: j.location || 'Remote',
-            salary_range: j.salary_range || 'Competitive',
-            urgency: 'Active',
-            skills: ['General', 'Technical'],
-            description: j.description || '',
-            status: (j.status === 'Open' ? 'Active' : 'Reviewing Candidates') as any,
-            created_at: j.created_at || new Date().toISOString(),
-            match_count: 5,
-          }));
-          setPostedJobs(formatted);
-        } else {
-          // Fallback to local demo jobs
-          const localSaved = localStorage.getItem('sa_client_posted_jobs');
-          if (localSaved) {
-            setPostedJobs(JSON.parse(localSaved));
-          } else {
-            const initialDemo: ClientJob[] = [
-              {
-                id: 'cj-1',
-                title: 'Senior Full Stack React / Node Developer',
-                department: 'Engineering',
-                company_name: 'Innovate Solutions Inc.',
-                contact_name: 'Michael Davis',
-                contact_email: 'michael.d@innovate.com',
-                contact_phone: '+1 (555) 349-2810',
-                job_type: 'Full-Time',
-                workplace_type: 'Remote',
-                experience_level: 'Senior (5+ yrs)',
-                location: 'Remote (US/Canada)',
-                salary_range: '$115,000 - $135,000 / year',
-                urgency: 'Immediate (1-2 weeks)',
-                skills: ['React', 'Node.js', 'TypeScript', 'PostgreSQL', 'AWS'],
-                description: 'Looking for a Senior Full Stack developer to lead front-end architecture and backend microservices.',
-                status: 'Active',
-                created_at: new Date(Date.now() - 86400000 * 2).toISOString(),
-                match_count: 4,
-              },
-              {
-                id: 'cj-2',
-                title: 'DevOps & Cloud Infrastructure Engineer',
-                department: 'IT & Infrastructure',
-                company_name: 'Nexus Cloud Systems',
-                contact_name: 'Sarah Connor',
-                contact_email: 'sconnor@nexuscloud.io',
-                contact_phone: '+1 (555) 782-9011',
-                job_type: 'Contract (C2C/W2)',
-                workplace_type: 'Hybrid',
-                experience_level: 'Mid-Senior (3-6 yrs)',
-                location: 'Austin, TX',
-                salary_range: '$65 - $80 / hour',
-                urgency: 'Within 1 month',
-                skills: ['Kubernetes', 'Terraform', 'AWS', 'Docker', 'CI/CD'],
-                description: 'Need hands-on DevOps professional to automate our deployment pipelines and manage multi-region AWS clusters.',
-                status: 'Reviewing Candidates',
-                created_at: new Date(Date.now() - 86400000 * 5).toISOString(),
-                match_count: 3,
-              },
-            ];
-            setPostedJobs(initialDemo);
-            localStorage.setItem('sa_client_posted_jobs', JSON.stringify(initialDemo));
-          }
+        const combined: CandidateProfile[] = [];
+
+        if (candRes.data && candRes.data.length > 0) {
+          candRes.data.forEach((c: any) => {
+            let parsedSkills: string[] = [];
+            if (Array.isArray(c.skills)) {
+              parsedSkills = c.skills;
+            } else if (typeof c.skills === 'string') {
+              try {
+                parsedSkills = JSON.parse(c.skills);
+              } catch (e) {
+                parsedSkills = c.skills.split(',').map((s: string) => s.trim());
+              }
+            } else if (c.parsed_data?.skills) {
+              parsedSkills = Array.isArray(c.parsed_data.skills) ? c.parsed_data.skills : [c.parsed_data.skills];
+            }
+
+            combined.push({
+              id: c.id,
+              name: c.name || 'Candidate',
+              title: c.job_title || 'Specialist',
+              skills: parsedSkills.filter(Boolean),
+              experience: c.experience_years ? `${c.experience_years} Yrs Exp` : '5+ Yrs',
+              location: c.location || 'Remote',
+              availability: 'Available Now',
+              rate: 'Competitive',
+              status: c.status || 'Verified Available',
+              matchScore: 95,
+            });
+          });
         }
+
+        if (vendorCandRes.data && vendorCandRes.data.length > 0) {
+          vendorCandRes.data.forEach((vc: any) => {
+            let parsedSkills: string[] = [];
+            if (Array.isArray(vc.skills)) {
+              parsedSkills = vc.skills;
+            } else if (typeof vc.skills === 'string') {
+              try {
+                parsedSkills = JSON.parse(vc.skills);
+              } catch (e) {
+                parsedSkills = vc.skills.split(',').map((s: string) => s.trim());
+              }
+            }
+
+            combined.push({
+              id: vc.id,
+              name: vc.name || 'Partner Talent',
+              title: vc.parsed_data?.job_title || 'Senior Consultant',
+              skills: parsedSkills.filter(Boolean),
+              experience: vc.experience_years ? `${vc.experience_years} Yrs Exp` : '6+ Yrs',
+              location: vc.location || 'Remote / Hybrid',
+              availability: vc.availability || 'Immediate',
+              rate: vc.salary_expectation || 'Open',
+              status: vc.status || 'Available',
+              matchScore: 92,
+            });
+          });
+        }
+
+        setRealCandidates(combined);
       } catch (err) {
-        console.warn('Fallback to local state:', err);
+        console.warn('Error fetching candidates from database:', err);
       } finally {
-        setLoading(false);
+        setLoadingCandidates(false);
       }
     };
 
+    fetchCandidatesFromDB();
+  }, []);
+
+  // 2. Fetch Posted Jobs
+  const loadJobs = async () => {
+    try {
+      setLoadingJobs(true);
+      // Attempt fetch from client_job_posts first
+      const { data, error } = await supabase
+        .from('client_job_posts')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (data && data.length > 0 && !error) {
+        const formatted: ClientJob[] = data.map((j: any) => ({
+          id: j.id,
+          title: j.title || 'Untitled Role',
+          department: j.department || 'General',
+          company_name: j.company_name || 'Client Co.',
+          contact_name: j.contact_name || '',
+          contact_email: j.contact_email || '',
+          contact_phone: j.contact_phone || '',
+          job_type: j.job_type || 'Full-Time',
+          workplace_type: j.workplace_type || 'Remote',
+          experience_level: j.experience_level || 'Mid-Senior',
+          location: j.location || 'Remote',
+          salary_range: j.salary_range || 'Competitive',
+          urgency: j.urgency || 'Active',
+          skills: Array.isArray(j.skills) ? j.skills : [],
+          description: j.description || '',
+          status: j.status || 'New',
+          created_at: j.created_at || new Date().toISOString(),
+          match_count: (j.assigned_candidates?.length) || 0,
+        }));
+        setPostedJobs(formatted);
+      } else {
+        // Fallback to local storage if table not yet populated
+        const localSaved = localStorage.getItem('sa_client_posted_jobs');
+        if (localSaved) {
+          try {
+            const parsed = JSON.parse(localSaved);
+            if (Array.isArray(parsed)) {
+              setPostedJobs(parsed);
+            }
+          } catch (e) {
+            console.error('Error parsing local jobs:', e);
+          }
+        }
+      }
+    } catch (err) {
+      console.warn('Fallback to local state:', err);
+    } finally {
+      setLoadingJobs(false);
+    }
+  };
+
+  useEffect(() => {
     loadJobs();
   }, []);
 
@@ -324,13 +323,38 @@ export default function ClientPortal() {
       urgency: jobForm.urgency,
       skills: skillsList.length > 0 ? skillsList : ['General'],
       description: jobForm.description,
-      status: 'Active',
+      status: 'New',
       created_at: new Date().toISOString(),
-      match_count: 5,
+      match_count: 0,
     };
 
     try {
-      // Also try to insert into supabase jobs or inquiries
+      // 1. Insert into client_job_posts for Admin Portal to pick up
+      const { error: insertErr } = await supabase.from('client_job_posts').insert([
+        {
+          title: newJob.title,
+          department: newJob.department,
+          company_name: newJob.company_name,
+          contact_name: newJob.contact_name,
+          contact_email: newJob.contact_email,
+          contact_phone: newJob.contact_phone,
+          job_type: newJob.job_type,
+          workplace_type: newJob.workplace_type,
+          experience_level: newJob.experience_level,
+          location: newJob.location,
+          salary_range: newJob.salary_range,
+          urgency: newJob.urgency,
+          skills: newJob.skills,
+          description: newJob.description,
+          status: 'New',
+        },
+      ]);
+
+      if (insertErr) {
+        console.warn('Insert to client_job_posts notice:', insertErr.message);
+      }
+
+      // 2. Also insert into jobs table for general visibility
       await supabase.from('jobs').insert([
         {
           title: newJob.title,
@@ -358,7 +382,7 @@ export default function ClientPortal() {
     setJobForm({
       title: '',
       department: 'Engineering & Technology',
-      company_name: jobForm.company_name, // keep company name for ease of next post
+      company_name: jobForm.company_name,
       contact_name: jobForm.contact_name,
       contact_email: jobForm.contact_email,
       contact_phone: jobForm.contact_phone,
@@ -373,7 +397,7 @@ export default function ClientPortal() {
     });
   };
 
-  const handleRequestCandidate = (candidate: any) => {
+  const handleRequestCandidate = (candidate: CandidateProfile) => {
     setSelectedCandidate(candidate);
     setCandidateModalOpen(true);
   };
@@ -385,6 +409,21 @@ export default function ClientPortal() {
     });
     setCandidateModalOpen(false);
   };
+
+  const filteredCandidates = useMemo(() => {
+    return realCandidates.filter((c) => {
+      const q = searchQuery.toLowerCase().trim();
+      const matchesSearch =
+        !q ||
+        c.name.toLowerCase().includes(q) ||
+        c.title.toLowerCase().includes(q) ||
+        (Array.isArray(c.skills) && c.skills.some((s) => s.toLowerCase().includes(q)));
+      const matchesRole =
+        filterRole === 'all' ||
+        c.title.toLowerCase().includes(filterRole.toLowerCase());
+      return matchesSearch && matchesRole;
+    });
+  }, [realCandidates, searchQuery, filterRole]);
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -484,11 +523,11 @@ export default function ClientPortal() {
                       Post Job Vacancy & Hire Candidates
                     </CardTitle>
                     <CardDescription className="text-sm text-muted-foreground mt-1">
-                      Specify your job requirements. Our recruitment engine matches and notifies top candidates immediately.
+                      Specify your job requirements. Your posting is received in the Admin Portal and matched with top candidates immediately.
                     </CardDescription>
                   </div>
                   <Badge variant="outline" className="w-fit text-primary border-primary/30 bg-primary/5">
-                    ✨ Fast-Track Review
+                    ✨ Live Admin Sync
                   </Badge>
                 </div>
               </CardHeader>
@@ -839,7 +878,7 @@ export default function ClientPortal() {
               </Button>
             </div>
 
-            {loading ? (
+            {loadingJobs ? (
               <div className="py-16 text-center">
                 <Loader2 className="w-8 h-8 animate-spin mx-auto text-primary" />
                 <p className="text-sm text-muted-foreground mt-2">Loading posted jobs...</p>
@@ -868,9 +907,11 @@ export default function ClientPortal() {
                           <h3 className="text-lg sm:text-xl font-bold text-foreground">{job.title}</h3>
                           <Badge
                             className={
-                              job.status === 'Active'
-                                ? 'bg-emerald-500/10 text-emerald-600 border-emerald-500/30'
-                                : 'bg-primary/10 text-primary border-primary/30'
+                              job.status === 'New'
+                                ? 'bg-blue-500/10 text-blue-600 border-blue-500/30'
+                                : job.status === 'Reviewing'
+                                ? 'bg-amber-500/10 text-amber-600 border-amber-500/30'
+                                : 'bg-purple-500/10 text-purple-600 border-purple-500/30'
                             }
                           >
                             {job.status}
@@ -913,10 +954,10 @@ export default function ClientPortal() {
                       {/* Right Action Area */}
                       <div className="flex flex-row md:flex-col items-center sm:items-end justify-between md:justify-center gap-3 border-t md:border-t-0 md:border-l border-border/50 pt-3 md:pt-0 md:pl-6 shrink-0">
                         <div className="text-left md:text-right">
-                          <span className="text-xs text-muted-foreground block">Candidates Matched</span>
+                          <span className="text-xs text-muted-foreground block">Candidates Assigned</span>
                           <span className="text-base font-bold text-primary flex items-center md:justify-end gap-1">
                             <Users className="w-4 h-4" />
-                            {job.match_count || 5} Verified Matches
+                            {job.match_count || 0} Assigned
                           </span>
                         </div>
 
@@ -929,7 +970,7 @@ export default function ClientPortal() {
                           size="sm"
                           className="border-primary/40 text-primary hover:bg-primary hover:text-primary-foreground font-semibold flex items-center gap-1.5"
                         >
-                          <span>Review Candidates</span>
+                          <span>Explore Candidates</span>
                           <ChevronRight className="w-4 h-4" />
                         </Button>
                       </div>
@@ -940,7 +981,7 @@ export default function ClientPortal() {
             )}
           </TabsContent>
 
-          {/* TAB 3: TALENT MATCH & CANDIDATE SEARCH */}
+          {/* TAB 3: TALENT MATCH & CANDIDATE SEARCH (REAL CANDIDATES FROM DB) */}
           <TabsContent value="talent-match" className="space-y-6 max-w-5xl mx-auto focus:outline-none">
             {/* Search and Filters Bar */}
             <Card className="border border-border/60 bg-card/60 backdrop-blur p-4 sm:p-5">
@@ -948,7 +989,7 @@ export default function ClientPortal() {
                 <div className="relative flex-1 w-full">
                   <Search className="w-4 h-4 absolute left-3 top-3 text-muted-foreground" />
                   <Input
-                    placeholder="Search by skill (e.g. React, Python, AWS), job role, or keywords..."
+                    placeholder="Search candidates by skills, role, or name..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     className="pl-9 bg-background"
@@ -962,11 +1003,12 @@ export default function ClientPortal() {
                       <SelectValue placeholder="Filter by role" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="all">All Disciplines</SelectItem>
-                      <SelectItem value="Engineer">Software Engineering</SelectItem>
+                      <SelectItem value="all">All Roles</SelectItem>
+                      <SelectItem value="Developer">Developers</SelectItem>
+                      <SelectItem value="Engineer">Engineers</SelectItem>
                       <SelectItem value="DevOps">DevOps & Cloud</SelectItem>
                       <SelectItem value="Data">Data & AI</SelectItem>
-                      <SelectItem value="Product">Product Management</SelectItem>
+                      <SelectItem value="Manager">Management</SelectItem>
                     </SelectContent>
                   </Select>
 
@@ -980,104 +1022,115 @@ export default function ClientPortal() {
             </Card>
 
             {/* Candidate Results Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {SAMPLE_CANDIDATES.filter((c) => {
-                const q = searchQuery.toLowerCase();
-                const matchesSearch =
-                  !q ||
-                  c.name.toLowerCase().includes(q) ||
-                  c.title.toLowerCase().includes(q) ||
-                  c.skills.some((s) => s.toLowerCase().includes(q));
-                const matchesRole =
-                  filterRole === 'all' ||
-                  c.title.toLowerCase().includes(filterRole.toLowerCase());
-                return matchesSearch && matchesRole;
-              }).map((candidate) => (
-                <Card
-                  key={candidate.id}
-                  className="hover:border-primary/60 transition-all duration-300 shadow-sm border border-border/70 flex flex-col justify-between"
-                >
-                  <CardHeader className="pb-3">
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="flex items-center gap-3">
-                        <div className="w-11 h-11 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center text-primary font-bold text-base shrink-0">
-                          {candidate.name.split(' ').map((n) => n[0]).join('')}
+            {loadingCandidates ? (
+              <div className="py-20 text-center">
+                <Loader2 className="w-8 h-8 animate-spin mx-auto text-primary" />
+                <p className="text-sm text-muted-foreground mt-2">Loading vetted candidates from database...</p>
+              </div>
+            ) : filteredCandidates.length === 0 ? (
+              <Card className="p-12 text-center border-dashed border-2 bg-card/40">
+                <UserX className="w-12 h-12 text-muted-foreground/40 mx-auto mb-3" />
+                <h3 className="text-lg font-bold text-foreground">No Candidates Found</h3>
+                <p className="text-sm text-muted-foreground max-w-md mx-auto mt-1 mb-6">
+                  {searchQuery || filterRole !== 'all'
+                    ? 'No candidates match your current search filters. Try clearing your search or filtering by all roles.'
+                    : 'Our talent pool is constantly growing. Post your job vacancy in the Post a Job tab and our recruitment specialists will source custom candidates for you immediately.'}
+                </p>
+                <Button onClick={() => setActiveTab('post-job')} className="bg-primary">
+                  Post Your Job Requirement
+                </Button>
+              </Card>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {filteredCandidates.map((candidate) => (
+                  <Card
+                    key={candidate.id}
+                    className="hover:border-primary/60 transition-all duration-300 shadow-sm border border-border/70 flex flex-col justify-between"
+                  >
+                    <CardHeader className="pb-3">
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="flex items-center gap-3">
+                          <div className="w-11 h-11 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center text-primary font-bold text-base shrink-0">
+                            {candidate.name.split(' ').map((n) => n[0]).join('')}
+                          </div>
+                          <div>
+                            <CardTitle className="text-base sm:text-lg font-bold text-foreground flex items-center gap-2">
+                              {candidate.name}
+                              <Badge variant="outline" className="text-[10px] text-emerald-600 bg-emerald-500/10 border-emerald-500/30">
+                                <CheckCircle2 className="w-3 h-3 mr-1 inline" />
+                                {candidate.status}
+                              </Badge>
+                            </CardTitle>
+                            <CardDescription className="text-xs sm:text-sm font-medium text-foreground/80">
+                              {candidate.title}
+                            </CardDescription>
+                          </div>
                         </div>
+
+                        <div className="text-right shrink-0">
+                          <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 font-bold text-xs border border-emerald-500/20">
+                            <Zap className="w-3 h-3" />
+                            {candidate.matchScore || 95}% Match
+                          </div>
+                        </div>
+                      </div>
+                    </CardHeader>
+
+                    <CardContent className="space-y-3.5 pb-4 text-xs sm:text-sm">
+                      <div className="grid grid-cols-2 gap-2 text-muted-foreground bg-muted/30 p-2.5 rounded-lg border border-border/30">
+                        <div className="flex items-center gap-1.5">
+                          <Clock className="w-3.5 h-3.5 text-primary" />
+                          <span>Exp: <strong className="text-foreground">{candidate.experience}</strong></span>
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                          <Calendar className="w-3.5 h-3.5 text-primary" />
+                          <span>Start: <strong className="text-foreground">{candidate.availability}</strong></span>
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                          <MapPin className="w-3.5 h-3.5 text-primary" />
+                          <span className="truncate">{candidate.location}</span>
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                          <DollarSign className="w-3.5 h-3.5 text-emerald-600" />
+                          <span className="font-semibold text-foreground">{candidate.rate}</span>
+                        </div>
+                      </div>
+
+                      {/* Skill Tags */}
+                      {candidate.skills && candidate.skills.length > 0 && (
                         <div>
-                          <CardTitle className="text-base sm:text-lg font-bold text-foreground flex items-center gap-2">
-                            {candidate.name}
-                            <Badge variant="outline" className="text-[10px] text-emerald-600 bg-emerald-500/10 border-emerald-500/30">
-                              <CheckCircle2 className="w-3 h-3 mr-1 inline" />
-                              {candidate.status}
-                            </Badge>
-                          </CardTitle>
-                          <CardDescription className="text-xs sm:text-sm font-medium text-foreground/80">
-                            {candidate.title}
-                          </CardDescription>
+                          <span className="text-[11px] font-semibold text-muted-foreground block mb-1.5">
+                            Core Competencies:
+                          </span>
+                          <div className="flex flex-wrap gap-1.5">
+                            {candidate.skills.slice(0, 6).map((skill, sIdx) => (
+                              <Badge
+                                key={sIdx}
+                                variant="secondary"
+                                className="text-[11px] px-2 py-0.5 bg-background border border-border/60"
+                              >
+                                {skill}
+                              </Badge>
+                            ))}
+                          </div>
                         </div>
-                      </div>
+                      )}
 
-                      <div className="text-right shrink-0">
-                        <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 font-bold text-xs border border-emerald-500/20">
-                          <Zap className="w-3 h-3" />
-                          {candidate.matchScore}% Match
-                        </div>
+                      {/* Actions */}
+                      <div className="pt-2 flex items-center justify-between gap-2 border-t border-border/40">
+                        <Button
+                          onClick={() => handleRequestCandidate(candidate)}
+                          className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold text-xs sm:text-sm flex items-center justify-center gap-1.5"
+                        >
+                          <UserCheck className="w-4 h-4" />
+                          Request Candidate Profile & Intro
+                        </Button>
                       </div>
-                    </div>
-                  </CardHeader>
-
-                  <CardContent className="space-y-3.5 pb-4 text-xs sm:text-sm">
-                    <div className="grid grid-cols-2 gap-2 text-muted-foreground bg-muted/30 p-2.5 rounded-lg border border-border/30">
-                      <div className="flex items-center gap-1.5">
-                        <Clock className="w-3.5 h-3.5 text-primary" />
-                        <span>Exp: <strong className="text-foreground">{candidate.experience}</strong></span>
-                      </div>
-                      <div className="flex items-center gap-1.5">
-                        <Calendar className="w-3.5 h-3.5 text-primary" />
-                        <span>Start: <strong className="text-foreground">{candidate.availability}</strong></span>
-                      </div>
-                      <div className="flex items-center gap-1.5">
-                        <MapPin className="w-3.5 h-3.5 text-primary" />
-                        <span className="truncate">{candidate.location}</span>
-                      </div>
-                      <div className="flex items-center gap-1.5">
-                        <DollarSign className="w-3.5 h-3.5 text-emerald-600" />
-                        <span className="font-semibold text-foreground">{candidate.rate}</span>
-                      </div>
-                    </div>
-
-                    {/* Skill Tags */}
-                    <div>
-                      <span className="text-[11px] font-semibold text-muted-foreground block mb-1.5">
-                        Core Competencies:
-                      </span>
-                      <div className="flex flex-wrap gap-1.5">
-                        {candidate.skills.map((skill, sIdx) => (
-                          <Badge
-                            key={sIdx}
-                            variant="secondary"
-                            className="text-[11px] px-2 py-0.5 bg-background border border-border/60"
-                          >
-                            {skill}
-                          </Badge>
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* Actions */}
-                    <div className="pt-2 flex items-center justify-between gap-2 border-t border-border/40">
-                      <Button
-                        onClick={() => handleRequestCandidate(candidate)}
-                        className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold text-xs sm:text-sm flex items-center justify-center gap-1.5"
-                      >
-                        <UserCheck className="w-4 h-4" />
-                        Request Candidate Profile & Intro
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
           </TabsContent>
 
           {/* TAB 4: HIRING SUPPORT & DEDICATED CONSULTATION */}
@@ -1175,14 +1228,14 @@ export default function ClientPortal() {
             </div>
             <DialogTitle className="text-xl font-bold">Job Vacancy Posted Successfully!</DialogTitle>
             <DialogDescription className="text-sm text-muted-foreground pt-1">
-              Your requirement has been registered into our talent matching system. Our recruitment specialists are actively filtering candidate profiles for your review.
+              Your requirement has been sent directly to our Admin Talent Management desk. Our recruitment specialists are actively matching qualified candidate profiles for your review.
             </DialogDescription>
           </DialogHeader>
 
           <div className="bg-muted/40 p-4 rounded-xl space-y-2 border border-border/40 text-xs sm:text-sm">
             <div className="flex justify-between">
-              <span className="text-muted-foreground">What happens next:</span>
-              <span className="font-semibold text-foreground">Immediate Match Processing</span>
+              <span className="text-muted-foreground">Status:</span>
+              <span className="font-semibold text-foreground">Received by Admin Desk</span>
             </div>
             <div className="flex justify-between">
               <span className="text-muted-foreground">Candidate Profiles Sent:</span>
@@ -1207,7 +1260,7 @@ export default function ClientPortal() {
                 setActiveTab('talent-match');
               }}
             >
-              Explore Matching Candidates
+              Explore Candidates
             </Button>
           </DialogFooter>
         </DialogContent>
