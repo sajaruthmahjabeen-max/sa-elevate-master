@@ -286,8 +286,54 @@ export const AIChatbot: React.FC = () => {
     // 🌐 CORE DOMAIN KNOWLEDGE & SPECIFIC TOPICS
     // ==========================================
 
-    // 0. WHAT SERVICES DO WE PROVIDE / OUR SERVICES
+    // 0A. ABOUT SA CONSULTANT / WHO WE ARE
     if (
+      q.includes('about sa consultant') ||
+      q.includes('about us') ||
+      q.includes('who is sa consultant') ||
+      q.includes('tell me about sa consultant') ||
+      q.includes('what is sa consultant') ||
+      q.includes('about company') ||
+      q.includes('about your company') ||
+      q.includes('tell me about the company') ||
+      q === 'about'
+    ) {
+      reply = {
+        id: `bot-${Date.now()}`,
+        sender: 'bot',
+        text: `🏢 **About SA Consultant & Staffing Solutions:**
+
+**SA Consultant & Staffing Solutions** is a premier consulting and staffing agency that blends digital innovation with top-tier talent solutions to help businesses thrive.
+
+### 🎯 Our Mission
+• To empower businesses with innovative digital solutions and exceptional staffing services that drive measurable growth and lasting success.
+
+### 👁️ Our Vision
+• To be the most trusted global partner for businesses seeking transformation through technology, talent, and strategic consulting.
+
+### ⚡ Our Core Values
+• **Excellence**: High-performance software engineering and top 1% candidate vetting.
+• **Integrity**: Transparent margins, predictable net-terms, and long-term client trust.
+• **Innovation**: Modern tech stacks (React, Node, Cloud, AI), agile sprints, and automated ATS matching.
+
+### 🌟 What We Deliver:
+1. **🌐 Website Creation**: Custom, SEO-optimized, high-converting web apps.
+2. **📢 Digital Marketing**: PPC, social media growth, and analytics.
+3. **👥 Staffing Solutions**: Executive search, C2C, and contract-to-hire.
+4. **🎨 Content Creation**: Branding, video production, and UI/UX design.`,
+        timestamp: now,
+        cta: { label: 'Visit About Us Page', path: '/about' },
+        quickReplies: [
+          { label: '🌟 Our Core Services', action: 'services_info' },
+          { label: '🌐 Web Development Procedure', action: 'web_dev' },
+          { label: '🏢 Client Portal (Post Job)', action: 'client_portal' },
+          { label: '🤝 Talent Partner Program', action: 'partner_portal' },
+        ],
+      };
+    }
+
+    // 0B. WHAT SERVICES DO WE PROVIDE / OUR SERVICES
+    else if (
       q.includes('what are the services') ||
       q.includes('what services') ||
       q.includes('our services') ||
@@ -760,6 +806,9 @@ Speak directly with our Senior Talent Director to discuss:
 
   const handleQuickReply = (action: string) => {
     switch (action) {
+      case 'services_info':
+        generateBotReply('What are the services we provide?');
+        break;
       case 'web_dev':
         generateBotReply('What is the website development procedure?');
         break;
