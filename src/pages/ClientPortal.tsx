@@ -1172,8 +1172,8 @@ export default function ClientPortal() {
               <Card className="border border-border/60 shadow-md">
                 <CardHeader>
                   <CardTitle className="text-xl font-bold flex items-center gap-2">
-                    <PhoneCall className="w-5 h-5 text-primary" />
-                    Dedicated Hiring Consultation
+                    <Mail className="w-5 h-5 text-primary" />
+                    Dedicated Hiring Support
                   </CardTitle>
                   <CardDescription className="text-sm">
                     Have complex hiring specifications or need a specialized team assembled fast? Speak directly with our senior talent director.
@@ -1184,15 +1184,13 @@ export default function ClientPortal() {
                     <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/40 border border-border/30">
                       <Mail className="w-4 h-4 text-primary shrink-0" />
                       <div>
-                        <div className="text-xs text-muted-foreground">Executive Staffing Desk</div>
-                        <div className="text-sm font-semibold text-foreground">clients@saconsultantandstaffing.com</div>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/40 border border-border/30">
-                      <PhoneCall className="w-4 h-4 text-primary shrink-0" />
-                      <div>
-                        <div className="text-xs text-muted-foreground">Client Hotline & WhatsApp</div>
-                        <div className="text-sm font-semibold text-foreground">+1 (800) 555-SA-JOBS</div>
+                        <div className="text-xs text-muted-foreground">Hiring Support & Client Desk</div>
+                        <a
+                          href="mailto:support@saconsultantandstaffing.com"
+                          className="text-sm font-semibold text-foreground hover:text-primary transition-colors"
+                        >
+                          support@saconsultantandstaffing.com
+                        </a>
                       </div>
                     </div>
                   </div>
