@@ -119,168 +119,163 @@ export const AIChatbot: React.FC = () => {
       reply = {
         id: `bot-${Date.now()}`,
         sender: 'bot',
-        text: 'Hello there! 👋 How can I assist you today? Feel free to ask me anything about:\n\n• **Hiring & Staffing** (Post jobs, find vetted developers)\n• **Career Support** (Resume writing, mock interviews, job search)\n• **Technical Skills** (React, Java, Python, Cloud, DevOps)\n• **Pricing & Consultations**',
+        text: 'Hello! 👋 Welcome to **SA Elevate AI Assistant**.\n\nI can assist you across all our services and engineering solutions:\n\n• 🌐 **Website & Software Development Procedure**\n• 🤝 **Talent Partner & Vendor Programs**\n• 👤 **Candidate Portal & Job Applications**\n• 🏢 **Client Portal & Job Postings**\n• 💰 **Pricing & Subscription Plans**\n• 📄 **Career & Resume Packages**\n\nWhat would you like to explore?',
         timestamp: now,
         quickReplies: [
-          { label: '🏢 Post a Job', action: 'client_portal' },
+          { label: '🌐 Web Development Procedure', action: 'web_dev' },
+          { label: '🤝 Talent Partner Program', action: 'partner_portal' },
+          { label: '👤 Candidate Portal', action: 'candidate_portal' },
+          { label: '🏢 Client Portal (Post Job)', action: 'client_portal' },
+          { label: '💰 Pricing Plans', action: 'pricing' },
+        ],
+      };
+    }
+    // 2. WEBSITE DEVELOPMENT PROCEDURE & SOFTWARE ENGINEERING
+    else if (q.includes('website development') || q.includes('web development') || q.includes('procedure') || q.includes('software development') || q.includes('how to build') || q.includes('development process') || q.includes('development lifecycle') || q.includes('sdlc') || q.includes('app development')) {
+      reply = {
+        id: `bot-${Date.now()}`,
+        sender: 'bot',
+        text: '🌐 **Our End-to-End Website & Software Development Procedure:**\n\nAt **SA Consultant & Staffing**, our engineering teams follow an agile 5-stage development methodology:\n\n1. **Discovery & Architecture Planning**:\n   • Business requirement analysis & scope definition\n   • Technology stack selection (React, Next.js, Node.js, Python, PostgreSQL/Supabase)\n   • Database schema and API specification\n\n2. **UI/UX Design & Prototyping**:\n   • Wireframing and responsive interactive mockups in Figma\n   • Design system, accessibility, and modern glassmorphism aesthetics\n\n3. **Full-Stack Engineering & Agile Sprints**:\n   • Clean modular frontend components\n   • Scalable backend REST/GraphQL APIs & database integrations\n   • Bi-weekly sprint demos and client review milestones\n\n4. **Rigorous Quality Assurance & Security**:\n   • Automated unit & integration testing\n   • Cross-browser & mobile responsiveness verification\n   • Security audits, authentication & data encryption\n\n5. **Cloud Deployment & Post-Launch Support**:\n   • CI/CD automated deployment pipelines (AWS, Vercel, Docker)\n   • Performance optimization, SEO indexing, and SLA maintenance.\n\nNeed to hire a dedicated development team or build a custom web application?',
+        timestamp: now,
+        cta: { label: 'Schedule Tech Consultation', path: '/book' },
+        quickReplies: [
+          { label: '🏢 Post Web Requirement', action: 'client_portal' },
+          { label: '👥 Find Full-Stack Developers', action: 'find_candidates' },
+          { label: '📅 Book 15-Min Call', action: 'book_call' },
+        ],
+      };
+    }
+    // 3. TALENT PARTNER & VENDOR COLLABORATION
+    else if (q.includes('talent partner') || q.includes('partner') || q.includes('partnership') || q.includes('vendor') || q.includes('c2c') || q.includes('supplier') || q.includes('sub-vendor') || q.includes('agency')) {
+      reply = {
+        id: `bot-${Date.now()}`,
+        sender: 'bot',
+        text: '🤝 **SA Consultant Talent Partner & Vendor Program:**\n\nWe collaborate with top-tier staffing agencies, IT vendors, and independent talent recruiters nationwide.\n\n**How the Partnership Works:**\n• **Co-Delivery Model**: Submit your vetted bench candidates for high-priority client requirements.\n• **Transparent Margins**: Fast net-payment cycles with competitive C2C and direct placement splits.\n• **Vendor Portal Access**: Track client feedback, submission statuses, and interview schedules in real time.\n• **Verified Onboarding**: Simple MSA (Master Services Agreement) and fast vendor registration.\n\nReady to become an authorized Talent Partner?',
+        timestamp: now,
+        cta: { label: 'Join Talent Partner Program', path: '/partnership' },
+        quickReplies: [
+          { label: '🤝 Open Partnership Page', action: 'partner_portal' },
+          { label: '🏢 View Client Openings', action: 'client_portal' },
+          { label: '✉️ Contact Partner Desk', action: 'contact_support' },
+        ],
+      };
+    }
+    // 4. CANDIDATE PORTAL & JOB SEEKERS
+    else if (q.includes('candidate portal') || q.includes('job seeker') || q.includes('apply for job') || q.includes('candidate account') || q.includes('find job') || q.includes('apply')) {
+      reply = {
+        id: `bot-${Date.now()}`,
+        sender: 'bot',
+        text: '👤 **Candidate Portal & Job Seeker Hub:**\n\nOur Candidate Portal empowers talent to connect directly with hiring managers and Fortune 500 opportunities:\n\n**What you can do:**\n• **Profile & Resume Upload**: Upload PDF resumes with AI auto-parsing into your verified profile.\n• **1-Click Job Applications**: Apply directly to full-time, contract, and remote tech roles.\n• **Application Tracking**: View live interview stages (Reviewing, Shortlisted, Interviewing, Offer).\n• **Career Enhancement**: Access resume rewriting, mock interviews, and career coaching.',
+        timestamp: now,
+        cta: { label: 'Open Candidate Portal', path: '/candidate-portal' },
+        quickReplies: [
+          { label: '💼 Browse Active Jobs', action: 'jobs' },
           { label: '📄 Resume Services ($99)', action: 'career_services' },
-          { label: '👥 Find Developers', action: 'find_candidates' },
-          { label: '📅 Book a Consultation', action: 'book_call' },
+          { label: '👤 Candidate Portal Login', action: 'candidate_portal' },
         ],
       };
     }
-    // 2. WHO ARE YOU / IDENTITY
-    else if (q.includes('who are you') || q.includes('what is your name') || q.includes('what can you do') || q.includes('about you')) {
+    // 5. CLIENT PORTAL & EMPLOYERS
+    else if (q.includes('client portal') || q.includes('post job') || q.includes('post a job') || q.includes('hire someone') || q.includes('need developer') || q.includes('employer portal') || q.includes('hiring manager')) {
       reply = {
         id: `bot-${Date.now()}`,
         sender: 'bot',
-        text: '🤖 I am **SA Elevate AI**, an intelligent recruitment and career co-pilot for **SA Consultant & Staffing**.\n\nI can answer questions on:\n1. 🏢 **Client Portal**: Posting vacancies and hiring talent\n2. 📄 **Career Services**: Resume packages, interview coaching\n3. 💡 **Technical Knowledge**: Tech stacks, IT staffing, hiring models\n4. 💰 **Pricing & Plans**: Free and Starter subscriptions\n5. 📅 **Consultation Booking**: Direct access to talent directors',
-        timestamp: now,
-        cta: { label: 'Explore Client Portal', path: '/client-portal' },
-        quickReplies: [
-          { label: '🏢 Post a Job', action: 'client_portal' },
-          { label: '📄 Career Services', action: 'career_services' },
-        ],
-      };
-    }
-    // 3. POSTING JOBS & CLIENT PORTAL
-    else if (q.includes('post job') || q.includes('post a job') || q.includes('hire someone') || q.includes('need developer') || q.includes('client portal')) {
-      reply = {
-        id: `bot-${Date.now()}`,
-        sender: 'bot',
-        text: '🏢 **Post a Job in the Client Portal:**\n\nOur Client Portal allows employers to:\n• Post hiring requirements in under 2 minutes\n• Define skills, seniority, salary range, and urgency\n• Match directly with our verified talent database\n• Track candidate assignments in real time',
+        text: '🏢 **Client Portal for Employers & Hiring Teams:**\n\nThe Client Portal is your dedicated platform for high-velocity technical hiring:\n\n**Key Capabilities:**\n1. **Instant Job Posting**: Post vacancies in under 2 minutes with title, skills, salary range, and urgency.\n2. **Curated Candidate Matching**: Instantly discover pre-vetted engineers and consultants matching your stack.\n3. **1-Click Profile Requests**: Request verified candidate portfolios, code samples, and interview scheduling.\n4. **Cloud Synchronization**: All postings are synced in real time to our Admin Recruitment Desk.\n5. **Dedicated Support**: Direct assistance at `support@saconsultantandstaffing.com`.',
         timestamp: now,
         cta: { label: 'Go to Client Portal', path: '/client-portal' },
         quickReplies: [
-          { label: '👥 Explore Candidate Database', action: 'find_candidates' },
-          { label: '📅 Book Hiring Consultation', action: 'book_call' },
+          { label: '🏢 Post a Job Now', action: 'client_portal' },
+          { label: '👥 Search Talent Database', action: 'find_candidates' },
+          { label: '📅 Book Hiring Strategy Call', action: 'book_call' },
         ],
       };
     }
-    // 4. CAREER SERVICES, RESUME & INTERVIEW
-    else if (q.includes('resume') || q.includes('career service') || q.includes('interview') || q.includes('job search assistance')) {
+    // 6. PRICING & SUBSCRIPTION PACKAGES
+    else if (q.includes('price') || q.includes('pricing') || q.includes('cost') || q.includes('how much') || q.includes('package') || q.includes('plan') || q.includes('subscription')) {
       reply = {
         id: `bot-${Date.now()}`,
         sender: 'bot',
-        text: '📄 **Professional Career Services:**\n\nWe provide 3 targeted career acceleration packages:\n\n1. **Professional Resume Package ($99)**: ATS-optimized formatting, job-tailored content in PDF & DOCX.\n2. **Interview Preparation ($79)**: 60-min 1-on-1 mock interview with personalized feedback and behavioral tips.\n3. **Job Search Assistance ($79)**: Targeted job matching strategy, direct application guidance, and tracking support.',
+        text: '💰 **Transparent Pricing & Subscription Packages:**\n\nWe offer clear options tailored for hiring managers:\n\n• **Free Plan ($0/month)**: *(Active & Available)*\n  - Post unlimited job listings\n  - Basic ATS to manage applicants\n  - 3 free resume unlocks\n  - Candidate matching notifications\n\n• **Starter Plan ($39/month)**: *(Under Development)*\n  - AI Resume Auto-parsing\n  - Direct apply links & direct email resumes\n  - In-portal candidate messaging\n  - 50% off database unlocks ($2/resume)\n\n• **Career Services Packages**:\n  - Professional Resume Package: **$99**\n  - Interview Preparation: **$79**\n  - Job Search Assistance: **$79**',
         timestamp: now,
-        cta: { label: 'View Career Packages', path: '/career-services' },
+        cta: { label: 'View Pricing Page', path: '/pricing' },
         quickReplies: [
-          { label: '📝 Get Resume Package ($99)', action: 'career_services' },
-          { label: '🎯 Book Interview Prep ($79)', action: 'career_services' },
-        ],
-      };
-    }
-    // 5. PRICING & PLANS
-    else if (q.includes('price') || q.includes('pricing') || q.includes('cost') || q.includes('how much') || q.includes('plan')) {
-      reply = {
-        id: `bot-${Date.now()}`,
-        sender: 'bot',
-        text: '💰 **Subscription & Hiring Plans:**\n\n• **Free Plan ($0/mo)**: Post unlimited job listings, basic ATS applicant management, candidate matching notifications.\n• **Starter Plan ($39/mo)**: *(Currently Under Development)* — Will include AI resume auto-parsing, direct application links, SMS alerts, and discounted resume unlocks.',
-        timestamp: now,
-        cta: { label: 'View Full Pricing Table', path: '/pricing' },
-        quickReplies: [
-          { label: '🚀 Start on Free Plan', action: 'signup_free' },
-          { label: '🏢 Post in Client Portal', action: 'client_portal' },
-        ],
-      };
-    }
-    // 6. CANDIDATES & TALENT POOL
-    else if (q.includes('candidate') || q.includes('talent') || q.includes('developer') || q.includes('engineer') || q.includes('designer')) {
-      reply = {
-        id: `bot-${Date.now()}`,
-        sender: 'bot',
-        text: '👥 **Pre-Screened Talent Database:**\n\nWe specialize in vetted professionals across top disciplines:\n• **Full Stack & Frontend**: React, TypeScript, Vue, Angular, Next.js\n• **Backend & Cloud**: Java, Spring Boot, Python, Node.js, AWS, Azure, GCP\n• **DevOps & Data**: Kubernetes, Docker, Terraform, CI/CD, SQL, AI/ML\n• **UI/UX & Design**: Figma, Design Systems, Graphic & Product Design\n\nAll candidates are pre-screened for technical proficiency.',
-        timestamp: now,
-        cta: { label: 'Browse Candidates', path: '/client-portal' },
-        quickReplies: [
-          { label: '🏢 Post Your Vacancy', action: 'client_portal' },
-          { label: '📅 Book Consultation', action: 'book_call' },
-        ],
-      };
-    }
-    // 7. TECHNICAL & CODING QUESTIONS (React, Python, Java, Cloud, DevOps, etc.)
-    else if (q.includes('react') || q.includes('python') || q.includes('java') || q.includes('javascript') || q.includes('typescript') || q.includes('aws') || q.includes('devops') || q.includes('docker') || q.includes('kubernetes') || q.includes('sql') || q.includes('backend') || q.includes('frontend') || q.includes('full stack')) {
-      reply = {
-        id: `bot-${Date.now()}`,
-        sender: 'bot',
-        text: `💻 **Technical Competency & Staffing:**\n\nYou asked about **${rawQ}**.\n\nAt **SA Consultant & Staffing**, our engineers and consultants possess extensive hands-on expertise in modern software stacks, cloud infrastructure, and DevOps pipelines. We evaluate candidates through rigorous code reviews and architectural assessments.\n\nLooking to hire specialists with these skills, or seeking career guidance in this domain?`,
-        timestamp: now,
-        cta: { label: 'Find Skilled Candidates', path: '/client-portal' },
-        quickReplies: [
-          { label: '🏢 Post Requirement', action: 'client_portal' },
-          { label: '📄 Resume Review ($99)', action: 'career_services' },
-        ],
-      };
-    }
-    // 8. INTERVIEW TIPS & ADVICE
-    else if (q.includes('interview tip') || q.includes('prepare for interview') || q.includes('tell me about yourself') || q.includes('salary negotiation') || q.includes('ats')) {
-      reply = {
-        id: `bot-${Date.now()}`,
-        sender: 'bot',
-        text: '🎯 **Key Interview & Career Tips:**\n\n1. **STAR Method**: Structure answers using *Situation, Task, Action, and Result*.\n2. **Quantify Achievements**: Use metrics (e.g. *"Improved latency by 35%"*, *"Delivered $1.2M in pipeline"*).\n3. **ATS Optimization**: Mirror keywords from the target job description naturally in your resume.\n4. **Mock Practice**: 1-on-1 mock sessions build confidence and highlight blind spots.',
-        timestamp: now,
-        cta: { label: 'Book 1-on-1 Mock Session ($79)', path: '/career-services' },
-        quickReplies: [
-          { label: '🎯 Interview Preparation ($79)', action: 'career_services' },
-          { label: '📄 Professional Resume ($99)', action: 'career_services' },
-        ],
-      };
-    }
-    // 9. C2C / W2 / STAFFING MODELS
-    else if (q.includes('c2c') || q.includes('corp to corp') || q.includes('w2') || q.includes('1099') || q.includes('contract') || q.includes('direct hire') || q.includes('staff augmentation')) {
-      reply = {
-        id: `bot-${Date.now()}`,
-        sender: 'bot',
-        text: '💼 **Our Flexible Staffing Models:**\n\n• **Contract / C2C (Corp-to-Corp)**: High-speed deployment of specialized contractors.\n• **Contract-to-Hire**: Evaluate candidate culture fit and performance before full-time transition.\n• **Direct Hire / Permanent Placement**: End-to-end sourcing, screening, and placement for permanent roles.\n• **Staff Augmentation**: Rapidly scale your existing engineering and product teams.',
-        timestamp: now,
-        cta: { label: 'Consult with Staffing Director', path: '/book' },
-        quickReplies: [
-          { label: '🏢 Post Vacancy', action: 'client_portal' },
-          { label: '🤝 Partnership Program', action: 'partner_portal' },
-        ],
-      };
-    }
-    // 10. BOOKING & CONSULTATIONS
-    else if (q.includes('book') || q.includes('consult') || q.includes('schedule') || q.includes('call') || q.includes('meeting')) {
-      reply = {
-        id: `bot-${Date.now()}`,
-        sender: 'bot',
-        text: '📅 **Schedule a Dedicated Consultation:**\n\nBook a direct 15-minute consultation with our Senior Talent Director to discuss:\n• Immediate technical hiring specifications\n• Dedicated team assembly\n• Custom enterprise staffing contracts',
-        timestamp: now,
-        cta: { label: 'Book 15-Min Meeting', path: '/book' },
-        quickReplies: [
-          { label: '✉️ Contact Support', action: 'contact_support' },
+          { label: '🚀 Start Free Plan ($0)', action: 'signup_free' },
+          { label: '📄 Career Services Packages', action: 'career_services' },
           { label: '🏢 Client Portal', action: 'client_portal' },
         ],
       };
     }
-    // 11. CONTACT & SUPPORT
+    // 7. CAREER SERVICES (Resume, Interview Prep, Job Search)
+    else if (q.includes('resume') || q.includes('career') || q.includes('interview prep') || q.includes('mock interview') || q.includes('job assistance')) {
+      reply = {
+        id: `bot-${Date.now()}`,
+        sender: 'bot',
+        text: '📄 **Professional Career Acceleration Packages:**\n\nDesigned to help candidates land top-tier tech roles:\n\n1. **Professional Resume Package ($99)**:\n   • ATS-optimized layout and keyword matching\n   • Achievement-focused bullet points\n   • Delivered in editable PDF & DOCX formats\n\n2. **Interview Preparation ($79)**:\n   • 60-minute 1-on-1 mock interview\n   • Behavioral & technical question frameworks\n   • Personalized feedback & scorecards\n\n3. **Job Search Assistance ($79)**:\n   • Targeted job matching and application guidance\n   • Application tracking and recruiter outreach strategy',
+        timestamp: now,
+        cta: { label: 'View Career Packages', path: '/career-services' },
+        quickReplies: [
+          { label: '📝 Get Resume Package ($99)', action: 'career_services' },
+          { label: '🎯 Interview Prep ($79)', action: 'career_services' },
+          { label: '💼 Job Search Assistance ($79)', action: 'career_services' },
+        ],
+      };
+    }
+    // 8. TECHNICAL & CODING QUESTIONS (React, Java, Python, Cloud, DevOps, AI, Database)
+    else if (q.includes('react') || q.includes('python') || q.includes('java') || q.includes('javascript') || q.includes('typescript') || q.includes('aws') || q.includes('devops') || q.includes('docker') || q.includes('kubernetes') || q.includes('sql') || q.includes('database') || q.includes('ai') || q.includes('frontend') || q.includes('backend') || q.includes('full stack') || q.includes('node')) {
+      reply = {
+        id: `bot-${Date.now()}`,
+        sender: 'bot',
+        text: `💻 **Technical Competency & Engineering Overview for "${rawQ}":**\n\nAt **SA Consultant & Staffing**, our software architects and pre-screened developers specialize in enterprise-grade technologies:\n\n• **Frontend**: React, Next.js, TypeScript, Vue, Angular, Tailwind CSS, responsive UI/UX\n• **Backend & APIs**: Node.js, Python (Django/FastAPI), Java (Spring Boot), Go, REST & GraphQL\n• **Cloud & DevOps**: AWS, GCP, Azure, Docker, Kubernetes, CI/CD automation, Terraform\n• **Data & AI**: PostgreSQL, Supabase, MongoDB, Redis, LLM integrations & AI data pipelines\n\nWe provide technical talent vetting, code assessments, and end-to-end software delivery for these technologies.`,
+        timestamp: now,
+        cta: { label: 'Find Developers in this Stack', path: '/client-portal' },
+        quickReplies: [
+          { label: '🏢 Post Tech Requirement', action: 'client_portal' },
+          { label: '🌐 Development Procedure', action: 'web_dev' },
+          { label: '📅 Book Tech Consultation', action: 'book_call' },
+        ],
+      };
+    }
+    // 9. BOOKING & CONSULTATIONS
+    else if (q.includes('book') || q.includes('consult') || q.includes('schedule') || q.includes('call') || q.includes('meeting')) {
+      reply = {
+        id: `bot-${Date.now()}`,
+        sender: 'bot',
+        text: '📅 **Schedule a 1-on-1 Consultation:**\n\nSpeak directly with our Senior Talent Director to discuss:\n• Immediate contract or full-time staffing requirements\n• Custom team assembly and project delivery timelines\n• Enterprise partnership and vendor agreements',
+        timestamp: now,
+        cta: { label: 'Book 15-Min Meeting', path: '/book' },
+        quickReplies: [
+          { label: '✉️ Email Support Desk', action: 'contact_support' },
+          { label: '🏢 Client Portal', action: 'client_portal' },
+        ],
+      };
+    }
+    // 10. CONTACT & SUPPORT
     else if (q.includes('contact') || q.includes('email') || q.includes('support') || q.includes('phone') || q.includes('reach')) {
       reply = {
         id: `bot-${Date.now()}`,
         sender: 'bot',
-        text: '✉️ **Contact SA Consultant & Staffing:**\n\n• **General Support**: `support@saconsultantandstaffing.com`\n• **Client & Staffing Desk**: `clients@saconsultantandstaffing.com`\n• **Working Hours**: Monday – Friday, 8:00 AM – 6:00 PM EST\n• **Location**: Serving clients and talent across the United States.',
+        text: '✉️ **Contact SA Consultant & Staffing:**\n\n• **General Inquiries & Support**: `support@saconsultantandstaffing.com`\n• **Client & Hiring Desk**: `clients@saconsultantandstaffing.com`\n• **Working Hours**: Monday – Friday, 8:00 AM – 6:00 PM EST\n• **Coverage**: Serving clients and candidates across all 50 US states.',
         timestamp: now,
         cta: { label: 'Go to Contact Page', path: '/contact' },
         quickReplies: [
           { label: '📅 Book a Consultation', action: 'book_call' },
-          { label: '🏢 Post in Client Portal', action: 'client_portal' },
+          { label: '🏢 Client Portal', action: 'client_portal' },
         ],
       };
     }
-    // 12. DYNAMIC CONVERSATIONAL SYNTHESIS (FOR ANY OTHER QUESTION)
+    // 11. UNIVERSAL COMPREHENSIVE INTELLIGENCE (ANY OTHER QUESTION)
     else {
       reply = {
         id: `bot-${Date.now()}`,
         sender: 'bot',
-        text: `✨ **Regarding "${rawQ}":**\n\nThank you for asking! As your **SA Elevate AI Copilot**, I can provide direct answers, strategic guidance, and connect you with the right staffing solutions.\n\nHere is how we can help:\n• **Employers**: Post job specifications in our Client Portal to receive matched candidate profiles within 24–48 hours.\n• **Candidates**: Explore professional resume building, interview prep, and active job postings.\n• **Consultations**: Book a 1-on-1 strategy call with our recruitment team.\n\nWould you like more details on any of these options?`,
+        text: `✨ **Regarding "${rawQ}":**\n\nThank you for asking! As your **SA Elevate AI Assistant**, here is an overview of how we can address your inquiry:\n\n• **Software & Web Solutions**: Full lifecycle architecture, agile web development, and cloud deployment.\n• **Client Portal**: Post technical vacancies and hire verified developers.\n• **Talent Partnering**: Vendor co-delivery, C2C staffing, and recruiter network collaboration.\n• **Candidate Portal**: Profile management, ATS resume parsing, and active job applications.\n• **Transparent Pricing**: $0 Free plan and flexible staffing tiers.\n\nWhich area would you like to dive into?`,
         timestamp: now,
         quickReplies: [
-          { label: '🏢 Post a Job (Client Portal)', action: 'client_portal' },
-          { label: '📄 Career Services Packages', action: 'career_services' },
-          { label: '💰 Subscription Plans', action: 'pricing' },
-          { label: '📅 Book Consultation', action: 'book_call' },
+          { label: '🌐 Web Development Procedure', action: 'web_dev' },
+          { label: '🤝 Talent Partner Program', action: 'partner_portal' },
+          { label: '👤 Candidate Portal', action: 'candidate_portal' },
+          { label: '🏢 Client Portal', action: 'client_portal' },
+          { label: '💰 Pricing Plans', action: 'pricing' },
           { label: '✉️ Contact Support', action: 'contact_support' },
         ],
       };
@@ -308,6 +303,14 @@ export const AIChatbot: React.FC = () => {
 
   const handleQuickReply = (action: string) => {
     switch (action) {
+      case 'web_dev':
+        navigate('/services');
+        setIsOpen(false);
+        break;
+      case 'candidate_portal':
+        navigate('/candidate-portal');
+        setIsOpen(false);
+        break;
       case 'client_portal':
         navigate('/client-portal');
         setIsOpen(false);
@@ -322,6 +325,10 @@ export const AIChatbot: React.FC = () => {
         break;
       case 'find_candidates':
         navigate('/client-portal');
+        setIsOpen(false);
+        break;
+      case 'jobs':
+        navigate('/jobs');
         setIsOpen(false);
         break;
       case 'book_call':
