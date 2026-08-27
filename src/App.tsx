@@ -23,6 +23,7 @@ import ClientPortal from "./pages/ClientPortal.tsx";
 import BusinessOnboarding from "./pages/BusinessOnboarding.tsx";
 import BusinessDashboard from "./pages/BusinessDashboard.tsx";
 import NotFound from "./pages/NotFound.tsx";
+import { AIChatbot } from "./components/chat/AIChatbot.tsx";
 
 const queryClient = new QueryClient();
 
@@ -120,6 +121,7 @@ const App = () => (
               />
               <Route path="*" element={<NotFound />} />
             </Routes>
+            <AIChatbot />
           </BrowserRouter>
         </TooltipProvider>
       </AuthProvider>
