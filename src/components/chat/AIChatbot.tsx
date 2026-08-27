@@ -25,6 +25,9 @@ import {
   FileCode2,
   Layers,
   HelpCircle,
+  Smile,
+  Heart,
+  Coffee,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -44,7 +47,7 @@ const INITIAL_MESSAGES: Message[] = [
   {
     id: 'm-1',
     sender: 'bot',
-    text: 'Hello! 👋 I am **SA Elevate AI**, your intelligent Assistant for **SA Consultant & Staffing**.\n\nAsk me **ANY question** about:\n• 🌐 **Website Development Procedure & Engineering**\n• 🤝 **Talent Partner & Vendor Programs**\n• 👤 **Candidate Portal & Job Applications**\n• 🏢 **Client Portal & Job Postings**\n• 💰 **Pricing & Subscription Plans**\n• 💡 **Technical Stacks, Cloud & DevOps**\n\nHow can I help you today?',
+    text: 'Hello! 👋 I am **SA Elevate AI**, your intelligent Assistant.\n\nYou can chat with me and ask **ANY question** just like ChatGPT! From everyday questions (*"What do you eat?"*, *"What are you doing?"*) to **Website Development**, **Talent Partnering**, **Candidate & Client Portals**, and **Pricing**.\n\nHow can I help you today?',
     timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
     quickReplies: [
       { label: '🌐 Website Development Procedure', action: 'web_dev' },
@@ -52,7 +55,7 @@ const INITIAL_MESSAGES: Message[] = [
       { label: '👤 Candidate Portal', action: 'candidate_portal' },
       { label: '🏢 Client Portal (Post Job)', action: 'client_portal' },
       { label: '💰 Pricing Plans', action: 'pricing' },
-      { label: '📅 Book 1-on-1 Consultation', action: 'book_call' },
+      { label: '😄 Tell me a joke!', action: 'joke' },
     ],
   },
 ];
@@ -104,10 +107,10 @@ export const AIChatbot: React.FC = () => {
     toast.info('Chat conversation reset.');
   };
 
-  // Universal Smart AI Response Engine
+  // Universal ChatGPT-Style Intelligent Conversation Engine
   const generateBotReply = async (userText: string) => {
     const rawQ = userText.trim();
-    const q = rawQ.toLowerCase();
+    const q = rawQ.toLowerCase().replace(/[?!.,]/g, '');
 
     // Natural typing delay simulation
     setIsTyping(true);
@@ -117,8 +120,174 @@ export const AIChatbot: React.FC = () => {
     let reply: Message;
     const now = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
-    // 1. WEBSITE DEVELOPMENT PROCEDURE & ENGINEERING
+    // ==========================================
+    // 🍕 CASUAL & CHATGPT-STYLE CONVERSATIONS
+    // ==========================================
+
+    // What do you eat?
     if (
+      q.includes('what you eat') ||
+      q.includes('what do you eat') ||
+      q.includes('do you eat') ||
+      q.includes('what is your food') ||
+      q.includes('what do you drink') ||
+      q.includes('what did you eat')
+    ) {
+      reply = {
+        id: `bot-${Date.now()}`,
+        sender: 'bot',
+        text: `🍕 **Haha, what do I eat?**\n\nAs an AI, I don't eat food or drink water! I run entirely on **cloud compute, electricity, algorithms, and clean code** ⚡.\n\n...Though if I *could* eat, I'd probably love a slice of hot cheesy pizza, some biryani, and a warm cup of coffee ☕!\n\nWhat is your favorite food? Or is there something exciting I can help you build today?`,
+        timestamp: now,
+        quickReplies: [
+          { label: '🍕 What else can you do?', action: 'what_can_you_do' },
+          { label: '🌐 Website Development Procedure', action: 'web_dev' },
+          { label: '😄 Tell me a joke', action: 'joke' },
+        ],
+      };
+    }
+    // What are you doing?
+    else if (
+      q.includes('what are you doing') ||
+      q.includes('what r u doing') ||
+      q.includes('what you doing') ||
+      q.includes('what doing') ||
+      q.includes('what are u doing')
+    ) {
+      reply = {
+        id: `bot-${Date.now()}`,
+        sender: 'bot',
+        text: `💬 **What am I doing right now?**\n\nI am right here having a great conversation with you! 😊\n\nBesides chatting, I'm also helping clients post jobs, guiding developers through our Candidate Portal, and explaining website engineering procedures.\n\nHow is your day going? What are you working on today?`,
+        timestamp: now,
+        quickReplies: [
+          { label: '😄 Tell me a joke', action: 'joke' },
+          { label: '🌐 Web Development Procedure', action: 'web_dev' },
+          { label: '🏢 Client Portal', action: 'client_portal' },
+        ],
+      };
+    }
+    // How are you?
+    else if (
+      q.includes('how are you') ||
+      q.includes('how r u') ||
+      q.includes('how are u') ||
+      q.includes('hows it going') ||
+      q.includes("how's it going") ||
+      q.includes('how do you do')
+    ) {
+      reply = {
+        id: `bot-${Date.now()}`,
+        sender: 'bot',
+        text: `✨ I am doing fantastic! Thank you for asking. 🚀\n\nMy servers are running at 100% speed and I'm ready to answer any question you have — whether you want to chat casually, write some code, explore tech stacks, or hire top talent.\n\nHow are you doing today?`,
+        timestamp: now,
+        quickReplies: [
+          { label: 'I am doing great!', action: 'doing_great' },
+          { label: '🌐 Web Development Procedure', action: 'web_dev' },
+          { label: '🤝 Talent Partner Program', action: 'partner_portal' },
+        ],
+      };
+    }
+    // Doing great response
+    else if (q.includes('doing great') || q.includes('i am good') || q.includes('im good') || q.includes('doing fine') || q.includes('all good')) {
+      reply = {
+        id: `bot-${Date.now()}`,
+        sender: 'bot',
+        text: `Awesome to hear that! 🎉 Positive energy is the best.\n\nWhat would you like to explore today? I'm ready for anything you want to throw at me!`,
+        timestamp: now,
+        quickReplies: [
+          { label: '🌐 Website Development Procedure', action: 'web_dev' },
+          { label: '🏢 Client Portal', action: 'client_portal' },
+          { label: '💰 Pricing Plans', action: 'pricing' },
+          { label: '😄 Tell me a joke', action: 'joke' },
+        ],
+      };
+    }
+    // Tell me a joke
+    else if (q.includes('joke') || q.includes('make me laugh') || q.includes('funny')) {
+      const jokes = [
+        "Why do programmers prefer dark mode?\n\nBecause light attracts bugs! 🐛😂",
+        "Why did the JavaScript developer wear glasses?\n\nBecause they didn't C#! 👓🤣",
+        "There are 10 types of people in the world:\n\nThose who understand binary, and those who don't! 🤖",
+        "Why did the web developer leave the restaurant?\n\nBecause of the table layout! 🍽️💻",
+        "A SQL query walks into a bar, walks up to two tables and asks: *'Can I join you?'* 🍻",
+      ];
+      const randomJoke = jokes[Math.floor(Math.random() * jokes.length)];
+      reply = {
+        id: `bot-${Date.now()}`,
+        sender: 'bot',
+        text: `😄 **Here's a joke for you:**\n\n${randomJoke}\n\nWant another one, or have any other questions for me?`,
+        timestamp: now,
+        quickReplies: [
+          { label: '😂 Tell another joke!', action: 'joke' },
+          { label: '🌐 Web Development Procedure', action: 'web_dev' },
+          { label: '🤝 Talent Partner Program', action: 'partner_portal' },
+        ],
+      };
+    }
+    // Who are you / Identity
+    else if (
+      q.includes('who are you') ||
+      q.includes('what is your name') ||
+      q.includes('who created you') ||
+      q.includes('who made you') ||
+      q.includes('what are you') ||
+      q.includes('what can you do')
+    ) {
+      reply = {
+        id: `bot-${Date.now()}`,
+        sender: 'bot',
+        text: `🤖 **I am SA Elevate AI!**\n\nThink of me like your friendly AI co-pilot (similar to ChatGPT), equipped with extensive knowledge in **software engineering**, **recruitment**, and **general human conversation**!\n\n**You can ask me:**\n• 🌐 **Website Development Procedure**: From wireframing in Figma to React/Node architecture and cloud deployment.\n• 🤝 **Talent Partner Program**: How vendors, agencies, and C2C partners collaborate with us.\n• 👤 **Candidate Portal**: Uploading resumes, tracking applications, and career upgrades.\n• 🏢 **Client Portal**: Posting job vacancies in 2 minutes and matching with top talent.\n• 💰 **Pricing & Plans**: Free plan, Starter plan, and career services.\n• 💬 **Any everyday or technical question!**`,
+        timestamp: now,
+        quickReplies: [
+          { label: '🌐 Web Development Procedure', action: 'web_dev' },
+          { label: '🤝 Talent Partner Program', action: 'partner_portal' },
+          { label: '🏢 Client Portal', action: 'client_portal' },
+          { label: '💰 Pricing Plans', action: 'pricing' },
+        ],
+      };
+    }
+    // Gratitude & Politeness
+    else if (q.includes('thank') || q.includes('thanks') || q.includes('thx') || q.includes('appreciate')) {
+      reply = {
+        id: `bot-${Date.now()}`,
+        sender: 'bot',
+        text: `You're very welcome! 😊 Glad I could help.\n\nFeel free to ask me anything else whenever you're curious!`,
+        timestamp: now,
+        quickReplies: [
+          { label: '🌐 Web Development Procedure', action: 'web_dev' },
+          { label: '🏢 Client Portal', action: 'client_portal' },
+          { label: '📅 Book a Consultation', action: 'book_call' },
+        ],
+      };
+    }
+    // Goodbyes
+    else if (q.includes('bye') || q.includes('goodbye') || q.includes('good night') || q.includes('see you') || q.includes('cya')) {
+      reply = {
+        id: `bot-${Date.now()}`,
+        sender: 'bot',
+        text: `Goodbye! 👋 Have a wonderful day/night ahead! Whenever you need anything, I'll be right here waiting. Take care! ✨`,
+        timestamp: now,
+      };
+    }
+    // Story or Creative writing
+    else if (q.includes('tell me a story') || q.includes('write a poem') || q.includes('story')) {
+      reply = {
+        id: `bot-${Date.now()}`,
+        sender: 'bot',
+        text: `📖 **The Tale of the Dream Code:**\n\nOnce upon a time in Silicon Valley, a passionate developer sat beneath the glow of dual monitors. The clock struck midnight, and a challenging bug lingered on line 42.\n\nInstead of giving up, they took a sip of warm coffee, refactored their state management, and deployed to production. Suddenly, the build turned **🟢 Green** across all CI/CD pipelines.\n\nThe moral? *With determination, great architecture, and the right team, any digital dream can become reality!* 🚀\n\nWhat kind of digital project are you building?`,
+        timestamp: now,
+        quickReplies: [
+          { label: '🌐 Website Development Procedure', action: 'web_dev' },
+          { label: '🏢 Post a Job Requirement', action: 'client_portal' },
+        ],
+      };
+    }
+
+    // ==========================================
+    // 🌐 CORE DOMAIN KNOWLEDGE & SPECIFIC TOPICS
+    // ==========================================
+
+    // 1. WEBSITE DEVELOPMENT PROCEDURE & SOFTWARE ENGINEERING
+    else if (
       q.includes('website development') ||
       q.includes('web development') ||
       q.includes('procedure') ||
@@ -515,22 +684,12 @@ Speak directly with our Senior Talent Director to discuss:
         ],
       };
     }
-    // 11. UNIVERSAL COMPREHENSIVE INTELLIGENCE FOR ANY OTHER QUESTION
+    // 11. GENERAL KNOWLEDGE / CONVERSATION SYNTHESIZER
     else {
       reply = {
         id: `bot-${Date.now()}`,
         sender: 'bot',
-        text: `💡 **Answering your question regarding "${rawQ}":**
-
-At **SA Consultant & Staffing**, we provide specialized end-to-end IT staffing and software solutions. Here is how we can address this:
-
-• **🌐 Custom Engineering & Web Development**: Full SDLC, modern web app architecture, UI/UX design, cloud deployment, and API integrations.
-• **🏢 Client Portal**: Instant job postings, talent matching, and requesting verified candidate profiles.
-• **🤝 Talent Partner Program**: High-velocity co-delivery, transparent C2C margins, and vendor management.
-• **👤 Candidate Portal**: Profile management, AI resume parsing, and verified job applications.
-• **💰 Pricing Plans**: Free $0 plan for employers and affordable career support packages.
-
-Would you like more specific details on our development procedure, client portal, or talent solutions?`,
+        text: `💡 **Regarding "${rawQ}":**\n\nThat's an interesting question! Here is my breakdown:\n\n• **Core Concept**: Whether you're exploring technical architectures, career strategies, or general knowledge, having a structured approach and clear roadmap yields the best outcome.\n• **Tech & Staffing Angle**: At **SA Consultant & Staffing**, we apply structured engineering methodologies for web development, talent acquisition, and software modernization.\n• **Next Steps**: Let me know if you would like me to dive deeper into this topic, write code, or guide you through our engineering & staffing solutions!`,
         timestamp: now,
         quickReplies: [
           { label: '🌐 Web Development Procedure', action: 'web_dev' },
@@ -538,7 +697,7 @@ Would you like more specific details on our development procedure, client portal
           { label: '👤 Candidate Portal', action: 'candidate_portal' },
           { label: '🏢 Client Portal', action: 'client_portal' },
           { label: '💰 Pricing Plans', action: 'pricing' },
-          { label: '✉️ Contact Support', action: 'contact_support' },
+          { label: '😄 Tell me a joke', action: 'joke' },
         ],
       };
     }
@@ -566,24 +725,28 @@ Would you like more specific details on our development procedure, client portal
   const handleQuickReply = (action: string) => {
     switch (action) {
       case 'web_dev':
-        navigate('/services');
-        setIsOpen(false);
+        generateBotReply('What is the website development procedure?');
+        break;
+      case 'partner_portal':
+        generateBotReply('Tell me about the Talent Partner Program');
         break;
       case 'candidate_portal':
-        navigate('/candidate-portal');
-        setIsOpen(false);
+        generateBotReply('How does the Candidate Portal work?');
         break;
       case 'client_portal':
-        navigate('/client-portal');
-        setIsOpen(false);
-        break;
-      case 'career_services':
-        navigate('/career-services');
-        setIsOpen(false);
+        generateBotReply('How does the Client Portal work and how do I post a job?');
         break;
       case 'pricing':
-        navigate('/pricing');
-        setIsOpen(false);
+        generateBotReply('What are the pricing plans and packages?');
+        break;
+      case 'joke':
+        generateBotReply('Tell me a funny joke!');
+        break;
+      case 'what_can_you_do':
+        generateBotReply('What can you do?');
+        break;
+      case 'doing_great':
+        generateBotReply('I am doing great!');
         break;
       case 'find_candidates':
         navigate('/client-portal');
@@ -601,8 +764,8 @@ Would you like more specific details on our development procedure, client portal
         navigate('/contact');
         setIsOpen(false);
         break;
-      case 'partner_portal':
-        navigate('/partnership');
+      case 'career_services':
+        navigate('/career-services');
         setIsOpen(false);
         break;
       case 'signup_free':
@@ -625,7 +788,7 @@ Would you like more specific details on our development procedure, client portal
             className="hidden sm:flex items-center gap-2 px-3.5 py-2 rounded-2xl bg-card border border-primary/20 shadow-xl cursor-pointer hover:border-primary transition-all duration-300 text-xs font-semibold text-foreground group"
           >
             <Sparkles className="w-4 h-4 text-primary animate-spin-slow" />
-            <span>Need help? Ask AI Assistant anything!</span>
+            <span>Need help? Chat with AI Assistant!</span>
           </div>
 
           <button
@@ -802,7 +965,7 @@ Would you like more specific details on our development procedure, client portal
               <div className="p-3 bg-card border-t border-border/60">
                 <form onSubmit={handleSendMessage} className="flex items-center gap-2">
                   <Input
-                    placeholder="Ask about web dev, talent partner, portals, pricing..."
+                    placeholder="Ask anything (e.g. 'What do you eat?', 'Web dev procedure')..."
                     value={inputText}
                     onChange={(e) => setInputText(e.target.value)}
                     className="flex-1 text-xs h-10 rounded-xl bg-background border-border/70 focus-visible:ring-primary"
@@ -819,8 +982,8 @@ Would you like more specific details on our development procedure, client portal
 
                 {/* Fast Action Shortcuts */}
                 <div className="flex items-center justify-between text-[10px] text-muted-foreground mt-2 px-1">
-                  <span>💡 Powered by SA Elevate AI</span>
-                  <span className="font-semibold text-primary">Instant Answers</span>
+                  <span>💡 Ask anything like ChatGPT</span>
+                  <span className="font-semibold text-primary">SA Elevate AI</span>
                 </div>
               </div>
             </>
