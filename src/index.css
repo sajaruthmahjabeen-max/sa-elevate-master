@@ -326,7 +326,7 @@
   .direction-trigger {
     position: absolute;
     inset: 0;
-    z-index: 25;
+    z-index: 10;
   }
   .direction-trigger-top {
     clip-path: polygon(0 0, 100% 0, 50% 50%);
@@ -345,53 +345,58 @@
     position: absolute;
     inset: 0;
     z-index: 20;
-    transition: transform 0.4s cubic-bezier(0.2, 0.9, 0.3, 1), opacity 0.3s ease;
+    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
     transform: translateY(100%);
     opacity: 0;
     pointer-events: auto;
   }
 
-  .direction-trigger-top:hover ~ .direction-overlay {
+  .direction-trigger-top:hover ~ .direction-overlay,
+  .direction-trigger-top:focus ~ .direction-overlay {
     transform: translateY(0);
     opacity: 1;
-    animation: dirSlideFromTop 0.4s cubic-bezier(0.2, 0.9, 0.3, 1) forwards;
+    animation: dirSlideFromTop 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   }
-  .direction-trigger-right:hover ~ .direction-overlay {
+  .direction-trigger-right:hover ~ .direction-overlay,
+  .direction-trigger-right:focus ~ .direction-overlay {
     transform: translateX(0);
     opacity: 1;
-    animation: dirSlideFromRight 0.4s cubic-bezier(0.2, 0.9, 0.3, 1) forwards;
+    animation: dirSlideFromRight 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   }
-  .direction-trigger-bottom:hover ~ .direction-overlay {
+  .direction-trigger-bottom:hover ~ .direction-overlay,
+  .direction-trigger-bottom:focus ~ .direction-overlay {
     transform: translateY(0);
     opacity: 1;
-    animation: dirSlideFromBottom 0.4s cubic-bezier(0.2, 0.9, 0.3, 1) forwards;
+    animation: dirSlideFromBottom 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   }
-  .direction-trigger-left:hover ~ .direction-overlay {
+  .direction-trigger-left:hover ~ .direction-overlay,
+  .direction-trigger-left:focus ~ .direction-overlay {
     transform: translateX(0);
     opacity: 1;
-    animation: dirSlideFromLeft 0.4s cubic-bezier(0.2, 0.9, 0.3, 1) forwards;
+    animation: dirSlideFromLeft 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   }
 
   .direction-overlay:hover {
     transform: translate(0, 0) !important;
     opacity: 1 !important;
+    z-index: 30 !important;
   }
 
   @keyframes dirSlideFromTop {
-    from { transform: translateY(-100%); }
-    to { transform: translateY(0); }
+    from { transform: translateY(-100%); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
   }
   @keyframes dirSlideFromRight {
-    from { transform: translateX(100%); }
-    to { transform: translateX(0); }
+    from { transform: translateX(100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
   }
   @keyframes dirSlideFromBottom {
-    from { transform: translateY(100%); }
-    to { transform: translateY(0); }
+    from { transform: translateY(100%); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
   }
   @keyframes dirSlideFromLeft {
-    from { transform: translateX(-100%); }
-    to { transform: translateX(0); }
+    from { transform: translateX(-100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
   }
 }
 

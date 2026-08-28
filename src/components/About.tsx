@@ -62,7 +62,7 @@ const About = () => (
         {cards.map((card, i) => (
           <div
             key={card.title}
-            className="direction-card group h-[380px] rounded-3xl border border-border shadow-xl bg-card hover:border-primary/50 hover:shadow-2xl transition-all duration-500 cursor-pointer"
+            className="direction-card group min-h-[420px] rounded-3xl border border-border/80 shadow-xl bg-card hover:border-primary/60 hover:shadow-2xl transition-all duration-500 cursor-pointer flex flex-col justify-between"
             style={{ transitionDelay: `${i * 150}ms` }}
           >
             {/* 4 Pure CSS Invisible Direction Triggers */}
@@ -71,10 +71,10 @@ const About = () => (
             <div className="direction-trigger direction-trigger-bottom" />
             <div className="direction-trigger direction-trigger-left" />
 
-            {/* 🖼️ Base Card Face (Always Visible until hovered) */}
-            <div className="relative w-full h-full flex flex-col justify-between p-6 z-10 bg-muted/20">
+            {/* 🖼️ Base Card Face (Always Visible with High Contrast Text) */}
+            <div className="relative w-full h-full flex flex-col justify-between p-6 z-0">
               {/* Picture banner */}
-              <div className="relative w-full aspect-video rounded-2xl overflow-hidden mb-4 border border-border/60 shadow-md">
+              <div className="relative w-full aspect-video rounded-2xl overflow-hidden mb-5 border border-border/60 shadow-md bg-muted">
                 <img
                   src={card.image}
                   alt={card.title}
@@ -83,37 +83,41 @@ const About = () => (
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
                 
                 {/* Floating Icon */}
-                <div className="absolute bottom-3 left-3 w-10 h-10 rounded-xl bg-background/95 backdrop-blur-md flex items-center justify-center border border-white/20 shadow-md text-primary">
-                  <card.icon size={20} />
+                <div className="absolute bottom-3 left-3 w-11 h-11 rounded-xl bg-background/95 backdrop-blur-md flex items-center justify-center border border-white/20 shadow-md text-primary font-bold">
+                  <card.icon size={22} />
+                </div>
+
+                <div className="absolute top-3 right-3 px-3 py-1 rounded-full bg-black/60 backdrop-blur-md text-white text-[11px] font-bold border border-white/20">
+                  {card.badge}
                 </div>
               </div>
 
-              {/* Resting Typography */}
-              <div className="mt-auto">
-                <span className="text-[11px] font-bold text-accent uppercase tracking-wider">
-                  {card.badge}
-                </span>
-                <h3 className="text-2xl font-display font-extrabold text-primary mt-1 mb-2">
-                  {card.title}
-                </h3>
-                <p className="text-foreground/80 font-medium text-xs line-clamp-2 leading-relaxed">
-                  {card.description}
-                </p>
-                <div className="mt-3 flex items-center gap-1 text-[11px] font-bold text-primary">
-                  <span>Explore from any direction</span>
-                  <ArrowRight className="w-3.5 h-3.5" />
+              {/* Resting Typography - 100% Crisp & Legible */}
+              <div className="flex-grow flex flex-col justify-between">
+                <div>
+                  <h3 className="text-2xl font-display font-extrabold text-primary mb-2">
+                    {card.title}
+                  </h3>
+                  <p className="text-foreground/90 font-medium text-sm leading-relaxed mb-4">
+                    {card.description}
+                  </p>
+                </div>
+
+                <div className="pt-3 border-t border-border/50 flex items-center justify-between text-xs font-bold text-accent">
+                  <span>Hover to reveal strategy</span>
+                  <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
                 </div>
               </div>
             </div>
 
             {/* 🧭 DIRECTION-AWARE OVERLAY (Slides in from Top/Right/Bottom/Left) */}
-            <div className="direction-overlay bg-gradient-to-br from-background/98 via-background/95 to-background/90 dark:from-card/98 dark:via-card/95 dark:to-card/90 backdrop-blur-2xl p-7 rounded-3xl border border-primary/40 shadow-2xl flex flex-col justify-between">
+            <div className="direction-overlay bg-card/98 backdrop-blur-2xl p-7 rounded-3xl border-2 border-primary/50 shadow-2xl flex flex-col justify-between z-20">
               <div>
-                <div className="flex items-center justify-between mb-3">
-                  <div className="w-12 h-12 rounded-2xl bg-primary/10 border border-primary/25 flex items-center justify-center text-primary shadow-sm">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="w-12 h-12 rounded-2xl bg-primary/10 border border-primary/30 flex items-center justify-center text-primary shadow-sm">
                     <card.icon size={24} />
                   </div>
-                  <span className="text-[11px] px-3 py-1 rounded-full bg-primary/15 text-primary font-black uppercase tracking-wider border border-primary/30">
+                  <span className="text-xs px-3 py-1 rounded-full bg-primary/15 text-primary font-black uppercase tracking-wider border border-primary/30">
                     {card.badge}
                   </span>
                 </div>
@@ -125,15 +129,15 @@ const About = () => (
                   {card.subtitle}
                 </p>
 
-                <p className="text-foreground/90 font-medium text-xs leading-relaxed mb-4">
+                <p className="text-foreground font-medium text-xs leading-relaxed mb-5">
                   {card.description}
                 </p>
 
                 {/* Key Strategic Pillars */}
-                <div className="space-y-1.5 pt-2 border-t border-border/50">
+                <div className="space-y-2 pt-3 border-t border-border/60">
                   {card.pillars.map((pillar) => (
-                    <div key={pillar} className="flex items-center gap-2 text-xs font-bold text-foreground">
-                      <card.accentIcon className="w-3.5 h-3.5 text-primary flex-shrink-0" />
+                    <div key={pillar} className="flex items-center gap-2.5 text-xs font-extrabold text-foreground">
+                      <card.accentIcon className="w-4 h-4 text-primary flex-shrink-0" />
                       <span>{pillar}</span>
                     </div>
                   ))}
@@ -141,9 +145,9 @@ const About = () => (
               </div>
 
               {/* Bottom Brand Guarantee */}
-              <div className="pt-3 border-t border-border/50 flex items-center justify-between text-[11px] font-bold text-muted-foreground">
+              <div className="pt-3 border-t border-border/60 flex items-center justify-between text-xs font-bold text-muted-foreground">
                 <span>SA Consultant Standard</span>
-                <span className="text-primary font-extrabold">100% Commitment</span>
+                <span className="text-primary font-black">100% Verified</span>
               </div>
             </div>
           </div>
