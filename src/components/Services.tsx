@@ -61,15 +61,15 @@ const ServiceCard = ({ service, index }: ServiceCardProps) => {
     const centerX = rect.width / 2;
     const centerY = rect.height / 2;
 
-    // Dynamic 3D tilt calculation
-    const rotateX = ((centerY - y) / centerY) * 10;
-    const rotateY = ((x - centerX) / centerX) * 10;
+    // Subtle 3D tilt calculation
+    const rotateX = ((centerY - y) / centerY) * 8;
+    const rotateY = ((x - centerX) / centerX) * 8;
 
-    setTransformStyle(`perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.02, 1.02, 1.02)`);
+    setTransformStyle(`perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`);
   };
 
   const handleMouseLeave = () => {
-    setTransformStyle('perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)');
+    setTransformStyle('perspective(1000px) rotateX(0deg) rotateY(0deg)');
   };
 
   return (
@@ -77,76 +77,81 @@ const ServiceCard = ({ service, index }: ServiceCardProps) => {
       ref={cardRef}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
-      className="scroll-reveal glass rounded-3xl p-6 hover-glow group relative overflow-hidden transition-all duration-300 ease-out cursor-pointer flex flex-col justify-between h-full border border-border/80 hover:border-primary/50 shadow-lg hover:shadow-2xl hover:shadow-primary/10"
+      className="scroll-reveal group relative h-[380px] rounded-3xl overflow-hidden shadow-lg border border-border bg-card hover:border-primary/60 hover:shadow-2xl hover:shadow-primary/20 transition-all duration-500 ease-out cursor-pointer flex flex-col justify-between"
       style={{
         transform: transformStyle,
         transitionDelay: `${index * 100}ms`,
-        transformStyle: 'preserve-3d',
       }}
     >
-      {/* Top Shimmer Gradient Accent */}
-      <div className="absolute top-0 left-0 right-0 h-[3px] gradient-bg opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-20" />
+      {/* 🖼️ Large, Crisp Picture Background (Always visible, zooms on hover) */}
+      <div className="absolute inset-0 w-full h-full overflow-hidden z-0 bg-muted">
+        <img
+          src={service.image}
+          alt={service.title}
+          className="w-full h-full object-cover transform scale-100 group-hover:scale-110 transition-transform duration-700 ease-out"
+        />
+        {/* Soft gradient darkening at the bottom for crystal-clear title contrast */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent z-10" />
+      </div>
 
-      <div className="flex flex-col h-full justify-between">
-        {/* Crystal Clear Service Image Box */}
-        <div 
-          className="relative w-full aspect-video rounded-2xl overflow-hidden mb-6 border border-border/60 group-hover:border-primary/40 transition-all duration-500 ease-out shadow-md bg-muted"
-          style={{ transform: 'translateZ(20px)' }}
-        >
-          <img 
-            src={service.image} 
-            alt={service.title} 
-            className="w-full h-full object-cover transform group-hover:scale-108 transition-transform duration-700 ease-out"
-          />
-          {/* Subtle bottom shadow overlay for contrast */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
-          
-          {/* Floating Category Icon Badge */}
-          <div className="absolute bottom-3 left-3 w-11 h-11 rounded-xl bg-background/95 backdrop-blur-md flex items-center justify-center border border-white/20 shadow-lg group-hover:scale-110 group-hover:bg-primary group-hover:text-primary-foreground transition-all duration-300 text-primary">
-            <service.icon size={20} />
-          </div>
-
-          {/* Service index chip */}
-          <div className="absolute top-3 right-3 px-2.5 py-0.5 rounded-full bg-black/60 backdrop-blur-md text-white text-[11px] font-bold border border-white/20">
-            0{index + 1}
-          </div>
+      {/* Floating Category Icon (Top Left) */}
+      <div className="relative z-20 p-5 flex items-center justify-between">
+        <div className="w-12 h-12 rounded-2xl bg-background/95 backdrop-blur-md flex items-center justify-center border border-white/20 shadow-lg text-primary group-hover:scale-110 group-hover:bg-primary group-hover:text-primary-foreground transition-all duration-300">
+          <service.icon size={22} />
         </div>
+        <span className="text-[11px] px-3 py-1 rounded-full bg-black/60 backdrop-blur-md text-white font-bold border border-white/20 uppercase tracking-wider shadow-sm">
+          Service 0{index + 1}
+        </span>
+      </div>
 
-        {/* Content Section - High Contrast and Crystal Clear */}
-        <div style={{ transform: 'translateZ(30px)' }} className="flex-grow flex flex-col justify-between">
-          <div>
-            <h3 className="text-xl font-display font-extrabold mb-2.5 text-primary group-hover:text-accent transition-colors duration-300">
-              {service.title}
-            </h3>
-            <p className="text-foreground/90 font-medium text-sm leading-relaxed mb-5">
-              {service.description}
-            </p>
+      {/* 🟢 RESTING STATE CONTENT (Title + Hover cue) */}
+      <div className="relative z-20 p-6 transition-all duration-300 group-hover:opacity-0 group-hover:translate-y-4">
+        <h3 className="text-2xl font-display font-black text-white tracking-tight mb-1 drop-shadow-md">
+          {service.title}
+        </h3>
+        <p className="text-amber-300 text-xs font-bold flex items-center gap-1">
+          <span>Hover to explore details</span>
+          <ArrowRight className="w-3.5 h-3.5" />
+        </p>
+      </div>
+
+      {/* 🌟 REVEAL CARD CONTENT ON HOVER (Glassmorphism curtain slides up from bottom) */}
+      <div className="absolute inset-x-0 bottom-0 z-30 bg-background/95 dark:bg-card/95 backdrop-blur-xl p-6 rounded-t-3xl border-t border-primary/30 shadow-2xl flex flex-col justify-between translate-y-full opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500 ease-out">
+        <div>
+          <div className="flex items-center gap-2 text-primary font-extrabold text-xs uppercase tracking-widest mb-1.5">
+            <Sparkles className="w-3.5 h-3.5" />
+            <span>Service Overview</span>
           </div>
+          
+          <h3 className="text-xl font-display font-extrabold text-foreground mb-2">
+            {service.title}
+          </h3>
 
-          {/* Feature Pills */}
-          <div className="flex flex-wrap gap-2 mb-4">
+          <p className="text-foreground/90 font-medium text-xs leading-relaxed mb-4">
+            {service.description}
+          </p>
+
+          {/* Feature Badges */}
+          <div className="flex flex-wrap gap-1.5 mb-5">
             {service.features.map((f) => (
-              <span 
-                key={f} 
-                className="text-xs px-3 py-1 rounded-full bg-primary/10 text-primary font-bold border border-primary/25 shadow-sm"
-                style={{ transform: 'translateZ(10px)' }}
+              <span
+                key={f}
+                className="text-[11px] px-2.5 py-1 rounded-lg bg-primary/10 text-primary font-extrabold border border-primary/25 shadow-sm"
               >
                 {f}
               </span>
             ))}
           </div>
-
-          {/* REVEAL ON HOVER: Action Button that smoothly slides & fades up */}
-          <div className="mt-2 pt-2 border-t border-border/40 transition-all duration-300">
-            <Link
-              to={service.link}
-              className="w-full py-2.5 px-4 rounded-xl bg-primary text-primary-foreground font-bold text-xs shadow-md hover:bg-primary/90 flex items-center justify-center gap-2 group-hover:shadow-primary/30 transition-all duration-300"
-            >
-              <span>{service.ctaText}</span>
-              <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
-            </Link>
-          </div>
         </div>
+
+        {/* CTA Button */}
+        <Link
+          to={service.link}
+          className="w-full py-2.5 px-4 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground font-extrabold text-xs shadow-lg flex items-center justify-center gap-2 group-hover:shadow-primary/30 transition-all duration-300"
+        >
+          <span>{service.ctaText}</span>
+          <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+        </Link>
       </div>
     </div>
   );
@@ -166,7 +171,7 @@ const Services = () => (
           What We <span className="gradient-text">Offer</span>
         </h2>
         <p className="text-foreground/90 font-semibold max-w-2xl mx-auto text-lg leading-relaxed">
-          Comprehensive solutions designed to elevate your business to new heights.
+          Hover over any card below to reveal complete service details, features, and direct actions.
         </p>
       </div>
 
