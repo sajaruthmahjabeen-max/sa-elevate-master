@@ -28,6 +28,12 @@ import {
   Smile,
   Heart,
   Coffee,
+  Mic,
+  MicOff,
+  Volume2,
+  VolumeX,
+  Radio,
+  Square,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -47,7 +53,7 @@ const INITIAL_MESSAGES: Message[] = [
   {
     id: 'm-1',
     sender: 'bot',
-    text: 'Hello! 👋 I am **SA Elevate AI**, your intelligent Assistant.\n\nYou can chat with me and ask **ANY question** just like ChatGPT! From everyday questions (*"What do you eat?"*, *"What are you doing?"*) to **Website Development**, **Talent Partnering**, **Candidate & Client Portals**, and **Pricing**.\n\nHow can I help you today?',
+    text: 'Hello! 👋 I am **SA Elevate AI**, your intelligent Assistant.\n\nYou can chat with me using **text or your voice 🎙️** and ask **ANY question**! From everyday questions (*"What do you eat?"*, *"What are you doing?"*) to **Website Development**, **Talent Partnering**, **Candidate & Client Portals**, and **Pricing**.\n\nHow can I help you today?',
     timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
     quickReplies: [
       { label: '🌐 Website Development Procedure', action: 'web_dev' },
@@ -59,6 +65,19 @@ const INITIAL_MESSAGES: Message[] = [
     ],
   },
 ];
+
+// Helper to strip markdown for crystal-clear text-to-speech
+function stripMarkdownForSpeech(text: string): string {
+  return text
+    .replace(/[*_~`#]/g, '') // remove markdown symbols
+    .replace(/\[([^\]]+)\]\([^\)]+\)/g, '$1') // replace links with label
+    .replace(/•/g, '') // remove bullet points
+    .replace(/[-+]\s/g, '') // remove dashes
+    .replace(/Phase \d+:/gi, 'Phase: ')
+    .replace(/Step \d+:/gi, 'Step: ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
 
 export const AIChatbot: React.FC = () => {
   const navigate = useNavigate();
@@ -79,6 +98,12 @@ export const AIChatbot: React.FC = () => {
   const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
+  // Voice Assistant State
+  const [isListening, setIsListening] = useState(false);
+  const [isVoiceOutputEnabled, setIsVoiceOutputEnabled] = useState(false);
+  const [isSpeaking, setIsSpeaking] = useState(false);
+  const recognitionRef = useRef<any>(null);
+
   // Auto-scroll to bottom of chat
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -94,6 +119,116 @@ export const AIChatbot: React.FC = () => {
     sessionStorage.setItem('sa_chatbot_messages', JSON.stringify(messages));
   }, [messages]);
 
+  // Clean up speech synthesis on unmount
+  useEffect(() => {
+    return () => {
+      if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+      }
+      if (recognitionRef.current) {
+        recognitionRef.current.abort();
+      }
+    };
+  }, []);
+
+  // Text-To-Speech (Speak Out Loud)
+  const speakText = (text: string) => {
+    if (typeof window === 'undefined' || !('speechSynthesis' in window)) {
+      toast.error('Text-to-speech is not supported on this browser.');
+      return;
+    }
+
+    window.speechSynthesis.cancel(); // Stop any previous speech
+    const cleanText = stripMarkdownForSpeech(text);
+    if (!cleanText) return;
+
+    const utterance = new SpeechSynthesisUtterance(cleanText);
+    utterance.rate = 1.0;
+    utterance.pitch = 1.0;
+
+    // Pick a natural English voice if available
+    const voices = window.speechSynthesis.getVoices();
+    const englishVoice = voices.find(
+      (v) => v.lang.includes('en-US') || v.lang.includes('en-GB') || v.lang.includes('en')
+    );
+    if (englishVoice) {
+      utterance.voice = englishVoice;
+    }
+
+    utterance.onstart = () => setIsSpeaking(true);
+    utterance.onend = () => setIsSpeaking(false);
+    utterance.onerror = () => setIsSpeaking(false);
+
+    window.speechSynthesis.speak(utterance);
+  };
+
+  // Stop Speaking
+  const stopSpeaking = () => {
+    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
+      setIsSpeaking(false);
+    }
+  };
+
+  // Speech-To-Text (Voice Recognition)
+  const toggleListening = () => {
+    const SpeechRecognition =
+      (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+
+    if (!SpeechRecognition) {
+      toast.error('Voice recognition is not supported in this browser. Please use Google Chrome or Microsoft Edge.');
+      return;
+    }
+
+    if (isListening) {
+      if (recognitionRef.current) {
+        recognitionRef.current.stop();
+      }
+      setIsListening(false);
+      return;
+    }
+
+    try {
+      const recognition = new SpeechRecognition();
+      recognitionRef.current = recognition;
+      recognition.continuous = false;
+      recognition.interimResults = true;
+      recognition.lang = 'en-US';
+
+      recognition.onstart = () => {
+        setIsListening(true);
+        toast.info('🎙️ Listening... speak now!');
+      };
+
+      recognition.onresult = (event: any) => {
+        const transcript = Array.from(event.results)
+          .map((result: any) => result[0])
+          .map((result: any) => result.transcript)
+          .join('');
+        setInputText(transcript);
+      };
+
+      recognition.onerror = (event: any) => {
+        console.error('Speech recognition error:', event.error);
+        setIsListening(false);
+        if (event.error === 'not-allowed') {
+          toast.error('Microphone permission was denied. Please allow microphone access.');
+        } else if (event.error !== 'no-speech') {
+          toast.error(`Voice error: ${event.error}`);
+        }
+      };
+
+      recognition.onend = () => {
+        setIsListening(false);
+      };
+
+      recognition.start();
+    } catch (err) {
+      console.error('Failed to start speech recognition:', err);
+      setIsListening(false);
+    }
+  };
+
   // Handle opening widget
   const handleToggleChat = () => {
     setIsOpen(!isOpen);
@@ -102,6 +237,7 @@ export const AIChatbot: React.FC = () => {
 
   // Reset conversation
   const handleResetChat = () => {
+    stopSpeaking();
     setMessages(INITIAL_MESSAGES);
     sessionStorage.removeItem('sa_chatbot_messages');
     toast.info('Chat conversation reset.');
@@ -277,7 +413,7 @@ export const AIChatbot: React.FC = () => {
       reply = {
         id: `bot-${Date.now()}`,
         sender: 'bot',
-        text: `🤖 **I am SA Elevate AI!**\n\nThink of me like your friendly AI co-pilot (similar to ChatGPT), equipped with extensive knowledge in **software engineering**, **recruitment**, and **general human conversation**!\n\n**You can ask me:**\n• 🌐 **Website Development Procedure**: From wireframing in Figma to React/Node architecture and cloud deployment.\n• 🤝 **Talent Partner Program**: How vendors, agencies, and C2C partners collaborate with us.\n• 👤 **Candidate Portal**: Uploading resumes, tracking applications, and career upgrades.\n• 🏢 **Client Portal**: Posting job vacancies in 2 minutes and matching with top talent.\n• 💰 **Pricing & Plans**: Free plan, Starter plan, and career services.\n• 💬 **Any everyday or technical question!**`,
+        text: `🤖 **I am SA Elevate AI!**\n\nThink of me like your friendly AI co-pilot (similar to ChatGPT), equipped with **voice recognition 🎙️**, **speech audio 🔊**, and extensive knowledge in **software engineering**, **recruitment**, and **general human conversation**!\n\n**You can ask me:**\n• 🌐 **Website Development Procedure**: 4-step process (Requirements ➔ Development ➔ Testing ➔ Deploy).\n• 👤 **Candidate Portal**: Submit resumes and we find the right job for you.\n• 💼 **Job Postings**: Active company openings at SA Consultant.\n• 🏢 **Client Portal**: Post job openings and we match top talent.\n• 🌟 **Our 4 Services**: Website Creation, Marketing, Staffing & Content.\n• 💰 **Pricing & Plans**: Free plan, Starter plan, and career packages.\n• 💬 **Any everyday or technical question!**`,
         timestamp: now,
         quickReplies: [
           { label: '🌐 Web Development Procedure', action: 'web_dev' },
@@ -288,11 +424,11 @@ export const AIChatbot: React.FC = () => {
       };
     }
     // Gratitude & Politeness
-    else if (q.includes('thank') || q.includes('thanks') || q.includes('thx') || q.includes('appreciate')) {
+    else if (q.includes('thank') || q.includes('thanks') || q.includes('thx') || q.includes('appreciate') || q.includes('tq')) {
       reply = {
         id: `bot-${Date.now()}`,
         sender: 'bot',
-        text: `You're very welcome! 😊 Glad I could help.\n\nFeel free to ask me anything else whenever you're curious!`,
+        text: `You're very welcome! 😊 Glad I could help.\n\nFeel free to speak or type anything else whenever you're curious!`,
         timestamp: now,
         quickReplies: [
           { label: '🌐 Web Development Procedure', action: 'web_dev' },
@@ -844,11 +980,20 @@ Speak directly with our Senior Talent Director to discuss:
     }
 
     setMessages((prev) => [...prev, reply]);
+
+    // If auto voice output is enabled, speak the answer out loud
+    if (isVoiceOutputEnabled) {
+      speakText(reply.text);
+    }
   };
 
   const handleSendMessage = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     if (!inputText.trim()) return;
+
+    if (isSpeaking) {
+      stopSpeaking();
+    }
 
     const userMsg: Message = {
       id: `user-${Date.now()}`,
@@ -864,6 +1009,8 @@ Speak directly with our Senior Talent Director to discuss:
   };
 
   const handleQuickReply = (action: string) => {
+    if (isSpeaking) stopSpeaking();
+
     switch (action) {
       case 'services_info':
         generateBotReply('What are the services we provide?');
@@ -932,12 +1079,12 @@ Speak directly with our Senior Talent Director to discuss:
             className="hidden sm:flex items-center gap-2 px-3.5 py-2 rounded-2xl bg-card border border-primary/20 shadow-xl cursor-pointer hover:border-primary transition-all duration-300 text-xs font-semibold text-foreground group"
           >
             <Sparkles className="w-4 h-4 text-primary animate-spin-slow" />
-            <span>Need help? Chat with AI Assistant!</span>
+            <span>Voice Assistant & Chatbot! 🎙️</span>
           </div>
 
           <button
             onClick={handleToggleChat}
-            aria-label="Open AI Assistant"
+            aria-label="Open AI Voice Assistant"
             className="w-14 h-14 rounded-full bg-gradient-to-tr from-primary via-primary to-amber-600 text-white shadow-2xl hover:shadow-primary/50 hover:scale-105 active:scale-95 transition-all duration-300 flex items-center justify-center relative group border-2 border-white/20"
           >
             <Bot className="w-7 h-7 transition-transform group-hover:rotate-6" />
@@ -953,7 +1100,7 @@ Speak directly with our Senior Talent Director to discuss:
           className={`fixed right-4 sm:right-6 bottom-4 sm:bottom-6 z-50 flex flex-col bg-card/95 backdrop-blur-xl border border-border/70 rounded-3xl shadow-2xl overflow-hidden transition-all duration-300 ${
             isMinimized
               ? 'w-[320px] sm:w-[360px] h-[72px]'
-              : 'w-[calc(100vw-32px)] sm:w-[420px] h-[600px] max-h-[85vh]'
+              : 'w-[calc(100vw-32px)] sm:w-[430px] h-[610px] max-h-[88vh]'
           }`}
         >
           {/* Header */}
@@ -966,16 +1113,54 @@ Speak directly with our Senior Talent Director to discuss:
               <div>
                 <h3 className="font-extrabold text-sm text-white flex items-center gap-1.5">
                   SA Elevate AI
-                  <Badge className="bg-white/20 hover:bg-white/30 text-[10px] text-white px-1.5 py-0 border-none font-semibold">
-                    Online
+                  <Badge className="bg-white/20 hover:bg-white/30 text-[10px] text-white px-1.5 py-0 border-none font-semibold flex items-center gap-1">
+                    <Radio className="w-2.5 h-2.5 text-emerald-300 animate-pulse" />
+                    Voice Ready
                   </Badge>
                 </h3>
-                <p className="text-[11px] text-white/80 font-medium">Ask any question • Instant replies</p>
+                <p className="text-[11px] text-white/80 font-medium">Talk or Type • Instant answers</p>
               </div>
             </div>
 
             {/* Header Controls */}
             <div className="flex items-center gap-1">
+              {/* Voice Output Toggle */}
+              <Button
+                size="icon"
+                variant="ghost"
+                onClick={() => {
+                  if (isVoiceOutputEnabled) {
+                    stopSpeaking();
+                    setIsVoiceOutputEnabled(false);
+                    toast.info('Voice audio output muted 🔇');
+                  } else {
+                    setIsVoiceOutputEnabled(true);
+                    toast.success('Voice audio output enabled 🔊 (AI will read replies out loud)');
+                  }
+                }}
+                title={isVoiceOutputEnabled ? 'Mute audio output' : 'Enable audio speech output'}
+                className={`w-8 h-8 rounded-full ${
+                  isVoiceOutputEnabled
+                    ? 'bg-white/25 text-white'
+                    : 'text-white/70 hover:text-white hover:bg-white/10'
+                }`}
+              >
+                {isVoiceOutputEnabled ? <Volume2 className="w-4 h-4 text-emerald-300" /> : <VolumeX className="w-4 h-4" />}
+              </Button>
+
+              {/* Stop Speaking Button (visible only when speaking) */}
+              {isSpeaking && (
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  onClick={stopSpeaking}
+                  title="Stop Speaking"
+                  className="w-8 h-8 rounded-full bg-red-500/30 text-white animate-pulse hover:bg-red-500/50"
+                >
+                  <Square className="w-3.5 h-3.5 fill-current" />
+                </Button>
+              )}
+
               <Button
                 size="icon"
                 variant="ghost"
@@ -997,7 +1182,10 @@ Speak directly with our Senior Talent Director to discuss:
               <Button
                 size="icon"
                 variant="ghost"
-                onClick={() => setIsOpen(false)}
+                onClick={() => {
+                  stopSpeaking();
+                  setIsOpen(false);
+                }}
                 title="Close chat"
                 className="w-8 h-8 rounded-full text-white/80 hover:text-white hover:bg-white/10"
               >
@@ -1025,7 +1213,7 @@ Speak directly with our Senior Talent Director to discuss:
                     )}
 
                     <div
-                      className={`max-w-[88%] rounded-2xl p-3.5 shadow-sm ${
+                      className={`max-w-[88%] rounded-2xl p-3.5 shadow-sm relative group ${
                         msg.sender === 'user'
                           ? 'bg-primary text-primary-foreground font-medium rounded-tr-none'
                           : 'bg-card border border-border/60 text-foreground rounded-tl-none space-y-2.5'
@@ -1045,6 +1233,7 @@ Speak directly with our Senior Talent Director to discuss:
                       {msg.cta && (
                         <Button
                           onClick={() => {
+                            stopSpeaking();
                             navigate(msg.cta!.path);
                             setIsOpen(false);
                           }}
@@ -1071,13 +1260,26 @@ Speak directly with our Senior Talent Director to discuss:
                         </div>
                       )}
 
-                      <span
-                        className={`text-[9px] block text-right mt-1 ${
-                          msg.sender === 'user' ? 'text-primary-foreground/70' : 'text-muted-foreground'
-                        }`}
-                      >
-                        {msg.timestamp}
-                      </span>
+                      <div className="flex items-center justify-between pt-1 mt-1 border-t border-border/30">
+                        {/* Audio Listen Button for Bot Messages */}
+                        {msg.sender === 'bot' && (
+                          <button
+                            onClick={() => speakText(msg.text)}
+                            title="Read this message out loud"
+                            className="text-[10px] text-muted-foreground hover:text-primary transition-colors flex items-center gap-1"
+                          >
+                            <Volume2 className="w-3 h-3" />
+                            <span>Listen</span>
+                          </button>
+                        )}
+                        <span
+                          className={`text-[9px] ml-auto ${
+                            msg.sender === 'user' ? 'text-primary-foreground/70' : 'text-muted-foreground'
+                          }`}
+                        >
+                          {msg.timestamp}
+                        </span>
+                      </div>
                     </div>
 
                     {msg.sender === 'user' && (
@@ -1105,15 +1307,47 @@ Speak directly with our Senior Talent Director to discuss:
                 <div ref={messagesEndRef} />
               </div>
 
+              {/* Listening Active Pulse Bar */}
+              {isListening && (
+                <div className="px-4 py-2 bg-gradient-to-r from-red-500/10 via-primary/10 to-red-500/10 border-t border-red-500/20 flex items-center justify-between text-xs font-semibold text-red-500 animate-pulse">
+                  <div className="flex items-center gap-2">
+                    <Mic className="w-4 h-4 animate-bounce" />
+                    <span>Listening to your voice... Speak your question!</span>
+                  </div>
+                  <button
+                    onClick={toggleListening}
+                    className="text-[11px] underline hover:text-red-700 font-bold"
+                  >
+                    Done
+                  </button>
+                </div>
+              )}
+
               {/* Input Area */}
               <div className="p-3 bg-card border-t border-border/60">
-                <form onSubmit={handleSendMessage} className="flex items-center gap-2">
+                <form onSubmit={handleSendMessage} className="flex items-center gap-1.5">
                   <Input
-                    placeholder="Ask anything (e.g. 'What do you eat?', 'Web dev procedure')..."
+                    placeholder={isListening ? "Listening to your voice..." : "Type or speak ('Web dev procedure', 'Hi')..."}
                     value={inputText}
                     onChange={(e) => setInputText(e.target.value)}
                     className="flex-1 text-xs h-10 rounded-xl bg-background border-border/70 focus-visible:ring-primary"
                   />
+
+                  {/* Microphone Voice Input Button */}
+                  <Button
+                    type="button"
+                    onClick={toggleListening}
+                    title={isListening ? 'Stop listening' : 'Click to Speak (Voice Input)'}
+                    className={`h-10 w-10 rounded-xl shrink-0 transition-all duration-300 shadow-sm ${
+                      isListening
+                        ? 'bg-red-500 hover:bg-red-600 text-white animate-pulse ring-2 ring-red-400'
+                        : 'bg-muted hover:bg-primary/15 text-muted-foreground hover:text-primary border border-border'
+                    }`}
+                  >
+                    {isListening ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
+                  </Button>
+
+                  {/* Send Button */}
                   <Button
                     type="submit"
                     disabled={!inputText.trim() || isTyping}
@@ -1124,9 +1358,12 @@ Speak directly with our Senior Talent Director to discuss:
                   </Button>
                 </form>
 
-                {/* Fast Action Shortcuts */}
+                {/* Voice Status Indicator & Fast Shortcuts */}
                 <div className="flex items-center justify-between text-[10px] text-muted-foreground mt-2 px-1">
-                  <span>💡 Ask anything like ChatGPT</span>
+                  <div className="flex items-center gap-1">
+                    <span className="inline-block w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                    <span>🎙️ Mic enabled • 🔊 Audio ready</span>
+                  </div>
                   <span className="font-semibold text-primary">SA Elevate AI</span>
                 </div>
               </div>
