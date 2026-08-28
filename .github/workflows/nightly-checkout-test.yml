@@ -1,0 +1,69 @@
+name: Nightly Website & Checkout Health Monitor
+
+on:
+  # Runs automatically every night at 2:00 AM UTC (7:30 AM IST)
+  schedule:
+    - cron: '0 2 * * *'
+  # Allows manual runs from GitHub Actions tab anytime
+  workflow_dispatch:
+
+jobs:
+  nightly-health-check:
+    name: 🌐 Automated Checkout & Health Check
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: 📥 Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: ⚙️ Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: 📦 Install Dependencies
+        run: |
+          npm ci || npm install
+          npx playwright install --with-deps chromium
+
+      - name: 🔍 Execute Nightly Health & Checkout Check
+        id: run_check
+        run: |
+          node scripts/nightly-health-check.mjs
+        env:
+          TEST_TARGET_URL: 'https://www.saconsultantandstaffing.com'
+
+      - name: 📊 Publish GitHub Summary Dashboard
+        if: always()
+        run: |
+          if [ -f nightly-summary.md ]; then
+            cat nightly-summary.md >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: 📸 Upload Proof & Failure Screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: nightly-screenshots-${{ github.run_number }}
+          path: |
+            screenshots/
+            nightly-report.json
+            nightly-summary.md
+          retention-days: 14
+
+      - name: 📧 Send Email Report to sajaruthmahjabeen@gmail.com
+        if: always()
+        uses: dawidd6/action-send-mail@v3
+        continue-on-error: true # Prevents blocking if SMTP secret is not yet configured
+        with:
+          server_address: ${{ secrets.MAIL_SERVER || 'smtp.gmail.com' }}
+          server_port: ${{ secrets.MAIL_PORT || 465 }}
+          username: ${{ secrets.MAIL_USERNAME }}
+          password: ${{ secrets.MAIL_PASSWORD }}
+          subject: "${{ steps.run_check.outcome == 'success' && '🟢 [PASSED]' || '🚨 [ALERT - FAILED]' }} SA Consultant Nightly Health & Checkout Report"
+          to: "sajaruthmahjabeen@gmail.com"
+          from: "SA Monitor <${{ secrets.MAIL_USERNAME || 'noreply@saconsultantandstaffing.com' }}>"
+          html_body: file://nightly-summary.md
+          attachments: screenshots/01_homepage.png,screenshots/03_checkout_modal.png
