@@ -317,4 +317,81 @@
   .animate-morph-blob {
     animation: morph-blob 8s ease-in-out infinite;
   }
+
+  /* CSS-Only Direction-Aware Hover System */
+  .direction-card {
+    position: relative;
+    overflow: hidden;
+  }
+  .direction-trigger {
+    position: absolute;
+    inset: 0;
+    z-index: 25;
+  }
+  .direction-trigger-top {
+    clip-path: polygon(0 0, 100% 0, 50% 50%);
+  }
+  .direction-trigger-right {
+    clip-path: polygon(100% 0, 100% 100%, 50% 50%);
+  }
+  .direction-trigger-bottom {
+    clip-path: polygon(100% 100%, 0 100%, 50% 50%);
+  }
+  .direction-trigger-left {
+    clip-path: polygon(0 100%, 0 0, 50% 50%);
+  }
+
+  .direction-overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 20;
+    transition: transform 0.4s cubic-bezier(0.2, 0.9, 0.3, 1), opacity 0.3s ease;
+    transform: translateY(100%);
+    opacity: 0;
+    pointer-events: auto;
+  }
+
+  .direction-trigger-top:hover ~ .direction-overlay {
+    transform: translateY(0);
+    opacity: 1;
+    animation: dirSlideFromTop 0.4s cubic-bezier(0.2, 0.9, 0.3, 1) forwards;
+  }
+  .direction-trigger-right:hover ~ .direction-overlay {
+    transform: translateX(0);
+    opacity: 1;
+    animation: dirSlideFromRight 0.4s cubic-bezier(0.2, 0.9, 0.3, 1) forwards;
+  }
+  .direction-trigger-bottom:hover ~ .direction-overlay {
+    transform: translateY(0);
+    opacity: 1;
+    animation: dirSlideFromBottom 0.4s cubic-bezier(0.2, 0.9, 0.3, 1) forwards;
+  }
+  .direction-trigger-left:hover ~ .direction-overlay {
+    transform: translateX(0);
+    opacity: 1;
+    animation: dirSlideFromLeft 0.4s cubic-bezier(0.2, 0.9, 0.3, 1) forwards;
+  }
+
+  .direction-overlay:hover {
+    transform: translate(0, 0) !important;
+    opacity: 1 !important;
+  }
+
+  @keyframes dirSlideFromTop {
+    from { transform: translateY(-100%); }
+    to { transform: translateY(0); }
+  }
+  @keyframes dirSlideFromRight {
+    from { transform: translateX(100%); }
+    to { transform: translateX(0); }
+  }
+  @keyframes dirSlideFromBottom {
+    from { transform: translateY(100%); }
+    to { transform: translateY(0); }
+  }
+  @keyframes dirSlideFromLeft {
+    from { transform: translateX(-100%); }
+    to { transform: translateX(0); }
+  }
 }
+
