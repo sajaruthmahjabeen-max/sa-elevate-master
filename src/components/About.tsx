@@ -1,3 +1,4 @@
+import React, { useState, useRef } from 'react';
 import { Target, Eye, Zap, Sparkles, ArrowRight, ShieldCheck, Award, Rocket } from 'lucide-react';
 import logo from '@/assets/logo.png';
 
@@ -34,6 +35,154 @@ const cards = [
   },
 ];
 
+// Helper to get entry/exit direction (0: top, 1: right, 2: bottom, 3: left)
+const getDirection = (e: React.MouseEvent<HTMLDivElement>, el: HTMLElement) => {
+  const { width, height, top, left } = el.getBoundingClientRect();
+  const x = e.clientX - left - width / 2;
+  const y = e.clientY - top - height / 2;
+  // Compute quadrant angle
+  return Math.round((Math.atan2(y, x) * (180 / Math.PI) + 180) / 90 + 3) % 4;
+};
+
+interface AboutCardProps {
+  card: typeof cards[number];
+  index: number;
+}
+
+const DirectionAwareCard = ({ card, index }: AboutCardProps) => {
+  const cardRef = useRef<HTMLDivElement>(null);
+  const [isHovered, setIsHovered] = useState(false);
+  const [direction, setDirection] = useState<'top' | 'right' | 'bottom' | 'left'>('bottom');
+
+  const handleMouseEnter = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!cardRef.current) return;
+    const dirIndex = getDirection(e, cardRef.current);
+    const directions: ('top' | 'right' | 'bottom' | 'left')[] = ['top', 'right', 'bottom', 'left'];
+    setDirection(directions[dirIndex]);
+    setIsHovered(true);
+  };
+
+  const handleMouseLeave = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!cardRef.current) return;
+    const dirIndex = getDirection(e, cardRef.current);
+    const directions: ('top' | 'right' | 'bottom' | 'left')[] = ['top', 'right', 'bottom', 'left'];
+    setDirection(directions[dirIndex]);
+    setIsHovered(false);
+  };
+
+  // Get initial transform offset based on direction
+  const getTransformClasses = () => {
+    if (isHovered) return 'translate-x-0 translate-y-0 opacity-100';
+    switch (direction) {
+      case 'top':
+        return '-translate-y-full translate-x-0 opacity-0';
+      case 'right':
+        return 'translate-x-full translate-y-0 opacity-0';
+      case 'bottom':
+        return 'translate-y-full translate-x-0 opacity-0';
+      case 'left':
+        return '-translate-x-full translate-y-0 opacity-0';
+      default:
+        return 'translate-y-full opacity-0';
+    }
+  };
+
+  return (
+    <div
+      ref={cardRef}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+      className="scroll-reveal group relative h-[430px] rounded-3xl border border-border/80 shadow-lg hover:shadow-2xl hover:border-primary/60 bg-card overflow-hidden transition-all duration-500 cursor-pointer flex flex-col justify-between"
+      style={{ transitionDelay: `${index * 150}ms` }}
+    >
+      {/* 🖼️ Base Card Content (Always 100% Crisp & Visible) */}
+      <div className="relative w-full h-full p-6 flex flex-col justify-between z-10 bg-card">
+        {/* Picture at Top */}
+        <div className="relative w-full aspect-video rounded-2xl overflow-hidden mb-4 border border-border/60 shadow-md bg-muted">
+          <img
+            src={card.image}
+            alt={card.title}
+            className="w-full h-full object-cover transform group-hover:scale-108 transition-transform duration-700 ease-out"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+          
+          {/* Floating Icon */}
+          <div className="absolute bottom-3 left-3 w-11 h-11 rounded-xl bg-background/95 backdrop-blur-md flex items-center justify-center border border-white/20 shadow-md text-primary font-bold">
+            <card.icon size={22} />
+          </div>
+
+          <div className="absolute top-3 right-3 px-3 py-1 rounded-full bg-black/60 backdrop-blur-md text-white text-[11px] font-bold border border-white/20">
+            {card.badge}
+          </div>
+        </div>
+
+        {/* Resting Typography */}
+        <div className="flex-grow flex flex-col justify-between">
+          <div>
+            <span className="text-[11px] font-bold text-accent uppercase tracking-wider">
+              {card.subtitle}
+            </span>
+            <h3 className="text-2xl font-display font-extrabold text-primary mt-1 mb-2">
+              {card.title}
+            </h3>
+            <p className="text-foreground/90 font-medium text-xs leading-relaxed line-clamp-3">
+              {card.description}
+            </p>
+          </div>
+
+          <div className="pt-3 mt-3 border-t border-border/50 flex items-center justify-between text-xs font-bold text-primary">
+            <span className="group-hover:text-accent transition-colors">Hover from any angle to view details</span>
+            <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+          </div>
+        </div>
+      </div>
+
+      {/* 🧭 REVEALED DIRECTION-AWARE OVERLAY (Slides in from Top, Right, Bottom, or Left) */}
+      <div
+        className={`absolute inset-0 z-30 p-7 bg-card border-2 border-primary/60 shadow-2xl flex flex-col justify-between transition-all duration-500 ease-out ${getTransformClasses()}`}
+      >
+        <div>
+          <div className="flex items-center justify-between mb-4">
+            <div className="w-12 h-12 rounded-2xl bg-primary/10 border border-primary/30 flex items-center justify-center text-primary shadow-sm">
+              <card.icon size={24} />
+            </div>
+            <span className="text-xs px-3 py-1 rounded-full bg-primary/15 text-primary font-extrabold uppercase tracking-wider border border-primary/30">
+              {card.badge}
+            </span>
+          </div>
+
+          <h3 className="text-2xl font-display font-extrabold text-foreground mb-1">
+            {card.title}
+          </h3>
+          <p className="text-primary font-bold text-xs mb-3">
+            {card.subtitle}
+          </p>
+
+          <p className="text-foreground/90 font-medium text-xs leading-relaxed mb-5">
+            {card.description}
+          </p>
+
+          {/* Strategic Pillars */}
+          <div className="space-y-2 pt-3 border-t border-border/60">
+            {card.pillars.map((pillar) => (
+              <div key={pillar} className="flex items-center gap-2.5 text-xs font-extrabold text-foreground">
+                <card.accentIcon className="w-4 h-4 text-primary flex-shrink-0" />
+                <span>{pillar}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Bottom Verification Footer */}
+        <div className="pt-3 border-t border-border/60 flex items-center justify-between text-xs font-bold text-muted-foreground">
+          <span>SA Consultant Quality</span>
+          <span className="text-primary font-extrabold">100% Verified</span>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const About = () => (
   <section id="about" className="section-padding relative overflow-hidden">
     <div className="absolute top-0 right-0 w-72 h-72 rounded-full bg-primary/10 blur-[100px]" />
@@ -57,100 +206,10 @@ const About = () => (
         </p>
       </div>
 
-      {/* Grid of CSS-Only Direction-Aware Cards */}
+      {/* Grid of Direction-Aware Cards */}
       <div className="grid md:grid-cols-3 gap-8">
         {cards.map((card, i) => (
-          <div
-            key={card.title}
-            className="direction-card group min-h-[420px] rounded-3xl border border-border/80 shadow-xl bg-card hover:border-primary/60 hover:shadow-2xl transition-all duration-500 cursor-pointer flex flex-col justify-between"
-            style={{ transitionDelay: `${i * 150}ms` }}
-          >
-            {/* 4 Pure CSS Invisible Direction Triggers */}
-            <div className="direction-trigger direction-trigger-top" />
-            <div className="direction-trigger direction-trigger-right" />
-            <div className="direction-trigger direction-trigger-bottom" />
-            <div className="direction-trigger direction-trigger-left" />
-
-            {/* 🖼️ Base Card Face (Always Visible with High Contrast Text) */}
-            <div className="relative w-full h-full flex flex-col justify-between p-6 z-0">
-              {/* Picture banner */}
-              <div className="relative w-full aspect-video rounded-2xl overflow-hidden mb-5 border border-border/60 shadow-md bg-muted">
-                <img
-                  src={card.image}
-                  alt={card.title}
-                  className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700 ease-out"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-                
-                {/* Floating Icon */}
-                <div className="absolute bottom-3 left-3 w-11 h-11 rounded-xl bg-background/95 backdrop-blur-md flex items-center justify-center border border-white/20 shadow-md text-primary font-bold">
-                  <card.icon size={22} />
-                </div>
-
-                <div className="absolute top-3 right-3 px-3 py-1 rounded-full bg-black/60 backdrop-blur-md text-white text-[11px] font-bold border border-white/20">
-                  {card.badge}
-                </div>
-              </div>
-
-              {/* Resting Typography - 100% Crisp & Legible */}
-              <div className="flex-grow flex flex-col justify-between">
-                <div>
-                  <h3 className="text-2xl font-display font-extrabold text-primary mb-2">
-                    {card.title}
-                  </h3>
-                  <p className="text-foreground/90 font-medium text-sm leading-relaxed mb-4">
-                    {card.description}
-                  </p>
-                </div>
-
-                <div className="pt-3 border-t border-border/50 flex items-center justify-between text-xs font-bold text-accent">
-                  <span>Hover to reveal strategy</span>
-                  <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
-                </div>
-              </div>
-            </div>
-
-            {/* 🧭 DIRECTION-AWARE OVERLAY (Slides in from Top/Right/Bottom/Left) */}
-            <div className="direction-overlay bg-card/98 backdrop-blur-2xl p-7 rounded-3xl border-2 border-primary/50 shadow-2xl flex flex-col justify-between z-20">
-              <div>
-                <div className="flex items-center justify-between mb-4">
-                  <div className="w-12 h-12 rounded-2xl bg-primary/10 border border-primary/30 flex items-center justify-center text-primary shadow-sm">
-                    <card.icon size={24} />
-                  </div>
-                  <span className="text-xs px-3 py-1 rounded-full bg-primary/15 text-primary font-black uppercase tracking-wider border border-primary/30">
-                    {card.badge}
-                  </span>
-                </div>
-
-                <h3 className="text-2xl font-display font-black text-foreground mb-1">
-                  {card.title}
-                </h3>
-                <p className="text-primary font-bold text-xs mb-3">
-                  {card.subtitle}
-                </p>
-
-                <p className="text-foreground font-medium text-xs leading-relaxed mb-5">
-                  {card.description}
-                </p>
-
-                {/* Key Strategic Pillars */}
-                <div className="space-y-2 pt-3 border-t border-border/60">
-                  {card.pillars.map((pillar) => (
-                    <div key={pillar} className="flex items-center gap-2.5 text-xs font-extrabold text-foreground">
-                      <card.accentIcon className="w-4 h-4 text-primary flex-shrink-0" />
-                      <span>{pillar}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Bottom Brand Guarantee */}
-              <div className="pt-3 border-t border-border/60 flex items-center justify-between text-xs font-bold text-muted-foreground">
-                <span>SA Consultant Standard</span>
-                <span className="text-primary font-black">100% Verified</span>
-              </div>
-            </div>
-          </div>
+          <DirectionAwareCard key={card.title} card={card} index={i} />
         ))}
       </div>
     </div>
