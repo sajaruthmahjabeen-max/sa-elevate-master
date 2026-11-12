@@ -29,3 +29,5 @@ dist-ssr
 .env*.local
 .vercel
 scratch/
+nightly-*
+screenshots/

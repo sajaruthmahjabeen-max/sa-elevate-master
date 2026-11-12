@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { getAdminBookingEmailHtml } from "../utils/emailTemplates";
+import { getAdminBookingEmailHtml, getClientInquiryEmailHtml } from "../utils/emailTemplates";
 
 describe("Email Templates - Google Calendar Integration", () => {
   it("should generate GCal URLs with correct local dates and Eastern timezone parameters", () => {
@@ -32,5 +32,12 @@ describe("Email Templates - Google Calendar Integration", () => {
 
     // Verify third slot (2:00 PM EST -> 14:00:00 local time America/New_York)
     expect(html).toContain("dates=20260604T140000%2F20260604T150000");
+  });
+
+  it("should generate client inquiry confirmation email HTML", () => {
+    const html = getClientInquiryEmailHtml("Alice Smith", "Need help with IT staffing");
+    expect(html).toContain("Alice Smith");
+    expect(html).toContain("Need help with IT staffing");
+    expect(html).toContain("Thank You for Contacting Us!");
   });
 });

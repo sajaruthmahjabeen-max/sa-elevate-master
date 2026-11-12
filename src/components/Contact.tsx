@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Send, MapPin, Mail, CheckCircle2, X } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { useToast } from "@/components/ui/use-toast";
+import { getClientInquiryEmailHtml } from '@/utils/emailTemplates';
 
 const Contact = () => {
   const { toast } = useToast();
@@ -79,12 +80,12 @@ const Contact = () => {
         if (fallbackError) throw fallbackError;
       }
 
-      // 2. Send email notification to admins (graceful fallback if Edge Function or SMTP fails)
+      // 2. Send email notification to admins and confirmation to client
       try {
         const adminRecipients = ['sajaruthmahjabeen@gmail.com', 'sagina111@gmail.com'];
-        const subject = `New Contact Inquiry from ${formData.name}`;
-        const text = `Name: ${formData.name}\nEmail: ${formData.email}\nPhone: ${formData.phone}\n\nMessage:\n${formData.message}`;
-        const html = `
+        const adminSubject = `New Contact Inquiry from ${formData.name}`;
+        const adminText = `Name: ${formData.name}\nEmail: ${formData.email}\nPhone: ${formData.phone}\n\nMessage:\n${formData.message}`;
+        const adminHtml = `
           <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 24px;">
             <h2 style="color: #4f46e5;">New Contact Inquiry</h2>
             <p><strong>Name:</strong> ${formData.name}</p>
@@ -96,9 +97,19 @@ const Contact = () => {
           </div>
         `;
 
-        await supabase.functions.invoke('send-email', {
-          body: { recipients: adminRecipients, subject, text, html },
-        });
+        const clientSubject = `Thank You for Contacting Us! - SA Consultant & Staffing`;
+        const clientText = `Hi ${formData.name},\n\nThank you for reaching out to SA Consultant & Staffing. We have received your inquiry:\n\n"${formData.message}"\n\nA representative from our team will review your message and get back to you shortly.\n\nBest regards,\nSA Consultant & Staffing`;
+        const clientHtml = getClientInquiryEmailHtml(formData.name, formData.message);
+
+        // Send to admins and client concurrently
+        await Promise.allSettled([
+          supabase.functions.invoke('send-email', {
+            body: { recipients: adminRecipients, subject: adminSubject, text: adminText, html: adminHtml },
+          }),
+          supabase.functions.invoke('send-email', {
+            body: { recipients: [formData.email], subject: clientSubject, text: clientText, html: clientHtml },
+          }),
+        ]);
       } catch (emailErr) {
         console.warn('Email notification sending failed, but inquiry was saved in database:', emailErr);
       }

@@ -197,3 +197,31 @@ export const getClientBookingEmailHtml = (
 
   return getEmailWrapper(content);
 };
+
+/**
+ * Generates HTML for the confirmation email sent to the Client upon submitting a contact inquiry
+ */
+export const getClientInquiryEmailHtml = (
+  clientName: string,
+  clientMessage: string
+) => {
+  const content = `
+    <div style="margin-bottom: 28px; text-align: center;">
+      <h1 style="font-size: 24px; font-weight: 700; color: #0f172a; margin: 0 0 8px 0; letter-spacing: -0.025em;">Thank You for Contacting Us!</h1>
+      <p style="font-size: 16px; color: #475569; margin: 0;">Hi ${clientName}, we have received your message.</p>
+    </div>
+
+    <div style="background-color: #ecfeff; border: 1px solid #c5f2f7; border-radius: 20px; padding: 20px; text-align: center; margin-bottom: 32px;">
+      <p style="font-size: 14px; font-weight: 550; color: #0891b2; margin: 0;">🤝 Thank you for reaching out to SA Consultant & Staffing. A representative from our team will review your inquiry and get back to you shortly.</p>
+    </div>
+
+    <!-- Inquiry Summary -->
+    <div style="background-color: #f8fafc; border-radius: 20px; padding: 24px; border: 1px solid #e2e8f0; margin-bottom: 32px;">
+      <h3 style="font-size: 12px; font-weight: 700; text-transform: uppercase; color: #4f46e5; margin: 0 0 12px 0; letter-spacing: 0.05em;">Your Message Summary</h3>
+      <p style="font-size: 14px; color: #334155; margin: 0; white-space: pre-wrap; line-height: 1.6;">${clientMessage}</p>
+    </div>
+  `;
+
+  return getEmailWrapper(content);
+};
+
