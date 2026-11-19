@@ -1,29 +1,12 @@
 import { useState, useEffect } from 'react';
-import { supabase } from '@/lib/supabase';
 
-const cleanWhatsApp = (num: string) => {
-  const digits = (num || '').replace(/\D/g, '');
-  if (!digits || digits === '9384797751') {
-    return '18568563240';
-  }
-  return digits;
-};
+// HARDCODED: Always open WhatsApp to +1 (856) 856-3240 (USA)
+const WHATSAPP_NUMBER = '18568563240';
 
 const WhatsAppButton = () => {
-  const [whatsapp, setWhatsapp] = useState('18568563240');
   const [shouldHide, setShouldHide] = useState(false);
 
   useEffect(() => {
-    const fetchWhatsApp = async () => {
-      try {
-        const { data } = await supabase.from('settings').select('value').eq('id', 'whatsapp_number').single() as any;
-        if (data && data.value) setWhatsapp(cleanWhatsApp(data.value));
-      } catch (err) {
-        console.warn('Could not fetch whatsapp number from settings:', err);
-      }
-    };
-    fetchWhatsApp();
-
     const handleScroll = () => {
       const bookEl = document.getElementById('book');
       const contactEl = document.getElementById('contact');
@@ -33,7 +16,6 @@ const WhatsAppButton = () => {
       [bookEl, contactEl].forEach((el) => {
         if (!el) return;
         const rect = el.getBoundingClientRect();
-        // Check if the section is in the viewport (with a 100px buffer)
         const inView = rect.top < window.innerHeight - 100 && rect.bottom > 100;
         if (inView) {
           isInsideSection = true;
@@ -44,7 +26,6 @@ const WhatsAppButton = () => {
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
-    // Run once initially to set correct state if starting scrolled down
     setTimeout(handleScroll, 100);
 
     return () => {
@@ -59,29 +40,29 @@ const WhatsAppButton = () => {
           right: 16px !important;
           left: auto !important;
           bottom: 16px !important;
-          width: 3rem !important; /* 48px */
-          height: 3rem !important; /* 48px */
+          width: 3rem !important;
+          height: 3rem !important;
         }
         .floating-whatsapp-btn svg {
-          width: 1.5rem !important; /* 24px */
-          height: 1.5rem !important; /* 24px */
+          width: 1.5rem !important;
+          height: 1.5rem !important;
         }
         @media (min-width: 768px) {
           .floating-whatsapp-btn {
             right: 24px !important;
             left: auto !important;
             bottom: 24px !important;
-            width: 3.5rem !important; /* 56px */
-            height: 3.5rem !important; /* 56px */
+            width: 3.5rem !important;
+            height: 3.5rem !important;
           }
           .floating-whatsapp-btn svg {
-            width: 1.75rem !important; /* 28px */
-            height: 1.75rem !important; /* 28px */
+            width: 1.75rem !important;
+            height: 1.75rem !important;
           }
         }
       `}</style>
       <a
-        href={`https://wa.me/${cleanWhatsApp(whatsapp)}`}
+        href={`https://wa.me/${WHATSAPP_NUMBER}`}
         target="_blank"
         rel="noopener noreferrer"
         aria-label="Contact us on WhatsApp"
