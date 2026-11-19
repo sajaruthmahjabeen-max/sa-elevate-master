@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Route, Routes, Navigate, useLocation } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -14,6 +15,7 @@ import VendorPortal from "./pages/VendorPortal.tsx";
 import Jobs from "./pages/Jobs.tsx";
 import ServicesPage from "./pages/ServicesPage.tsx";
 import AboutPage from "./pages/AboutPage.tsx";
+import PortfolioPage from "./pages/PortfolioPage.tsx";
 import ContactPage from "./pages/ContactPage.tsx";
 import PartnershipPage from "./pages/PartnershipPage.tsx";
 import BookingPage from "./pages/BookingPage.tsx";
@@ -51,6 +53,16 @@ const ProtectedRoute = ({ children, requireAdmin = false }: { children: React.Re
 };
 
 
+const ScrollToTop = () => {
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+  }, [pathname]);
+
+  return null;
+};
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme" attribute="class">
@@ -59,6 +71,7 @@ const App = () => (
           <Toaster />
           <Sonner />
           <BrowserRouter>
+            <ScrollToTop />
             <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/auth" element={<Auth />} />
@@ -96,6 +109,7 @@ const App = () => (
               />
               <Route path="/jobs" element={<Jobs />} />
               <Route path="/services" element={<ServicesPage />} />
+              <Route path="/portfolio" element={<PortfolioPage />} />
               <Route path="/about" element={<AboutPage />} />
               <Route path="/contact" element={<ContactPage />} />
               <Route path="/partnership" element={<PartnershipPage />} />

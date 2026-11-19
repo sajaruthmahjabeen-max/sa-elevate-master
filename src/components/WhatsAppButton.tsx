@@ -1,14 +1,20 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 
+const cleanWhatsApp = (num: string) => (num || '').replace(/\D/g, '') || '18568563240';
+
 const WhatsAppButton = () => {
-  const [whatsapp, setWhatsapp] = useState('9384797751');
+  const [whatsapp, setWhatsapp] = useState('18568563240');
   const [shouldHide, setShouldHide] = useState(false);
 
   useEffect(() => {
     const fetchWhatsApp = async () => {
-      const { data } = await supabase.from('settings').select('value').eq('id', 'whatsapp_number').single() as any;
-      if (data) setWhatsapp(data.value);
+      try {
+        const { data } = await supabase.from('settings').select('value').eq('id', 'whatsapp_number').single() as any;
+        if (data && data.value) setWhatsapp(cleanWhatsApp(data.value));
+      } catch (err) {
+        console.warn('Could not fetch whatsapp number from settings:', err);
+      }
     };
     fetchWhatsApp();
 
@@ -69,7 +75,7 @@ const WhatsAppButton = () => {
         }
       `}</style>
       <a
-        href={`https://wa.me/${whatsapp}`}
+        href={`https://wa.me/${cleanWhatsApp(whatsapp)}`}
         target="_blank"
         rel="noopener noreferrer"
         aria-label="Contact us on WhatsApp"

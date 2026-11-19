@@ -1678,7 +1678,7 @@ SA Consultant & Staffing Team`
                     <Input 
                       value={settings.whatsapp_number}
                       onChange={(e) => setSettings({...settings, whatsapp_number: e.target.value})}
-                      placeholder="9384797751"
+                      placeholder="+1 (856) 856-3240"
                       className="bg-secondary/50"
                     />
                   </div>

@@ -206,7 +206,7 @@ const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [socialLinks, setSocialLinks] = useState({
-    whatsapp: '9384797751',
+    whatsapp: '18568563240',
     linkedin: 'https://linkedin.com',
     instagram: 'https://instagram.com'
   });
