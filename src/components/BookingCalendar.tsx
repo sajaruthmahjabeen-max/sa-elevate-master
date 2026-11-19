@@ -104,7 +104,7 @@ useEffect(() => {
   useEffect(() => {
     const fetchSettings = async () => {
       const { data } = await supabase.from('settings').select('value').eq('id', 'whatsapp_number').single();
-      if (data) setWhatsappNumber(data.value);
+      if (data && data.value) setWhatsappNumber(data.value === '9384797751' ? '18568563240' : data.value);
     };
     fetchSettings();
   }, []);

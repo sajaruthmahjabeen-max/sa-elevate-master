@@ -3,7 +3,13 @@ import { Link } from 'react-router-dom';
 import { supabase } from '@/lib/supabase';
 import logo from '@/assets/logo.png';
 
-const cleanWhatsApp = (num: string) => (num || '').replace(/\D/g, '') || '18568563240';
+const cleanWhatsApp = (num: string) => {
+  const digits = (num || '').replace(/\D/g, '');
+  if (!digits || digits === '9384797751') {
+    return '18568563240';
+  }
+  return digits;
+};
 
 const SocialLink = ({ href, children, label }: { href: string; children: React.ReactNode; label: string }) => (
   <a

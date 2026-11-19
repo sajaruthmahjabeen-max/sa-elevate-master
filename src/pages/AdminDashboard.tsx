@@ -299,7 +299,7 @@ const AdminDashboard = () => {
     contact_email: '',
     contact_phone: '',
     contact_address: '',
-    whatsapp_number: '',
+    whatsapp_number: '+1 (856) 856-3240',
     linkedin_url: '',
     instagram_url: ''
   });
@@ -515,7 +515,7 @@ const AdminDashboard = () => {
         contact_email: settingsMap.contact_email || '',
         contact_phone: settingsMap.contact_phone || '',
         contact_address: settingsMap.contact_address || '',
-        whatsapp_number: settingsMap.whatsapp_number || '',
+        whatsapp_number: settingsMap.whatsapp_number === '9384797751' ? '+1 (856) 856-3240' : (settingsMap.whatsapp_number || '+1 (856) 856-3240'),
         linkedin_url: settingsMap.linkedin_url || '',
         instagram_url: settingsMap.instagram_url || ''
       });

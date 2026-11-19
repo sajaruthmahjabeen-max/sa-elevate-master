@@ -225,7 +225,7 @@ const Navbar = () => {
           return acc;
         }, {});
         setSocialLinks({
-          whatsapp: settingsMap.whatsapp_number || socialLinks.whatsapp,
+          whatsapp: settingsMap.whatsapp_number === '9384797751' ? '18568563240' : (settingsMap.whatsapp_number || socialLinks.whatsapp),
           linkedin: settingsMap.linkedin_url || socialLinks.linkedin,
           instagram: settingsMap.instagram_url || socialLinks.instagram
         });

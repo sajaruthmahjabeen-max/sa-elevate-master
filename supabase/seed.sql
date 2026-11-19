@@ -115,7 +115,7 @@ INSERT INTO public.settings (id, value) VALUES
   ('contact_address', 'New Jersey, USA'),
   ('contact_email', 'mahjabeensajaruth@gmail.com'),
   ('contact_phone', '+1 (609) 313-9192, 9384797751'),
-  ('whatsapp_number', '9384797751')
+  ('whatsapp_number', '18568563240')
 ON CONFLICT (id) DO UPDATE SET value = EXCLUDED.value;
 
 -- Create projects table for portfolio
