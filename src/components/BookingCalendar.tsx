@@ -22,8 +22,8 @@ export default function BookingCalendar() {
   const [captchaQuestion, setCaptchaQuestion] = useState({ num1: 0, num2: 0 });
   const [captchaAnswer, setCaptchaAnswer] = useState('');
   const [callMeBotKey, setCallMeBotKey] = useState('');
-  const [whatsappNumber, setWhatsappNumber] = useState('');
-  // whatsappNumber will be loaded from settings
+  // HARDCODED: Always use +1 (856) 856-3240 (USA)
+  const [whatsappNumber, setWhatsappNumber] = useState('18568563240');
   // Load CallMeBot API key from settings
 useEffect(() => {
   const fetchApiKey = async () => {
@@ -100,14 +100,7 @@ useEffect(() => {
     fetchKey();
   }, []);
 
-  // Load WhatsApp number from settings
-  useEffect(() => {
-    const fetchSettings = async () => {
-      const { data } = await supabase.from('settings').select('value').eq('id', 'whatsapp_number').single();
-      if (data && data.value) setWhatsappNumber(data.value === '9384797751' ? '18568563240' : data.value);
-    };
-    fetchSettings();
-  }, []);
+  // WhatsApp number is hardcoded - no DB fetch needed
 
   const generateCaptcha = () => {
     const num1 = Math.floor(Math.random() * 10) + 1;

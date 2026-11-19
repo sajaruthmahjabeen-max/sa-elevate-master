@@ -225,7 +225,7 @@ const Navbar = () => {
           return acc;
         }, {});
         setSocialLinks({
-          whatsapp: settingsMap.whatsapp_number === '9384797751' ? '18568563240' : (settingsMap.whatsapp_number || socialLinks.whatsapp),
+          whatsapp: '18568563240', // HARDCODED: Always use +1 (856) 856-3240
           linkedin: settingsMap.linkedin_url || socialLinks.linkedin,
           instagram: settingsMap.instagram_url || socialLinks.instagram
         });
