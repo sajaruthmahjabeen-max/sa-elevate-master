@@ -36,7 +36,7 @@ const Footer = () => {
         }, {});
         setSettings({
           contact_email: settingsMap.contact_email || settings.contact_email,
-          whatsapp_number: settingsMap.whatsapp_number || settings.whatsapp_number,
+          whatsapp_number: '18568563240', // HARDCODED: ignore DB value
           linkedin_url: settingsMap.linkedin_url || settings.linkedin_url,
           instagram_url: settingsMap.instagram_url || settings.instagram_url
         });
