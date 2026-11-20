@@ -102,7 +102,7 @@ export const StickyBottomBar: React.FC = () => {
 
           {/* Book a Call */}
           <Link
-            to="/book"
+            to="/book?service=Phone+Call"
             className="px-3 sm:px-4 py-1.5 text-xs sm:text-xs font-bold rounded-full bg-[#FAF7F2] text-[#2C211B] hover:bg-white shadow-sm transition-all hover:scale-105 active:scale-95 whitespace-nowrap"
           >
             Book a Call

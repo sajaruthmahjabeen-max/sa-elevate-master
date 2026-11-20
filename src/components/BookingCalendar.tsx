@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { supabase } from '@/lib/supabase';
 import { Calendar } from '@/components/ui/calendar';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -14,9 +15,23 @@ import { useToast } from '@/components/ui/use-toast';
 import { getAdminBookingEmailHtml, getClientBookingEmailHtml } from '@/utils/emailTemplates';
 
 export default function BookingCalendar() {
+  const [searchParams] = useSearchParams();
+  const serviceParam = searchParams.get('service');
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
   const [preferredSlots, setPreferredSlots] = useState<{ date: Date; time: string }[]>([]);
-  const [formData, setFormData] = useState({ name: '', email: '', phone: '', service: '', message: '' });
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    service: serviceParam || '',
+    message: ''
+  });
+
+  useEffect(() => {
+    if (serviceParam) {
+      setFormData(prev => ({ ...prev, service: serviceParam }));
+    }
+  }, [serviceParam]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [captchaQuestion, setCaptchaQuestion] = useState({ num1: 0, num2: 0 });
@@ -538,6 +553,7 @@ useEffect(() => {
                             <SelectValue placeholder="Select a service" />
                           </SelectTrigger>
                           <SelectContent>
+                            <SelectItem value="Phone Call">Phone Call</SelectItem>
                             <SelectItem value="Digital Marketing">Digital Marketing</SelectItem>
                             <SelectItem value="Staffing and Recruiting">Staffing and Recruiting</SelectItem>
                             <SelectItem value="Content Creation">Content Creation</SelectItem>
