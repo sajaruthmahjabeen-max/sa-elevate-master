@@ -46,7 +46,7 @@ const Footer = () => {
   }, []);
 
   return (
-    <footer className="border-t border-border/30 pt-6 pb-10 md:py-12 px-4 md:px-8">
+    <footer className="border-t border-border/30 pt-6 pb-20 md:pb-24 px-4 md:px-8">
       <div className="container mx-auto">
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 sm:gap-10 mb-10">
           <div>

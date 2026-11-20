@@ -26,6 +26,7 @@ import BusinessOnboarding from "./pages/BusinessOnboarding.tsx";
 import BusinessDashboard from "./pages/BusinessDashboard.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import { AIChatbot } from "./components/chat/AIChatbot.tsx";
+import { StickyBottomBar } from "./components/StickyBottomBar.tsx";
 
 const queryClient = new QueryClient();
 
@@ -135,6 +136,7 @@ const App = () => (
               />
               <Route path="*" element={<NotFound />} />
             </Routes>
+            <StickyBottomBar />
             <AIChatbot />
           </BrowserRouter>
         </TooltipProvider>

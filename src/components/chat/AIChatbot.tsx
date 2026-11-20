@@ -1072,7 +1072,7 @@ Speak directly with our Senior Talent Director to discuss:
     <>
       {/* Floating Trigger Button */}
       {!isOpen && (
-        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-3 animate-fade-in">
+        <div className="fixed bottom-14 sm:bottom-16 right-4 sm:right-6 z-50 flex items-center gap-3 animate-fade-in">
           {/* Welcome Tooltip Badge */}
           <div
             onClick={handleToggleChat}
@@ -1097,7 +1097,7 @@ Speak directly with our Senior Talent Director to discuss:
       {/* Chat Window */}
       {isOpen && (
         <div
-          className={`fixed right-4 sm:right-6 bottom-4 sm:bottom-6 z-50 flex flex-col bg-card/95 backdrop-blur-xl border border-border/70 rounded-3xl shadow-2xl overflow-hidden transition-all duration-300 ${
+          className={`fixed right-4 sm:right-6 bottom-14 sm:bottom-16 z-50 flex flex-col bg-card/95 backdrop-blur-xl border border-border/70 rounded-3xl shadow-2xl overflow-hidden transition-all duration-300 ${
             isMinimized
               ? 'w-[320px] sm:w-[360px] h-[72px]'
               : 'w-[calc(100vw-32px)] sm:w-[430px] h-[610px] max-h-[88vh]'
